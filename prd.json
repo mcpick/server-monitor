@@ -181,7 +181,7 @@
         "create src/components/charts/NetworkChart.tsx - line chart for bytes sent/received",
         "create src/components/charts/ProcessList.tsx - table for top processes"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "react-ui-components",
