@@ -167,7 +167,7 @@
         "implement useProcessMetrics(serverId, timeRange) hook",
         "implement auto-refresh with configurable interval"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "react-charts",
