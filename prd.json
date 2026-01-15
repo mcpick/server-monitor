@@ -244,9 +244,9 @@
         "create src/components/charts/__tests__/MemoryChart.test.tsx",
         "create src/hooks/__tests__/useMetrics.test.ts",
         "create src/lib/__tests__/auth.test.ts",
-        "run npm test to verify all tests pass"
+        "run pnpm test:run to verify all tests pass"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "react-lint-typecheck",
