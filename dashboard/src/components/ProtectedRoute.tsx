@@ -3,19 +3,21 @@ import { isAuthenticated } from '../lib/auth';
 import { LoginForm } from './LoginForm';
 
 interface ProtectedRouteProps {
-  children: ReactNode;
+    children: ReactNode;
 }
 
-export function ProtectedRoute({ children }: ProtectedRouteProps): ReactElement {
-  const [authenticated, setAuthenticated] = useState(() => isAuthenticated());
+export function ProtectedRoute({
+    children,
+}: ProtectedRouteProps): ReactElement {
+    const [authenticated, setAuthenticated] = useState(() => isAuthenticated());
 
-  function handleLoginSuccess(): void {
-    setAuthenticated(true);
-  }
+    function handleLoginSuccess(): void {
+        setAuthenticated(true);
+    }
 
-  if (!authenticated) {
-    return <LoginForm onSuccess={handleLoginSuccess} />;
-  }
+    if (!authenticated) {
+        return <LoginForm onSuccess={handleLoginSuccess} />;
+    }
 
-  return <>{children}</>;
+    return <>{children}</>;
 }

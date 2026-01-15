@@ -47,7 +47,7 @@
         ]
     },
     "categories": {
-        "correctness": "error",
+        "correctness": "error"
     },
     "plugins": [
         "eslint",

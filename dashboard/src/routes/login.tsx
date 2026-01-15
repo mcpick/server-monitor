@@ -4,22 +4,22 @@ import { LoginForm } from '../components/LoginForm';
 import { isAuthenticated } from '../lib/auth';
 
 function LoginPage(): ReactElement {
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
-  function handleLoginSuccess(): void {
-    void navigate({ to: '/' });
-  }
+    function handleLoginSuccess(): void {
+        void navigate({ to: '/' });
+    }
 
-  return <LoginForm onSuccess={handleLoginSuccess} />;
+    return <LoginForm onSuccess={handleLoginSuccess} />;
 }
 
 export const Route = createFileRoute('/login')({
-  beforeLoad: () => {
-    if (isAuthenticated()) {
-      throw redirect({
-        to: '/',
-      });
-    }
-  },
-  component: LoginPage,
+    beforeLoad: () => {
+        if (isAuthenticated()) {
+            throw redirect({
+                to: '/',
+            });
+        }
+    },
+    component: LoginPage,
 });
