@@ -1,0 +1,302 @@
+{
+  "project": "server-monitor",
+  "description": "A server monitoring tool with a Go daemon for collecting system metrics and a React dashboard for visualization",
+  "tasks": [
+    {
+      "category": "setup-go-daemon",
+      "description": "Scaffold Go daemon project structure",
+      "steps": [
+        "create server-agent/ directory",
+        "initialize Go module with go mod init server-agent",
+        "install gopsutil/v4 dependency",
+        "install go-libsql (Turso) dependency",
+        "create directory structure: collector/, storage/, config/",
+        "create main.go entry point file"
+      ],
+      "passes": false
+    },
+    {
+      "category": "setup-react-dashboard",
+      "description": "Scaffold React dashboard with Vite",
+      "steps": [
+        "create dashboard/ directory",
+        "run npm create vite@latest . -- --template react-ts",
+        "install TailwindCSS and configure",
+        "install recharts for charting",
+        "install @libsql/client for Turso connection",
+        "install date-fns for date handling",
+        "create directory structure: components/, hooks/, lib/, types/"
+      ],
+      "passes": false
+    },
+    {
+      "category": "database-setup",
+      "description": "Set up Turso database and schema",
+      "steps": [
+        "create schema.sql file with all table definitions",
+        "create servers table",
+        "create cpu_metrics table with indexes",
+        "create memory_metrics table with indexes",
+        "create swap_metrics table with indexes",
+        "create disk_usage_metrics table with indexes",
+        "create disk_io_metrics table with indexes",
+        "create network_metrics table with indexes",
+        "create process_metrics table with indexes"
+      ],
+      "passes": false
+    },
+    {
+      "category": "go-daemon-config",
+      "description": "Implement configuration management",
+      "steps": [
+        "create config/config.go",
+        "implement Config struct with Turso URL, auth token, interval, hostname",
+        "implement LoadConfig() function to read from environment variables",
+        "add validation for required environment variables",
+        "add sensible defaults for optional values"
+      ],
+      "passes": false
+    },
+    {
+      "category": "go-daemon-storage",
+      "description": "Implement Turso storage client",
+      "steps": [
+        "create storage/turso.go",
+        "implement TursoClient struct",
+        "implement NewTursoClient() constructor with connection",
+        "implement RegisterServer() to upsert server entry",
+        "implement InsertCPUMetrics() method",
+        "implement InsertMemoryMetrics() method",
+        "implement InsertSwapMetrics() method",
+        "implement InsertDiskUsageMetrics() method",
+        "implement InsertDiskIOMetrics() method",
+        "implement InsertNetworkMetrics() method",
+        "implement InsertProcessMetrics() method",
+        "implement Close() method for cleanup"
+      ],
+      "passes": false
+    },
+    {
+      "category": "go-daemon-collectors",
+      "description": "Implement metric collectors using gopsutil",
+      "steps": [
+        "create collector/types.go with metric structs",
+        "create collector/cpu.go - CollectCPU() function",
+        "create collector/memory.go - CollectMemory() and CollectSwap() functions",
+        "create collector/disk.go - CollectDiskUsage() and CollectDiskIO() functions",
+        "create collector/network.go - CollectNetwork() function",
+        "create collector/process.go - CollectTopProcesses() function (top 10 by CPU/memory)"
+      ],
+      "passes": false
+    },
+    {
+      "category": "go-daemon-main",
+      "description": "Implement main daemon loop and orchestration",
+      "steps": [
+        "implement main() entry point",
+        "load configuration from environment",
+        "initialize Turso client connection",
+        "register server in database",
+        "create ticker for 5-second interval",
+        "implement collection loop calling all collectors",
+        "push all metrics to Turso in each iteration",
+        "implement graceful shutdown with signal handling (SIGINT, SIGTERM)",
+        "add logging for collection cycles and errors"
+      ],
+      "passes": false
+    },
+    {
+      "category": "react-turso-client",
+      "description": "Implement Turso client for React dashboard",
+      "steps": [
+        "create src/lib/turso.ts",
+        "implement createTursoClient() with browser-compatible libSQL",
+        "implement fetchCPUMetrics(serverId, startTime, endTime) query",
+        "implement fetchMemoryMetrics(serverId, startTime, endTime) query",
+        "implement fetchSwapMetrics(serverId, startTime, endTime) query",
+        "implement fetchDiskUsageMetrics(serverId, startTime, endTime) query",
+        "implement fetchDiskIOMetrics(serverId, startTime, endTime) query",
+        "implement fetchNetworkMetrics(serverId, startTime, endTime) query",
+        "implement fetchProcessMetrics(serverId, startTime, endTime) query",
+        "implement fetchServers() to list available servers"
+      ],
+      "passes": false
+    },
+    {
+      "category": "react-auth",
+      "description": "Implement basic authentication",
+      "steps": [
+        "create src/lib/auth.ts",
+        "implement login(username, password) function",
+        "implement logout() function",
+        "implement isAuthenticated() check",
+        "store auth token in localStorage",
+        "create src/components/LoginForm.tsx",
+        "create src/components/ProtectedRoute.tsx wrapper"
+      ],
+      "passes": false
+    },
+    {
+      "category": "react-types",
+      "description": "Define TypeScript types for metrics",
+      "steps": [
+        "create src/types/metrics.ts",
+        "define Server interface",
+        "define CPUMetric interface",
+        "define MemoryMetric interface",
+        "define SwapMetric interface",
+        "define DiskUsageMetric interface",
+        "define DiskIOMetric interface",
+        "define NetworkMetric interface",
+        "define ProcessMetric interface",
+        "define TimeRange type for filtering"
+      ],
+      "passes": false
+    },
+    {
+      "category": "react-hooks",
+      "description": "Implement custom hooks for data fetching",
+      "steps": [
+        "create src/hooks/useMetrics.ts",
+        "implement useServers() hook",
+        "implement useCPUMetrics(serverId, timeRange) hook",
+        "implement useMemoryMetrics(serverId, timeRange) hook",
+        "implement useSwapMetrics(serverId, timeRange) hook",
+        "implement useDiskMetrics(serverId, timeRange) hook",
+        "implement useNetworkMetrics(serverId, timeRange) hook",
+        "implement useProcessMetrics(serverId, timeRange) hook",
+        "implement auto-refresh with configurable interval"
+      ],
+      "passes": false
+    },
+    {
+      "category": "react-charts",
+      "description": "Implement chart components with Recharts",
+      "steps": [
+        "create src/components/charts/CPUChart.tsx - line chart for CPU usage over time",
+        "create src/components/charts/MemoryChart.tsx - area chart for memory usage",
+        "create src/components/charts/SwapChart.tsx - area chart for swap usage",
+        "create src/components/charts/DiskUsageChart.tsx - bar chart for disk partitions",
+        "create src/components/charts/DiskIOChart.tsx - line chart for read/write bytes",
+        "create src/components/charts/NetworkChart.tsx - line chart for bytes sent/received",
+        "create src/components/charts/ProcessList.tsx - table for top processes"
+      ],
+      "passes": false
+    },
+    {
+      "category": "react-ui-components",
+      "description": "Implement UI components",
+      "steps": [
+        "create src/components/TimeRangeSelector.tsx - dropdown/buttons for time range",
+        "create src/components/ServerSelector.tsx - dropdown to switch servers",
+        "create src/components/DashboardHeader.tsx - header with selectors and logout",
+        "create src/components/MetricCard.tsx - wrapper card for each metric section",
+        "create src/components/LoadingSpinner.tsx - loading state indicator"
+      ],
+      "passes": false
+    },
+    {
+      "category": "react-pages",
+      "description": "Implement main pages and layout",
+      "steps": [
+        "create src/pages/Dashboard.tsx - main dashboard with all charts",
+        "create src/pages/Login.tsx - login page",
+        "update src/App.tsx with routing and protected routes",
+        "implement responsive grid layout for charts",
+        "add error boundary for chart failures"
+      ],
+      "passes": false
+    },
+    {
+      "category": "go-daemon-testing",
+      "description": "Write tests for Go daemon",
+      "steps": [
+        "create collector/cpu_test.go - test CPU collection",
+        "create collector/memory_test.go - test memory and swap collection",
+        "create collector/disk_test.go - test disk usage and I/O collection",
+        "create collector/network_test.go - test network collection",
+        "create collector/process_test.go - test process collection",
+        "create config/config_test.go - test config loading",
+        "create storage/turso_test.go - test Turso client (mock or integration)"
+      ],
+      "passes": false
+    },
+    {
+      "category": "go-daemon-lint-typecheck",
+      "description": "Set up linting and static analysis for Go",
+      "steps": [
+        "install golangci-lint",
+        "create .golangci.yml configuration",
+        "run golangci-lint run to check for issues",
+        "run go vet ./... for static analysis",
+        "run go build ./... to verify compilation",
+        "fix any linting or type errors"
+      ],
+      "passes": false
+    },
+    {
+      "category": "react-testing",
+      "description": "Write tests for React dashboard",
+      "steps": [
+        "install vitest and @testing-library/react",
+        "configure vitest in vite.config.ts",
+        "create src/components/charts/__tests__/CPUChart.test.tsx",
+        "create src/components/charts/__tests__/MemoryChart.test.tsx",
+        "create src/hooks/__tests__/useMetrics.test.ts",
+        "create src/lib/__tests__/auth.test.ts",
+        "run npm test to verify all tests pass"
+      ],
+      "passes": false
+    },
+    {
+      "category": "react-lint-typecheck",
+      "description": "Set up linting and type checking for React",
+      "steps": [
+        "install eslint and @typescript-eslint plugins",
+        "create .eslintrc.cjs configuration",
+        "run npm run lint to check for issues",
+        "run npx tsc --noEmit to verify TypeScript types",
+        "fix any linting or type errors"
+      ],
+      "passes": false
+    },
+    {
+      "category": "go-daemon-deployment",
+      "description": "Prepare Go daemon for deployment",
+      "steps": [
+        "create server-agent.service systemd service file",
+        "add ExecStart pointing to binary",
+        "add EnvironmentFile for secrets",
+        "add Restart=always for resilience",
+        "document installation steps in README",
+        "build binary with GOOS=linux GOARCH=amd64 go build"
+      ],
+      "passes": false
+    },
+    {
+      "category": "react-deployment",
+      "description": "Prepare React dashboard for deployment",
+      "steps": [
+        "configure environment variables for production Turso URL",
+        "run npm run build to create production build",
+        "verify dist/ output is correct",
+        "document deployment to Vercel/Netlify/self-hosted"
+      ],
+      "passes": false
+    },
+    {
+      "category": "integration-testing",
+      "description": "End-to-end integration testing",
+      "steps": [
+        "start Go daemon locally with test Turso database",
+        "verify metrics are being inserted into Turso",
+        "start React dashboard in development mode",
+        "verify charts display real data",
+        "test time range filtering queries",
+        "test basic auth login/logout flow",
+        "test auto-refresh functionality"
+      ],
+      "passes": false
+    }
+  ]
+}
