@@ -55,7 +55,7 @@
         "add validation for required environment variables",
         "add sensible defaults for optional values"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "go-daemon-storage",
