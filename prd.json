@@ -232,7 +232,7 @@
         "run go build ./... to verify compilation",
         "fix any linting or type errors"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "react-testing",

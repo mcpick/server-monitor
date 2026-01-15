@@ -22,7 +22,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to connect to Turso: %v", err)
 	}
-	defer client.Close()
+	defer func() {
+		if err := client.Close(); err != nil {
+			log.Printf("Error closing Turso client: %v", err)
+		}
+	}()
 
 	if err := client.RegisterServer(cfg.ServerID, cfg.Hostname); err != nil {
 		log.Fatalf("Failed to register server: %v", err)

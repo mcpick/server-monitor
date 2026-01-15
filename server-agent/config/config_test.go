@@ -14,7 +14,7 @@ func TestLoad_RequiredEnvVars(t *testing.T) {
 		t.Error("Expected error when TURSO_DATABASE_URL is missing")
 	}
 
-	os.Setenv("TURSO_DATABASE_URL", "libsql://test.turso.io")
+	t.Setenv("TURSO_DATABASE_URL", "libsql://test.turso.io")
 	_, err = Load()
 	if err == nil {
 		t.Error("Expected error when TURSO_AUTH_TOKEN is missing")
@@ -23,8 +23,8 @@ func TestLoad_RequiredEnvVars(t *testing.T) {
 
 func TestLoad_Defaults(t *testing.T) {
 	os.Clearenv()
-	os.Setenv("TURSO_DATABASE_URL", "libsql://test.turso.io")
-	os.Setenv("TURSO_AUTH_TOKEN", "test-token")
+	t.Setenv("TURSO_DATABASE_URL", "libsql://test.turso.io")
+	t.Setenv("TURSO_AUTH_TOKEN", "test-token")
 
 	cfg, err := Load()
 	if err != nil {
@@ -46,11 +46,11 @@ func TestLoad_Defaults(t *testing.T) {
 
 func TestLoad_CustomValues(t *testing.T) {
 	os.Clearenv()
-	os.Setenv("TURSO_DATABASE_URL", "libsql://custom.turso.io")
-	os.Setenv("TURSO_AUTH_TOKEN", "custom-token")
-	os.Setenv("COLLECTION_INTERVAL", "10s")
-	os.Setenv("HOSTNAME", "custom-host")
-	os.Setenv("SERVER_ID", "custom-id")
+	t.Setenv("TURSO_DATABASE_URL", "libsql://custom.turso.io")
+	t.Setenv("TURSO_AUTH_TOKEN", "custom-token")
+	t.Setenv("COLLECTION_INTERVAL", "10s")
+	t.Setenv("HOSTNAME", "custom-host")
+	t.Setenv("SERVER_ID", "custom-id")
 
 	cfg, err := Load()
 	if err != nil {
@@ -80,9 +80,9 @@ func TestLoad_CustomValues(t *testing.T) {
 
 func TestLoad_InvalidInterval(t *testing.T) {
 	os.Clearenv()
-	os.Setenv("TURSO_DATABASE_URL", "libsql://test.turso.io")
-	os.Setenv("TURSO_AUTH_TOKEN", "test-token")
-	os.Setenv("COLLECTION_INTERVAL", "invalid")
+	t.Setenv("TURSO_DATABASE_URL", "libsql://test.turso.io")
+	t.Setenv("TURSO_AUTH_TOKEN", "test-token")
+	t.Setenv("COLLECTION_INTERVAL", "invalid")
 
 	_, err := Load()
 	if err == nil {
