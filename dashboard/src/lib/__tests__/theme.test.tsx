@@ -1,22 +1,24 @@
+import type { ReactNode } from 'react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { ThemeProvider, useTheme } from '../theme';
-import type { ReactNode } from 'react';
 
-function wrapper({ children }: { children: ReactNode }) {
+function wrapper({ children }: { children: ReactNode }): React.JSX.Element {
     return <ThemeProvider>{children}</ThemeProvider>;
 }
 
-const mockMatchMedia = (matches: boolean) => ({
-    matches,
-    media: '',
-    onchange: null,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-});
+function mockMatchMedia(matches: boolean): MediaQueryList {
+    return {
+        matches,
+        media: '',
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+    } as unknown as MediaQueryList;
+}
 
 describe('useTheme', () => {
     beforeEach(() => {

@@ -453,7 +453,7 @@
         "implement error logging/analytics in dashboard",
         "improve user-facing error messages"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "feature-health-check",

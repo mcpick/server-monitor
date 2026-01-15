@@ -42,7 +42,10 @@ func (c *TursoClient) RegisterServer(serverID, hostname string) error {
 		VALUES (?, ?, ?)
 		ON CONFLICT(id) DO UPDATE SET hostname = excluded.hostname
 	`, serverID, hostname, time.Now().Unix())
-	return err
+	if err != nil {
+		return fmt.Errorf("register server %q: %w", hostname, err)
+	}
+	return nil
 }
 
 func (c *TursoClient) InsertCPUMetrics(serverID string, timestamp int64, metrics *collector.CPUMetrics) error {
@@ -50,7 +53,10 @@ func (c *TursoClient) InsertCPUMetrics(serverID string, timestamp int64, metrics
 		INSERT INTO cpu_metrics (server_id, timestamp, usage_percent, load_1m, load_5m, load_15m)
 		VALUES (?, ?, ?, ?, ?, ?)
 	`, serverID, timestamp, metrics.UsagePercent, metrics.Load1m, metrics.Load5m, metrics.Load15m)
-	return err
+	if err != nil {
+		return fmt.Errorf("insert cpu metrics: %w", err)
+	}
+	return nil
 }
 
 func (c *TursoClient) InsertMemoryMetrics(serverID string, timestamp int64, metrics *collector.MemoryMetrics) error {
@@ -58,7 +64,10 @@ func (c *TursoClient) InsertMemoryMetrics(serverID string, timestamp int64, metr
 		INSERT INTO memory_metrics (server_id, timestamp, total_bytes, used_bytes, available_bytes, cached_bytes)
 		VALUES (?, ?, ?, ?, ?, ?)
 	`, serverID, timestamp, metrics.TotalBytes, metrics.UsedBytes, metrics.AvailableBytes, metrics.CachedBytes)
-	return err
+	if err != nil {
+		return fmt.Errorf("insert memory metrics: %w", err)
+	}
+	return nil
 }
 
 func (c *TursoClient) InsertSwapMetrics(serverID string, timestamp int64, metrics *collector.SwapMetrics) error {
@@ -66,7 +75,10 @@ func (c *TursoClient) InsertSwapMetrics(serverID string, timestamp int64, metric
 		INSERT INTO swap_metrics (server_id, timestamp, total_bytes, used_bytes, free_bytes)
 		VALUES (?, ?, ?, ?, ?)
 	`, serverID, timestamp, metrics.TotalBytes, metrics.UsedBytes, metrics.FreeBytes)
-	return err
+	if err != nil {
+		return fmt.Errorf("insert swap metrics: %w", err)
+	}
+	return nil
 }
 
 func (c *TursoClient) InsertDiskUsageMetrics(serverID string, timestamp int64, metrics []collector.DiskUsageMetrics) error {
@@ -76,7 +88,7 @@ func (c *TursoClient) InsertDiskUsageMetrics(serverID string, timestamp int64, m
 			VALUES (?, ?, ?, ?, ?, ?)
 		`, serverID, timestamp, m.MountPoint, m.TotalBytes, m.UsedBytes, m.FreeBytes)
 		if err != nil {
-			return err
+			return fmt.Errorf("insert disk usage metrics for %q: %w", m.MountPoint, err)
 		}
 	}
 	return nil
@@ -89,7 +101,7 @@ func (c *TursoClient) InsertDiskIOMetrics(serverID string, timestamp int64, metr
 			VALUES (?, ?, ?, ?, ?, ?, ?)
 		`, serverID, timestamp, m.Device, m.ReadBytes, m.WriteBytes, m.ReadCount, m.WriteCount)
 		if err != nil {
-			return err
+			return fmt.Errorf("insert disk io metrics for %q: %w", m.Device, err)
 		}
 	}
 	return nil
@@ -102,7 +114,7 @@ func (c *TursoClient) InsertNetworkMetrics(serverID string, timestamp int64, met
 			VALUES (?, ?, ?, ?, ?, ?, ?)
 		`, serverID, timestamp, m.Interface, m.BytesSent, m.BytesRecv, m.PacketsSent, m.PacketsRecv)
 		if err != nil {
-			return err
+			return fmt.Errorf("insert network metrics for %q: %w", m.Interface, err)
 		}
 	}
 	return nil
@@ -115,7 +127,7 @@ func (c *TursoClient) InsertProcessMetrics(serverID string, timestamp int64, met
 			VALUES (?, ?, ?, ?, ?, ?)
 		`, serverID, timestamp, m.PID, m.Name, m.CPUPercent, m.MemoryPercent)
 		if err != nil {
-			return err
+			return fmt.Errorf("insert process metrics for %q (pid %d): %w", m.Name, m.PID, err)
 		}
 	}
 	return nil

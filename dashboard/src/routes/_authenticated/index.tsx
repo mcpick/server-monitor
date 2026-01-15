@@ -97,6 +97,7 @@ function DashboardPage(): ReactElement {
                         title="CPU Usage"
                         loading={cpu.loading}
                         error={cpu.error}
+                        onRetry={cpu.refetch}
                     >
                         {cpu.data && <CPUChart data={cpu.data} />}
                     </MetricCard>
@@ -105,6 +106,7 @@ function DashboardPage(): ReactElement {
                         title="Memory Usage"
                         loading={memory.loading}
                         error={memory.error}
+                        onRetry={memory.refetch}
                     >
                         {memory.data && <MemoryChart data={memory.data} />}
                     </MetricCard>
@@ -113,6 +115,7 @@ function DashboardPage(): ReactElement {
                         title="Swap Usage"
                         loading={swap.loading}
                         error={swap.error}
+                        onRetry={swap.refetch}
                     >
                         {swap.data && <SwapChart data={swap.data} />}
                     </MetricCard>
@@ -121,6 +124,7 @@ function DashboardPage(): ReactElement {
                         title="Disk Usage"
                         loading={disk.usage.loading}
                         error={disk.usage.error}
+                        onRetry={disk.usage.refetch}
                     >
                         {disk.usage.data && (
                             <DiskUsageChart data={disk.usage.data} />
@@ -131,6 +135,7 @@ function DashboardPage(): ReactElement {
                         title="Disk I/O"
                         loading={disk.io.loading}
                         error={disk.io.error}
+                        onRetry={disk.io.refetch}
                     >
                         {disk.io.data && <DiskIOChart data={disk.io.data} />}
                     </MetricCard>
@@ -139,6 +144,7 @@ function DashboardPage(): ReactElement {
                         title="Network"
                         loading={network.loading}
                         error={network.error}
+                        onRetry={network.refetch}
                     >
                         {network.data && <NetworkChart data={network.data} />}
                     </MetricCard>
@@ -148,6 +154,7 @@ function DashboardPage(): ReactElement {
                             title="Top Processes"
                             loading={process.loading}
                             error={process.error}
+                            onRetry={process.refetch}
                         >
                             {process.data && (
                                 <ProcessList data={process.data} />
