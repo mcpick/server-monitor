@@ -15,6 +15,15 @@ const TanStackRouterDevtools =
         })),
       );
 
+const ReactQueryDevtools =
+  import.meta.env.PROD
+    ? () => null
+    : lazy(() =>
+        import('@tanstack/react-query-devtools').then((res) => ({
+          default: res.ReactQueryDevtools,
+        })),
+      );
+
 interface ErrorBoundaryProps {
   children: ReactNode;
 }
@@ -65,6 +74,7 @@ function RootComponent(): ReactElement {
       <Outlet />
       <Suspense>
         <TanStackRouterDevtools position="bottom-right" />
+        <ReactQueryDevtools buttonPosition="bottom-left" />
       </Suspense>
     </ErrorBoundary>
   );

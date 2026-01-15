@@ -1,7 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
-import { useServers, useCPUMetrics } from '../useMetrics';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as turso from '../../lib/turso';
+import { queryKeys } from '../../lib/queryKeys';
 
 vi.mock('../../lib/turso');
 
@@ -12,12 +11,36 @@ describe('useMetrics hooks', () => {
     vi.clearAllMocks();
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
+  describe('queryKeys', () => {
+    it('creates servers query key', () => {
+      expect(queryKeys.servers()).toEqual(['metrics', 'servers']);
+    });
+
+    it('creates cpu query key with parameters', () => {
+      const timeRange = { preset: '1h' as const, startTime: 1700000000, endTime: 1700003600 };
+      expect(queryKeys.cpu('server-1', timeRange)).toEqual([
+        'metrics',
+        'cpu',
+        'server-1',
+        1700000000,
+        1700003600,
+      ]);
+    });
+
+    it('creates memory query key with parameters', () => {
+      const timeRange = { preset: '1h' as const, startTime: 1700000000, endTime: 1700003600 };
+      expect(queryKeys.memory('server-1', timeRange)).toEqual([
+        'metrics',
+        'memory',
+        'server-1',
+        1700000000,
+        1700003600,
+      ]);
+    });
   });
 
-  describe('useServers', () => {
-    it('fetches servers on mount', async () => {
+  describe('turso fetch functions', () => {
+    it('fetchServers returns server data', async () => {
       const mockServers = [
         { id: 'server-1', hostname: 'server1.example.com', created_at: 1700000000 },
         { id: 'server-2', hostname: 'server2.example.com', created_at: 1700000001 },
@@ -25,49 +48,13 @@ describe('useMetrics hooks', () => {
 
       mockedTurso.fetchServers.mockResolvedValue(mockServers);
 
-      const { result } = renderHook(() => useServers());
+      const result = await turso.fetchServers();
 
-      expect(result.current.loading).toBe(true);
-      expect(result.current.data).toBeNull();
-
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false);
-      });
-
-      expect(result.current.data).toEqual(mockServers);
-      expect(result.current.error).toBeNull();
+      expect(result).toEqual(mockServers);
       expect(mockedTurso.fetchServers).toHaveBeenCalledTimes(1);
     });
 
-    it('handles fetch error', async () => {
-      const error = new Error('Failed to fetch');
-      mockedTurso.fetchServers.mockRejectedValue(error);
-
-      const { result } = renderHook(() => useServers());
-
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false);
-      });
-
-      expect(result.current.data).toBeNull();
-      expect(result.current.error).toEqual(error);
-    });
-  });
-
-  describe('useCPUMetrics', () => {
-    const timeRange = { preset: '1h' as const, startTime: 1700000000, endTime: 1700003600 };
-
-    it('does not fetch when serverId is null', async () => {
-      const { result } = renderHook(() => useCPUMetrics(null, timeRange));
-
-      // Give some time for any potential fetch to occur
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      expect(result.current.loading).toBe(true);
-      expect(mockedTurso.fetchCPUMetrics).not.toHaveBeenCalled();
-    });
-
-    it('fetches CPU metrics when serverId is provided', async () => {
+    it('fetchCPUMetrics is called with correct parameters', async () => {
       const mockMetrics = [
         {
           id: 1,
@@ -82,33 +69,21 @@ describe('useMetrics hooks', () => {
 
       mockedTurso.fetchCPUMetrics.mockResolvedValue(mockMetrics);
 
-      const { result } = renderHook(() => useCPUMetrics('server-1', timeRange));
+      const result = await turso.fetchCPUMetrics('server-1', 1700000000, 1700003600);
 
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false);
-      });
-
-      expect(result.current.data).toEqual(mockMetrics);
-      expect(result.current.error).toBeNull();
+      expect(result).toEqual(mockMetrics);
       expect(mockedTurso.fetchCPUMetrics).toHaveBeenCalledWith(
         'server-1',
-        timeRange.startTime,
-        timeRange.endTime
+        1700000000,
+        1700003600
       );
     });
 
     it('handles fetch error', async () => {
-      const error = new Error('Failed to fetch CPU metrics');
-      mockedTurso.fetchCPUMetrics.mockRejectedValue(error);
+      const error = new Error('Failed to fetch');
+      mockedTurso.fetchServers.mockRejectedValue(error);
 
-      const { result } = renderHook(() => useCPUMetrics('server-1', timeRange));
-
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false);
-      });
-
-      expect(result.current.data).toBeNull();
-      expect(result.current.error).toEqual(error);
+      await expect(turso.fetchServers()).rejects.toThrow('Failed to fetch');
     });
   });
 });

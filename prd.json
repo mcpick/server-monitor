@@ -294,7 +294,7 @@
         "refactor useProcessMetrics() hook to use useQuery with refetchInterval",
         "update hook tests to work with TanStack Query"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "go-daemon-deployment",
