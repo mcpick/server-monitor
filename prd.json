@@ -27,7 +27,7 @@
         "install date-fns for date handling",
         "create directory structure: components/, hooks/, lib/, types/"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "database-setup",
