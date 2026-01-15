@@ -43,7 +43,7 @@
         "create network_metrics table with indexes",
         "create process_metrics table with indexes"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "go-daemon-config",
