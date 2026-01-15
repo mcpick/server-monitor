@@ -15,14 +15,16 @@ export function MetricCard({
     children,
 }: MetricCardProps): ReactElement {
     return (
-        <div className="bg-white rounded-lg shadow p-4">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">{title}</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/50 p-4">
+            <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                {title}
+            </h2>
             {loading ? (
                 <div className="flex items-center justify-center h-64">
                     <LoadingSpinner />
                 </div>
             ) : error ? (
-                <div className="flex items-center justify-center h-64 text-red-600">
+                <div className="flex items-center justify-center h-64 text-red-600 dark:text-red-400">
                     <p>Error: {error.message}</p>
                 </div>
             ) : (

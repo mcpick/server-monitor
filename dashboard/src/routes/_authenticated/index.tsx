@@ -63,16 +63,18 @@ function DashboardPage(): ReactElement {
 
     if (serversLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <p className="text-gray-600">Loading servers...</p>
+            <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+                <p className="text-gray-600 dark:text-gray-400">
+                    Loading servers...
+                </p>
             </div>
         );
     }
 
     if (!servers || servers.length === 0) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <p className="text-gray-600">
+            <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+                <p className="text-gray-600 dark:text-gray-400">
                     No servers found. Make sure the agent is running.
                 </p>
             </div>
@@ -80,7 +82,7 @@ function DashboardPage(): ReactElement {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
             <DashboardHeader
                 servers={servers}
                 selectedServerId={selectedServerId}

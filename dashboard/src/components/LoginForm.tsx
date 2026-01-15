@@ -31,9 +31,9 @@ export function LoginForm({ onSuccess }: LoginFormProps): ReactElement {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100">
-            <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-                <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+        <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+            <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-md">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
                     Server Monitor
                 </h1>
                 <form
@@ -43,7 +43,7 @@ export function LoginForm({ onSuccess }: LoginFormProps): ReactElement {
                     <div>
                         <label
                             htmlFor="username"
-                            className="block text-sm font-medium text-gray-700 mb-1"
+                            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                         >
                             Username
                         </label>
@@ -52,7 +52,7 @@ export function LoginForm({ onSuccess }: LoginFormProps): ReactElement {
                             id="username"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                             required
                             autoComplete="username"
                         />
@@ -60,7 +60,7 @@ export function LoginForm({ onSuccess }: LoginFormProps): ReactElement {
                     <div>
                         <label
                             htmlFor="password"
-                            className="block text-sm font-medium text-gray-700 mb-1"
+                            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                         >
                             Password
                         </label>
@@ -69,20 +69,20 @@ export function LoginForm({ onSuccess }: LoginFormProps): ReactElement {
                             id="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                             required
                             autoComplete="current-password"
                         />
                     </div>
                     {error && (
-                        <div className="text-red-600 text-sm text-center">
+                        <div className="text-red-600 dark:text-red-400 text-sm text-center">
                             {error}
                         </div>
                     )}
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {loading ? 'Signing in...' : 'Sign In'}
                     </button>

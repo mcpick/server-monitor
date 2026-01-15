@@ -479,7 +479,7 @@
         "store theme preference in localStorage",
         "respect system preference as default"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "feature-alerting",

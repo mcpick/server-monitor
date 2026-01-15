@@ -44,17 +44,17 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     render(): ReactNode {
         if (this.state.hasError) {
             return (
-                <div className="min-h-screen flex items-center justify-center bg-gray-100">
-                    <div className="bg-white p-8 rounded-lg shadow-md max-w-md">
-                        <h1 className="text-xl font-bold text-red-600 mb-4">
+                <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+                    <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md max-w-md">
+                        <h1 className="text-xl font-bold text-red-600 dark:text-red-400 mb-4">
                             Something went wrong
                         </h1>
-                        <p className="text-gray-600 mb-4">
+                        <p className="text-gray-600 dark:text-gray-300 mb-4">
                             {this.state.error?.message}
                         </p>
                         <button
                             onClick={() => window.location.reload()}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
                         >
                             Reload Page
                         </button>
