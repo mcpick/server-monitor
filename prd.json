@@ -134,7 +134,7 @@
         "create src/components/LoginForm.tsx",
         "create src/components/ProtectedRoute.tsx wrapper"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "react-types",
