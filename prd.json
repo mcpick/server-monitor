@@ -13,7 +13,7 @@
         "create directory structure: collector/, storage/, config/",
         "create main.go entry point file"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "setup-react-dashboard",
