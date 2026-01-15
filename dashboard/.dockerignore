@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Source code
+src/
+public/
+
+# Build configuration
+*.config.ts
+*.config.js
+tsconfig*.json
+
+# Package files (not needed in image)
+package.json
+package-lock.json
+pnpm-lock.yaml
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Documentation
+README.md
+*.md
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# Test files
+**/__tests__/
+**/*.test.*
+**/*.spec.*
+coverage/

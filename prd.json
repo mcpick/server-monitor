@@ -356,7 +356,7 @@
         "configure environment variable injection at runtime",
         "add .dockerignore to exclude node_modules and source"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "docker-compose-setup",
