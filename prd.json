@@ -74,7 +74,7 @@
         "implement InsertProcessMetrics() method",
         "implement Close() method for cleanup"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "go-daemon-collectors",
