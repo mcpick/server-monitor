@@ -219,7 +219,7 @@
         "create config/config_test.go - test config loading",
         "create storage/turso_test.go - test Turso client (mock or integration)"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "go-daemon-lint-typecheck",
