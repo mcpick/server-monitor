@@ -426,7 +426,7 @@
         "refactor 8 fetch functions to use generic utility",
         "create collector interface in server-agent for main loop"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "code-quality-test-coverage",

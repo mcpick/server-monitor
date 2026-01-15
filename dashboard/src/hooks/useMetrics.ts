@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, type QueryKey } from '@tanstack/react-query';
 import type {
     Server,
     CPUMetric,
@@ -31,6 +31,31 @@ interface UseDataResult<T> {
 
 const DEFAULT_REFRESH_INTERVAL = 10000;
 
+/**
+ * Factory function to create metric hooks with consistent behavior.
+ * Reduces duplication across useXMetrics hooks.
+ */
+function useMetricQuery<T>(
+    queryKey: QueryKey,
+    queryFn: () => Promise<T[]>,
+    enabled: boolean,
+    refreshInterval: number,
+): UseDataResult<T[]> {
+    const query = useQuery({
+        queryKey,
+        queryFn,
+        enabled,
+        refetchInterval: refreshInterval,
+    });
+
+    return {
+        data: query.data ?? null,
+        loading: query.isLoading,
+        error: query.error,
+        refetch: () => void query.refetch(),
+    };
+}
+
 export function useServers(): UseDataResult<Server[]> {
     const query = useQuery({
         queryKey: queryKeys.servers(),
@@ -50,20 +75,13 @@ export function useCPUMetrics(
     timeRange: TimeRange,
     refreshInterval = DEFAULT_REFRESH_INTERVAL,
 ): UseDataResult<CPUMetric[]> {
-    const query = useQuery({
-        queryKey: queryKeys.cpu(serverId, timeRange),
-        queryFn: () =>
+    return useMetricQuery(
+        queryKeys.cpu(serverId, timeRange),
+        () =>
             fetchCPUMetrics(serverId!, timeRange.startTime, timeRange.endTime),
-        enabled: !!serverId,
-        refetchInterval: refreshInterval,
-    });
-
-    return {
-        data: query.data ?? null,
-        loading: query.isLoading,
-        error: query.error,
-        refetch: () => void query.refetch(),
-    };
+        !!serverId,
+        refreshInterval,
+    );
 }
 
 export function useMemoryMetrics(
@@ -71,24 +89,17 @@ export function useMemoryMetrics(
     timeRange: TimeRange,
     refreshInterval = DEFAULT_REFRESH_INTERVAL,
 ): UseDataResult<MemoryMetric[]> {
-    const query = useQuery({
-        queryKey: queryKeys.memory(serverId, timeRange),
-        queryFn: () =>
+    return useMetricQuery(
+        queryKeys.memory(serverId, timeRange),
+        () =>
             fetchMemoryMetrics(
                 serverId!,
                 timeRange.startTime,
                 timeRange.endTime,
             ),
-        enabled: !!serverId,
-        refetchInterval: refreshInterval,
-    });
-
-    return {
-        data: query.data ?? null,
-        loading: query.isLoading,
-        error: query.error,
-        refetch: () => void query.refetch(),
-    };
+        !!serverId,
+        refreshInterval,
+    );
 }
 
 export function useSwapMetrics(
@@ -96,20 +107,13 @@ export function useSwapMetrics(
     timeRange: TimeRange,
     refreshInterval = DEFAULT_REFRESH_INTERVAL,
 ): UseDataResult<SwapMetric[]> {
-    const query = useQuery({
-        queryKey: queryKeys.swap(serverId, timeRange),
-        queryFn: () =>
+    return useMetricQuery(
+        queryKeys.swap(serverId, timeRange),
+        () =>
             fetchSwapMetrics(serverId!, timeRange.startTime, timeRange.endTime),
-        enabled: !!serverId,
-        refetchInterval: refreshInterval,
-    });
-
-    return {
-        data: query.data ?? null,
-        loading: query.isLoading,
-        error: query.error,
-        refetch: () => void query.refetch(),
-    };
+        !!serverId,
+        refreshInterval,
+    );
 }
 
 export function useDiskMetrics(
@@ -120,44 +124,31 @@ export function useDiskMetrics(
     usage: UseDataResult<DiskUsageMetric[]>;
     io: UseDataResult<DiskIOMetric[]>;
 } {
-    const usageQuery = useQuery({
-        queryKey: queryKeys.diskUsage(serverId, timeRange),
-        queryFn: () =>
+    const usage = useMetricQuery(
+        queryKeys.diskUsage(serverId, timeRange),
+        () =>
             fetchDiskUsageMetrics(
                 serverId!,
                 timeRange.startTime,
                 timeRange.endTime,
             ),
-        enabled: !!serverId,
-        refetchInterval: refreshInterval,
-    });
+        !!serverId,
+        refreshInterval,
+    );
 
-    const ioQuery = useQuery({
-        queryKey: queryKeys.diskIO(serverId, timeRange),
-        queryFn: () =>
+    const io = useMetricQuery(
+        queryKeys.diskIO(serverId, timeRange),
+        () =>
             fetchDiskIOMetrics(
                 serverId!,
                 timeRange.startTime,
                 timeRange.endTime,
             ),
-        enabled: !!serverId,
-        refetchInterval: refreshInterval,
-    });
+        !!serverId,
+        refreshInterval,
+    );
 
-    return {
-        usage: {
-            data: usageQuery.data ?? null,
-            loading: usageQuery.isLoading,
-            error: usageQuery.error,
-            refetch: () => void usageQuery.refetch(),
-        },
-        io: {
-            data: ioQuery.data ?? null,
-            loading: ioQuery.isLoading,
-            error: ioQuery.error,
-            refetch: () => void ioQuery.refetch(),
-        },
-    };
+    return { usage, io };
 }
 
 export function useNetworkMetrics(
@@ -165,24 +156,17 @@ export function useNetworkMetrics(
     timeRange: TimeRange,
     refreshInterval = DEFAULT_REFRESH_INTERVAL,
 ): UseDataResult<NetworkMetric[]> {
-    const query = useQuery({
-        queryKey: queryKeys.network(serverId, timeRange),
-        queryFn: () =>
+    return useMetricQuery(
+        queryKeys.network(serverId, timeRange),
+        () =>
             fetchNetworkMetrics(
                 serverId!,
                 timeRange.startTime,
                 timeRange.endTime,
             ),
-        enabled: !!serverId,
-        refetchInterval: refreshInterval,
-    });
-
-    return {
-        data: query.data ?? null,
-        loading: query.isLoading,
-        error: query.error,
-        refetch: () => void query.refetch(),
-    };
+        !!serverId,
+        refreshInterval,
+    );
 }
 
 export function useProcessMetrics(
@@ -190,22 +174,15 @@ export function useProcessMetrics(
     timeRange: TimeRange,
     refreshInterval = DEFAULT_REFRESH_INTERVAL,
 ): UseDataResult<ProcessMetric[]> {
-    const query = useQuery({
-        queryKey: queryKeys.process(serverId, timeRange),
-        queryFn: () =>
+    return useMetricQuery(
+        queryKeys.process(serverId, timeRange),
+        () =>
             fetchProcessMetrics(
                 serverId!,
                 timeRange.startTime,
                 timeRange.endTime,
             ),
-        enabled: !!serverId,
-        refetchInterval: refreshInterval,
-    });
-
-    return {
-        data: query.data ?? null,
-        loading: query.isLoading,
-        error: query.error,
-        refetch: () => void query.refetch(),
-    };
+        !!serverId,
+        refreshInterval,
+    );
 }

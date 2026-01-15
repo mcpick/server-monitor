@@ -10,6 +10,29 @@ import (
 	"github.com/tursodatabase/libsql-client-go/libsql"
 )
 
+// batchInsert executes an insert statement for each item in a slice.
+// The argsFunc extracts the SQL arguments for each item.
+// The identifierFunc returns a string identifier for error messages.
+func batchInsert[T any](
+	db *sql.DB,
+	items []T,
+	query string,
+	serverID string,
+	timestamp int64,
+	argsFunc func(item T) []any,
+	identifierFunc func(item T) string,
+	metricType string,
+) error {
+	for _, item := range items {
+		args := append([]any{serverID, timestamp}, argsFunc(item)...)
+		_, err := db.Exec(query, args...)
+		if err != nil {
+			return fmt.Errorf("insert %s for %q: %w", metricType, identifierFunc(item), err)
+		}
+	}
+	return nil
+}
+
 type TursoClient struct {
 	db *sql.DB
 }
@@ -82,53 +105,65 @@ func (c *TursoClient) InsertSwapMetrics(serverID string, timestamp int64, metric
 }
 
 func (c *TursoClient) InsertDiskUsageMetrics(serverID string, timestamp int64, metrics []collector.DiskUsageMetrics) error {
-	for _, m := range metrics {
-		_, err := c.db.Exec(`
-			INSERT INTO disk_usage_metrics (server_id, timestamp, mount_point, total_bytes, used_bytes, free_bytes)
-			VALUES (?, ?, ?, ?, ?, ?)
-		`, serverID, timestamp, m.MountPoint, m.TotalBytes, m.UsedBytes, m.FreeBytes)
-		if err != nil {
-			return fmt.Errorf("insert disk usage metrics for %q: %w", m.MountPoint, err)
-		}
-	}
-	return nil
+	return batchInsert(
+		c.db,
+		metrics,
+		`INSERT INTO disk_usage_metrics (server_id, timestamp, mount_point, total_bytes, used_bytes, free_bytes)
+		VALUES (?, ?, ?, ?, ?, ?)`,
+		serverID,
+		timestamp,
+		func(m collector.DiskUsageMetrics) []any {
+			return []any{m.MountPoint, m.TotalBytes, m.UsedBytes, m.FreeBytes}
+		},
+		func(m collector.DiskUsageMetrics) string { return m.MountPoint },
+		"disk usage metrics",
+	)
 }
 
 func (c *TursoClient) InsertDiskIOMetrics(serverID string, timestamp int64, metrics []collector.DiskIOMetrics) error {
-	for _, m := range metrics {
-		_, err := c.db.Exec(`
-			INSERT INTO disk_io_metrics (server_id, timestamp, device, read_bytes, write_bytes, read_count, write_count)
-			VALUES (?, ?, ?, ?, ?, ?, ?)
-		`, serverID, timestamp, m.Device, m.ReadBytes, m.WriteBytes, m.ReadCount, m.WriteCount)
-		if err != nil {
-			return fmt.Errorf("insert disk io metrics for %q: %w", m.Device, err)
-		}
-	}
-	return nil
+	return batchInsert(
+		c.db,
+		metrics,
+		`INSERT INTO disk_io_metrics (server_id, timestamp, device, read_bytes, write_bytes, read_count, write_count)
+		VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		serverID,
+		timestamp,
+		func(m collector.DiskIOMetrics) []any {
+			return []any{m.Device, m.ReadBytes, m.WriteBytes, m.ReadCount, m.WriteCount}
+		},
+		func(m collector.DiskIOMetrics) string { return m.Device },
+		"disk io metrics",
+	)
 }
 
 func (c *TursoClient) InsertNetworkMetrics(serverID string, timestamp int64, metrics []collector.NetworkMetrics) error {
-	for _, m := range metrics {
-		_, err := c.db.Exec(`
-			INSERT INTO network_metrics (server_id, timestamp, interface, bytes_sent, bytes_recv, packets_sent, packets_recv)
-			VALUES (?, ?, ?, ?, ?, ?, ?)
-		`, serverID, timestamp, m.Interface, m.BytesSent, m.BytesRecv, m.PacketsSent, m.PacketsRecv)
-		if err != nil {
-			return fmt.Errorf("insert network metrics for %q: %w", m.Interface, err)
-		}
-	}
-	return nil
+	return batchInsert(
+		c.db,
+		metrics,
+		`INSERT INTO network_metrics (server_id, timestamp, interface, bytes_sent, bytes_recv, packets_sent, packets_recv)
+		VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		serverID,
+		timestamp,
+		func(m collector.NetworkMetrics) []any {
+			return []any{m.Interface, m.BytesSent, m.BytesRecv, m.PacketsSent, m.PacketsRecv}
+		},
+		func(m collector.NetworkMetrics) string { return m.Interface },
+		"network metrics",
+	)
 }
 
 func (c *TursoClient) InsertProcessMetrics(serverID string, timestamp int64, metrics []collector.ProcessMetrics) error {
-	for _, m := range metrics {
-		_, err := c.db.Exec(`
-			INSERT INTO process_metrics (server_id, timestamp, pid, name, cpu_percent, memory_percent)
-			VALUES (?, ?, ?, ?, ?, ?)
-		`, serverID, timestamp, m.PID, m.Name, m.CPUPercent, m.MemoryPercent)
-		if err != nil {
-			return fmt.Errorf("insert process metrics for %q (pid %d): %w", m.Name, m.PID, err)
-		}
-	}
-	return nil
+	return batchInsert(
+		c.db,
+		metrics,
+		`INSERT INTO process_metrics (server_id, timestamp, pid, name, cpu_percent, memory_percent)
+		VALUES (?, ?, ?, ?, ?, ?)`,
+		serverID,
+		timestamp,
+		func(m collector.ProcessMetrics) []any {
+			return []any{m.PID, m.Name, m.CPUPercent, m.MemoryPercent}
+		},
+		func(m collector.ProcessMetrics) string { return fmt.Sprintf("%s (pid %d)", m.Name, m.PID) },
+		"process metrics",
+	)
 }
