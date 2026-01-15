@@ -271,7 +271,7 @@
         "document installation steps in README",
         "build binary with GOOS=linux GOARCH=amd64 go build"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "react-deployment",

@@ -1,0 +1,29 @@
+[Unit]
+Description=Server Monitor Agent
+Documentation=https://github.com/jackmcpickle/server-monitor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=server-agent
+Group=server-agent
+ExecStart=/usr/local/bin/server-agent
+EnvironmentFile=/etc/server-agent/server-agent.env
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,8 @@
+# Binary
+server-agent
+server-agent-linux-*
+server-agent-darwin-*
+server-agent-windows-*
+
+# Environment file with secrets
+server-agent.env
