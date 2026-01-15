@@ -1,0 +1,33 @@
+# Source code (binary is copied directly)
+*.go
+go.mod
+go.sum
+
+# Directories
+collector/
+config/
+storage/
+
+# Test files
+*_test.go
+
+# Build artifacts (except the main binary)
+server-agent-linux-*
+server-agent-darwin-*
+server-agent-windows-*
+
+# Configuration files
+*.env
+*.env.example
+.golangci.yml
+
+# Documentation
+README.md
+*.md
+
+# Service files
+*.service
+
+# Git
+.git
+.gitignore

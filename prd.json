@@ -333,6 +333,45 @@
         "test auto-refresh functionality"
       ],
       "passes": false
+    },
+    {
+      "category": "docker-daemon-setup",
+      "description": "Create Dockerfile for Go daemon testing",
+      "steps": [
+        "create server-agent/Dockerfile using Ubuntu base image",
+        "copy pre-built Linux binary into container",
+        "set up environment variables for Turso connection",
+        "configure entrypoint to run server-agent binary",
+        "add .dockerignore to exclude unnecessary files"
+      ],
+      "passes": true
+    },
+    {
+      "category": "docker-dashboard-setup",
+      "description": "Create Dockerfile for React dashboard with nginx",
+      "steps": [
+        "create dashboard/Dockerfile using nginx:alpine base",
+        "copy built dist/ files into nginx html directory",
+        "create nginx.conf for SPA routing (fallback to index.html)",
+        "configure environment variable injection at runtime",
+        "add .dockerignore to exclude node_modules and source"
+      ],
+      "passes": false
+    },
+    {
+      "category": "docker-compose-setup",
+      "description": "Create Docker Compose for full-stack testing",
+      "steps": [
+        "create docker-compose.yml in project root",
+        "add sqld service using libsql/sqld image for local database",
+        "add server-agent service with depends_on sqld",
+        "add dashboard service using nginx container",
+        "configure shared network for inter-container communication",
+        "add volume mounts for database persistence",
+        "create .env.docker template with all required variables",
+        "document usage in README (docker compose up)"
+      ],
+      "passes": false
     }
   ]
 }
