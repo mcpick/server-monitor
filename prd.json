@@ -103,7 +103,7 @@
         "implement graceful shutdown with signal handling (SIGINT, SIGTERM)",
         "add logging for collection cycles and errors"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "react-turso-client",
