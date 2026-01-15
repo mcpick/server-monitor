@@ -87,7 +87,7 @@
         "create collector/network.go - CollectNetwork() function",
         "create collector/process.go - CollectTopProcesses() function (top 10 by CPU/memory)"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "go-daemon-main",
