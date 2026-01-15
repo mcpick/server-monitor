@@ -371,7 +371,7 @@
         "create .env.docker template with all required variables",
         "document usage in README (docker compose up)"
       ],
-      "passes": false
+      "passes": true
     }
   ]
 }
