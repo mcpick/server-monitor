@@ -261,6 +261,42 @@
       "passes": true
     },
     {
+      "category": "react-tanstack-router",
+      "description": "Integrate TanStack Router for type-safe routing",
+      "steps": [
+        "install @tanstack/react-router and @tanstack/router-devtools dependencies",
+        "create src/routes/__root.tsx - root layout with ErrorBoundary",
+        "create src/routes/_authenticated.tsx - protected layout with auth guard using beforeLoad",
+        "create src/routes/_authenticated/index.tsx - dashboard route",
+        "create src/routes/login.tsx - public login route",
+        "create src/lib/router.ts - router configuration and route tree",
+        "update src/main.tsx to use RouterProvider",
+        "update src/App.tsx to render router outlet",
+        "update src/lib/auth.ts to use router.navigate() for redirects",
+        "remove conditional rendering logic and migrate pages to routes"
+      ],
+      "passes": false
+    },
+    {
+      "category": "react-tanstack-query",
+      "description": "Integrate TanStack Query for data fetching and caching",
+      "steps": [
+        "install @tanstack/react-query and @tanstack/react-query-devtools dependencies",
+        "create src/lib/queryClient.ts with QueryClient configuration",
+        "create src/lib/queryKeys.ts with query key factory for all metric types",
+        "update src/main.tsx to wrap app with QueryClientProvider",
+        "refactor useServers() hook to use useQuery",
+        "refactor useCPUMetrics() hook to use useQuery with refetchInterval",
+        "refactor useMemoryMetrics() hook to use useQuery with refetchInterval",
+        "refactor useSwapMetrics() hook to use useQuery with refetchInterval",
+        "refactor useDiskMetrics() hook to use useQuery with refetchInterval",
+        "refactor useNetworkMetrics() hook to use useQuery with refetchInterval",
+        "refactor useProcessMetrics() hook to use useQuery with refetchInterval",
+        "update hook tests to work with TanStack Query"
+      ],
+      "passes": false
+    },
+    {
       "category": "go-daemon-deployment",
       "description": "Prepare Go daemon for deployment",
       "steps": [
@@ -282,7 +318,7 @@
         "verify dist/ output is correct",
         "document deployment to Vercel/Netlify/self-hosted"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "integration-testing",
