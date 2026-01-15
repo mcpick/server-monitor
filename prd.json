@@ -151,7 +151,7 @@
         "define ProcessMetric interface",
         "define TimeRange type for filtering"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "react-hooks",
