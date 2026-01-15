@@ -120,7 +120,7 @@
         "implement fetchProcessMetrics(serverId, startTime, endTime) query",
         "implement fetchServers() to list available servers"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "react-auth",
