@@ -412,7 +412,7 @@
         "configure HTTPS with SSL/TLS certificates",
         "add HTTP to HTTPS redirect"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "code-quality-refactor-duplication",
