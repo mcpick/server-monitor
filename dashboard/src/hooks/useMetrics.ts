@@ -49,7 +49,7 @@ export function useServers(): UseDataResult<Server[]> {
   }, []);
 
   useEffect(() => {
-    refetch();
+    void refetch();
   }, [refetch]);
 
   return { data, loading, error, refetch };
@@ -79,8 +79,8 @@ export function useCPUMetrics(
   }, [serverId, timeRange.startTime, timeRange.endTime]);
 
   useEffect(() => {
-    refetch();
-    const interval = setInterval(refetch, refreshInterval);
+    void refetch();
+    const interval = setInterval(() => void refetch(), refreshInterval);
     return () => clearInterval(interval);
   }, [refetch, refreshInterval]);
 
@@ -111,8 +111,8 @@ export function useMemoryMetrics(
   }, [serverId, timeRange.startTime, timeRange.endTime]);
 
   useEffect(() => {
-    refetch();
-    const interval = setInterval(refetch, refreshInterval);
+    void refetch();
+    const interval = setInterval(() => void refetch(), refreshInterval);
     return () => clearInterval(interval);
   }, [refetch, refreshInterval]);
 
@@ -143,8 +143,8 @@ export function useSwapMetrics(
   }, [serverId, timeRange.startTime, timeRange.endTime]);
 
   useEffect(() => {
-    refetch();
-    const interval = setInterval(refetch, refreshInterval);
+    void refetch();
+    const interval = setInterval(() => void refetch(), refreshInterval);
     return () => clearInterval(interval);
   }, [refetch, refreshInterval]);
 
@@ -192,11 +192,11 @@ export function useDiskMetrics(
   }, [serverId, timeRange.startTime, timeRange.endTime]);
 
   useEffect(() => {
-    refetchUsage();
-    refetchIO();
+    void refetchUsage();
+    void refetchIO();
     const interval = setInterval(() => {
-      refetchUsage();
-      refetchIO();
+      void refetchUsage();
+      void refetchIO();
     }, refreshInterval);
     return () => clearInterval(interval);
   }, [refetchUsage, refetchIO, refreshInterval]);
@@ -231,8 +231,8 @@ export function useNetworkMetrics(
   }, [serverId, timeRange.startTime, timeRange.endTime]);
 
   useEffect(() => {
-    refetch();
-    const interval = setInterval(refetch, refreshInterval);
+    void refetch();
+    const interval = setInterval(() => void refetch(), refreshInterval);
     return () => clearInterval(interval);
   }, [refetch, refreshInterval]);
 
@@ -263,8 +263,8 @@ export function useProcessMetrics(
   }, [serverId, timeRange.startTime, timeRange.endTime]);
 
   useEffect(() => {
-    refetch();
-    const interval = setInterval(refetch, refreshInterval);
+    void refetch();
+    const interval = setInterval(() => void refetch(), refreshInterval);
     return () => clearInterval(interval);
   }, [refetch, refreshInterval]);
 

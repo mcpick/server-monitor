@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import {
   LineChart,
   Line,
@@ -15,7 +16,7 @@ interface CPUChartProps {
   data: CPUMetric[];
 }
 
-export function CPUChart({ data }: CPUChartProps) {
+export function CPUChart({ data }: CPUChartProps): ReactElement {
   const chartData = data.map((m) => ({
     time: m.timestamp * 1000,
     usage: m.usage_percent,
@@ -40,7 +41,7 @@ export function CPUChart({ data }: CPUChartProps) {
         />
         <Tooltip
           labelFormatter={(ts) => format(new Date(ts as number), 'MMM d, HH:mm:ss')}
-          formatter={(value: number) => [`${value.toFixed(1)}%`, '']}
+          formatter={(value) => `${(value as number).toFixed(1)}%`}
         />
         <Legend />
         <Line

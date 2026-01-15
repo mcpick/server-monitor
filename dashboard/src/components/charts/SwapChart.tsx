@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import {
   AreaChart,
   Area,
@@ -24,7 +25,7 @@ function formatBytes(bytes: number): string {
   return `${mb.toFixed(0)} MB`;
 }
 
-export function SwapChart({ data }: SwapChartProps) {
+export function SwapChart({ data }: SwapChartProps): ReactElement {
   const chartData = data.map((m) => ({
     time: m.timestamp * 1000,
     used: m.used_bytes / (1024 * 1024 * 1024),
@@ -50,7 +51,7 @@ export function SwapChart({ data }: SwapChartProps) {
         />
         <Tooltip
           labelFormatter={(ts) => format(new Date(ts as number), 'MMM d, HH:mm:ss')}
-          formatter={(value: number) => [formatBytes(value * 1024 * 1024 * 1024), '']}
+          formatter={(value) => formatBytes((value as number) * 1024 * 1024 * 1024)}
         />
         <Legend />
         <Area

@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import type { TimeRangePreset } from '../types/metrics';
 
 interface TimeRangeSelectorProps {
@@ -11,9 +12,9 @@ const presets: { value: TimeRangePreset; label: string }[] = [
   { value: '24h', label: 'Last 24 Hours' },
   { value: '7d', label: 'Last 7 Days' },
   { value: '30d', label: 'Last 30 Days' },
-];
+] satisfies { value: TimeRangePreset; label: string }[];
 
-export function TimeRangeSelector({ value, onChange }: TimeRangeSelectorProps) {
+export function TimeRangeSelector({ value, onChange }: TimeRangeSelectorProps): ReactElement {
   return (
     <div className="flex gap-1">
       {presets.map((preset) => (

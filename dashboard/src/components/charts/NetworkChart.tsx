@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import {
   LineChart,
   Line,
@@ -24,7 +25,7 @@ function formatRate(bytesPerSecond: number): string {
   return `${kbps.toFixed(0)} KB/s`;
 }
 
-export function NetworkChart({ data }: NetworkChartProps) {
+export function NetworkChart({ data }: NetworkChartProps): ReactElement {
   const byTimestamp = new Map<number, { sent: number; recv: number }>();
 
   for (const m of data) {
@@ -37,7 +38,7 @@ export function NetworkChart({ data }: NetworkChartProps) {
     }
   }
 
-  const timestamps = Array.from(byTimestamp.keys()).sort((a, b) => a - b);
+  const timestamps = [...byTimestamp.keys()].sort((a, b) => a - b);
   const chartData: { time: number; sendRate: number; recvRate: number }[] = [];
 
   for (let i = 1; i < timestamps.length; i++) {
@@ -69,10 +70,7 @@ export function NetworkChart({ data }: NetworkChartProps) {
         />
         <Tooltip
           labelFormatter={(ts) => format(new Date(ts as number), 'MMM d, HH:mm:ss')}
-          formatter={(value: number, name: string) => [
-            formatRate(value),
-            name === 'sendRate' ? 'Sent' : 'Received',
-          ]}
+          formatter={(value) => formatRate(value as number)}
         />
         <Legend />
         <Line

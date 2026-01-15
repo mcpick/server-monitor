@@ -252,13 +252,13 @@
       "category": "react-lint-typecheck",
       "description": "Set up linting and type checking for React",
       "steps": [
-        "install eslint and @typescript-eslint plugins",
-        "create .eslintrc.cjs configuration",
-        "run npm run lint to check for issues",
-        "run npx tsc --noEmit to verify TypeScript types",
+        "install oxlint for linting",
+        "configure pnpm lint script",
+        "run pnpm lint to check for issues",
+        "run tsc --noEmit to verify TypeScript types",
         "fix any linting or type errors"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "go-daemon-deployment",

@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import {
   BarChart,
   Bar,
@@ -24,7 +25,7 @@ function formatBytes(bytes: number): string {
   return `${gb.toFixed(1)} GB`;
 }
 
-export function DiskUsageChart({ data }: DiskUsageChartProps) {
+export function DiskUsageChart({ data }: DiskUsageChartProps): ReactElement {
   const latestByMount = new Map<string, DiskUsageMetric>();
   for (const m of data) {
     const existing = latestByMount.get(m.mount_point);
@@ -41,11 +42,11 @@ export function DiskUsageChart({ data }: DiskUsageChartProps) {
     usedPercent: (m.used_bytes / m.total_bytes) * 100,
   }));
 
-  const getBarColor = (percent: number) => {
+  function getBarColor(percent: number): string {
     if (percent >= 90) return '#ef4444';
     if (percent >= 75) return '#f59e0b';
     return '#22c55e';
-  };
+  }
 
   return (
     <ResponsiveContainer width="100%" height={300}>
@@ -63,10 +64,7 @@ export function DiskUsageChart({ data }: DiskUsageChartProps) {
           fontSize={12}
         />
         <Tooltip
-          formatter={(value: number, name: string) => {
-            if (name === 'used') return [formatBytes(value * 1024 * 1024 * 1024), 'Used'];
-            return [formatBytes(value * 1024 * 1024 * 1024), 'Free'];
-          }}
+          formatter={(value) => formatBytes((value as number) * 1024 * 1024 * 1024)}
         />
         <Legend />
         <Bar dataKey="used" name="Used" stackId="a">

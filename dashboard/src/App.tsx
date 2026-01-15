@@ -1,4 +1,4 @@
-import { useState, useEffect, Component, ReactNode } from 'react';
+import { useState, Component, type ReactNode, type ReactElement } from 'react';
 import { isAuthenticated } from './lib/auth';
 import { Dashboard } from './pages/Dashboard';
 import { Login } from './pages/Login';
@@ -22,7 +22,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     return { hasError: true, error };
   }
 
-  render() {
+  render(): ReactNode {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -44,27 +44,15 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 }
 
-function App() {
-  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+function App(): ReactElement {
+  const [authenticated, setAuthenticated] = useState(() => isAuthenticated());
 
-  useEffect(() => {
-    setAuthenticated(isAuthenticated());
-  }, []);
-
-  const handleLoginSuccess = () => {
+  function handleLoginSuccess(): void {
     setAuthenticated(true);
-  };
+  }
 
-  const handleLogout = () => {
+  function handleLogout(): void {
     setAuthenticated(false);
-  };
-
-  if (authenticated === null) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p className="text-gray-600">Loading...</p>
-      </div>
-    );
   }
 
   return (
@@ -78,4 +66,4 @@ function App() {
   );
 }
 
-export default App;
+export { App };

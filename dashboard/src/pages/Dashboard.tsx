@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, type ReactElement } from 'react';
 import { DashboardHeader } from '../components/DashboardHeader';
 import { MetricCard } from '../components/MetricCard';
 import { CPUChart } from '../components/charts/CPUChart';
@@ -23,26 +23,30 @@ interface DashboardProps {
   onLogout: () => void;
 }
 
-export function Dashboard({ onLogout }: DashboardProps) {
-  const [selectedServerId, setSelectedServerId] = useState<string | null>(null);
+export function Dashboard({ onLogout }: DashboardProps): ReactElement {
+  const [manuallySelectedServerId, setManuallySelectedServerId] = useState<string | null>(null);
   const [timeRangePreset, setTimeRangePreset] = useState<TimeRangePreset>('1h');
-  const [timeRange, setTimeRange] = useState(getTimeRange('1h'));
+  const [timeRange, setTimeRange] = useState(() => getTimeRange('1h'));
 
   const { data: servers, loading: serversLoading } = useServers();
 
-  useEffect(() => {
-    if (servers && servers.length > 0 && !selectedServerId) {
-      setSelectedServerId(servers[0].id);
-    }
-  }, [servers, selectedServerId]);
+  // Derive the effective server ID: use manually selected if set, otherwise default to first server
+  const selectedServerId = useMemo(() => {
+    if (manuallySelectedServerId) return manuallySelectedServerId;
+    return servers && servers.length > 0 ? servers[0].id : null;
+  }, [manuallySelectedServerId, servers]);
 
   useEffect(() => {
-    setTimeRange(getTimeRange(timeRangePreset));
     const interval = setInterval(() => {
       setTimeRange(getTimeRange(timeRangePreset));
     }, 10000);
     return () => clearInterval(interval);
   }, [timeRangePreset]);
+
+  function handleTimeRangeChange(preset: TimeRangePreset): void {
+    setTimeRangePreset(preset);
+    setTimeRange(getTimeRange(preset));
+  }
 
   const cpu = useCPUMetrics(selectedServerId, timeRange);
   const memory = useMemoryMetrics(selectedServerId, timeRange);
@@ -72,9 +76,9 @@ export function Dashboard({ onLogout }: DashboardProps) {
       <DashboardHeader
         servers={servers}
         selectedServerId={selectedServerId}
-        onServerChange={setSelectedServerId}
+        onServerChange={setManuallySelectedServerId}
         timeRangePreset={timeRangePreset}
-        onTimeRangeChange={setTimeRangePreset}
+        onTimeRangeChange={handleTimeRangeChange}
         onLogout={onLogout}
       />
       <main className="max-w-7xl mx-auto px-4 py-6">

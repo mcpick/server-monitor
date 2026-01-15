@@ -1,0 +1,71 @@
+{
+    "rules": {
+        "no-console": "warn",
+        "no-void": ["warn", { "allowAsStatement": true }],
+        "no-undefined": "off",
+        "import/no-default-export": "warn",
+        "import/max-dependencies": ["error", { "max": 40 }],
+        "import/no-unassigned-import": [
+            "warn",
+            { "allow": ["**/*.css", "**/*.svg"] }
+        ],
+        "max-lines-per-function": ["warn", { "max": 500 }],
+        "react/react-in-jsx-scope": "off",
+        "react/only-export-components": "off",
+        "react-perf/jsx-no-new-function-as-prop": "off",
+        "react_perf/jsx-no-new-object-as-prop": "off",
+        "react_perf/jsx-no-new-array-as-prop": "off",
+        "func-style": [
+            "error",
+            "declaration",
+            { "overrides": { "namedExports": "ignore" } }
+        ],
+        "typescript/no-floating-promises": [
+            "error",
+            {
+                "checkThenables": true
+            }
+        ],
+        "typescript/strict-boolean-expressions": "off",
+        "typescript/explicit-module-boundary-types": [
+            "warn",
+            { "allowArgumentsExplicitlyTypedAsAny": true }
+        ],
+        "typescript/explicit-function-return-type": [
+            "warn",
+            {
+                "allowExpressions": true,
+                "allowTypedFunctionExpressions": true
+            }
+        ],
+        "jsx_a11y/anchor-is-valid": "warn",
+        "react/jsx-filename-extension": [
+            "warn",
+            {
+                "extensions": [".jsx", ".tsx"]
+            }
+        ]
+    },
+    "categories": {
+        "correctness": "error",
+    },
+    "plugins": [
+        "eslint",
+        "typescript",
+        "import",
+        "react",
+        "jsx-a11y",
+        "react-perf"
+    ],
+    "ignorePatterns": [
+        ".venv/",
+        "node_modules/",
+        "build/",
+        "dist/",
+        ".ruff_cache/",
+        "static/",
+        "tailwind.config.js",
+        "postcss.config.mjs",
+        "vite.config.ts"
+    ]
+}

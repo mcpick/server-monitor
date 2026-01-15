@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import {
   AreaChart,
   Area,
@@ -20,7 +21,7 @@ function formatBytes(bytes: number): string {
   return `${gb.toFixed(1)} GB`;
 }
 
-export function MemoryChart({ data }: MemoryChartProps) {
+export function MemoryChart({ data }: MemoryChartProps): ReactElement {
   const chartData = data.map((m) => ({
     time: m.timestamp * 1000,
     used: m.used_bytes / (1024 * 1024 * 1024),
@@ -47,7 +48,7 @@ export function MemoryChart({ data }: MemoryChartProps) {
         />
         <Tooltip
           labelFormatter={(ts) => format(new Date(ts as number), 'MMM d, HH:mm:ss')}
-          formatter={(value: number) => [formatBytes(value * 1024 * 1024 * 1024), '']}
+          formatter={(value) => formatBytes((value as number) * 1024 * 1024 * 1024)}
         />
         <Legend />
         <Area

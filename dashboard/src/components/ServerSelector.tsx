@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import type { Server } from '../types/metrics';
 
 interface ServerSelectorProps {
@@ -6,7 +7,7 @@ interface ServerSelectorProps {
   onChange: (serverId: string) => void;
 }
 
-export function ServerSelector({ servers, value, onChange }: ServerSelectorProps) {
+export function ServerSelector({ servers, value, onChange }: ServerSelectorProps): ReactElement {
   return (
     <select
       value={value || ''}

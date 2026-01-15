@@ -5,7 +5,6 @@ export async function login(username: string, password: string): Promise<boolean
   const expectedPasswordHash = import.meta.env.VITE_AUTH_PASSWORD_HASH;
 
   if (!expectedUsername || !expectedPasswordHash) {
-    console.error('Auth environment variables not configured');
     return false;
   }
 

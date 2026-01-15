@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect } from 'react';
+import { useState, type ReactNode, type ReactElement } from 'react';
 import { isAuthenticated } from '../lib/auth';
 import { LoginForm } from './LoginForm';
 
@@ -6,23 +6,11 @@ interface ProtectedRouteProps {
   children: ReactNode;
 }
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+export function ProtectedRoute({ children }: ProtectedRouteProps): ReactElement {
+  const [authenticated, setAuthenticated] = useState(() => isAuthenticated());
 
-  useEffect(() => {
-    setAuthenticated(isAuthenticated());
-  }, []);
-
-  const handleLoginSuccess = () => {
+  function handleLoginSuccess(): void {
     setAuthenticated(true);
-  };
-
-  if (authenticated === null) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-600">Loading...</div>
-      </div>
-    );
   }
 
   if (!authenticated) {

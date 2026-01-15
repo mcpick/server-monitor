@@ -1,13 +1,13 @@
+import type { ReactElement } from 'react';
 import type { ProcessMetric } from '../../types/metrics';
 
 interface ProcessListProps {
   data: ProcessMetric[];
 }
 
-export function ProcessList({ data }: ProcessListProps) {
+export function ProcessList({ data }: ProcessListProps): ReactElement {
   const latestTimestamp = Math.max(...data.map((m) => m.timestamp));
-  const latestProcesses = data
-    .filter((m) => m.timestamp === latestTimestamp)
+  const latestProcesses = [...data.filter((m) => m.timestamp === latestTimestamp)]
     .sort((a, b) => b.cpu_percent + b.memory_percent - (a.cpu_percent + a.memory_percent))
     .slice(0, 10);
 

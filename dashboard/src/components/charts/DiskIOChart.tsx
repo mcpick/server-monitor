@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import {
   LineChart,
   Line,
@@ -24,7 +25,7 @@ function formatRate(bytesPerSecond: number): string {
   return `${kbps.toFixed(0)} KB/s`;
 }
 
-export function DiskIOChart({ data }: DiskIOChartProps) {
+export function DiskIOChart({ data }: DiskIOChartProps): ReactElement {
   const byTimestamp = new Map<number, { read: number; write: number }>();
 
   for (const m of data) {
@@ -37,7 +38,7 @@ export function DiskIOChart({ data }: DiskIOChartProps) {
     }
   }
 
-  const timestamps = Array.from(byTimestamp.keys()).sort((a, b) => a - b);
+  const timestamps = [...byTimestamp.keys()].sort((a, b) => a - b);
   const chartData: { time: number; readRate: number; writeRate: number }[] = [];
 
   for (let i = 1; i < timestamps.length; i++) {
@@ -69,10 +70,7 @@ export function DiskIOChart({ data }: DiskIOChartProps) {
         />
         <Tooltip
           labelFormatter={(ts) => format(new Date(ts as number), 'MMM d, HH:mm:ss')}
-          formatter={(value: number, name: string) => [
-            formatRate(value),
-            name === 'readRate' ? 'Read' : 'Write',
-          ]}
+          formatter={(value) => formatRate(value as number)}
         />
         <Legend />
         <Line

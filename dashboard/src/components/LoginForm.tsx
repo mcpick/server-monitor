@@ -1,17 +1,17 @@
-import { useState, FormEvent } from 'react';
+import { useState, type FormEvent, type ReactElement } from 'react';
 import { login } from '../lib/auth';
 
 interface LoginFormProps {
   onSuccess: () => void;
 }
 
-export function LoginForm({ onSuccess }: LoginFormProps) {
+export function LoginForm({ onSuccess }: LoginFormProps): ReactElement {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: FormEvent) => {
+  async function handleSubmit(e: FormEvent): Promise<void> {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -28,7 +28,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
