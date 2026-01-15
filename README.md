@@ -62,7 +62,7 @@ The easiest way to run the full stack locally is with Docker Compose.
 | Service | Port | Description |
 |---------|------|-------------|
 | sqld | 8080 | Local Turso-compatible database |
-| server-agent | - | Metrics collection daemon |
+| server-agent | 8081 | Metrics collection daemon (health check port) |
 | dashboard | 3000 | React dashboard (nginx) |
 
 ### Configuration
@@ -75,6 +75,7 @@ Environment variables can be customized in `.env`:
 | `TURSO_AUTH_TOKEN` | (empty) | Auth token for Turso (optional for local sqld) |
 | `COLLECTION_INTERVAL` | `5s` | Metrics collection interval |
 | `HOSTNAME` | `docker-agent` | Server hostname for identification |
+| `HEALTH_PORT` | `8081` | Port for health check HTTP server |
 | `VITE_TURSO_DATABASE_URL` | `http://localhost:8080` | Database URL for dashboard (browser) |
 | `VITE_AUTH_USERNAME` | `admin` | Dashboard login username |
 | `VITE_AUTH_PASSWORD_HASH` | (hash of "admin") | SHA-256 hash of the password |
@@ -99,6 +100,53 @@ To also remove the database volume:
 
 ```bash
 docker compose down -v
+```
+
+## Health Check Endpoints
+
+The server-agent exposes HTTP health check endpoints for monitoring and container orchestration.
+
+### Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/health` | GET | Liveness probe - returns 200 if the process is running |
+| `/ready` | GET | Readiness probe - returns 200 if connected to database |
+
+### Response Format
+
+Both endpoints return JSON with the following structure:
+
+```json
+{
+  "status": "healthy",
+  "last_collection_time": 1705420800,
+  "last_collection_error": "",
+  "error_count": 0,
+  "uptime": "1h30m45s"
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `status` | Current status: "healthy", "ready", or "not_ready" |
+| `last_collection_time` | Unix timestamp of the last successful metric collection |
+| `last_collection_error` | Error message from the last failed collection (empty if none) |
+| `error_count` | Total number of errors since startup |
+| `uptime` | Duration since the daemon started |
+
+### Usage
+
+Check if the daemon is running:
+
+```bash
+curl http://localhost:8081/health
+```
+
+Check if the daemon is ready to collect metrics:
+
+```bash
+curl http://localhost:8081/ready
 ```
 
 ## Development

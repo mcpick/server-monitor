@@ -42,6 +42,10 @@ func TestLoad_Defaults(t *testing.T) {
 	if cfg.ServerID == "" {
 		t.Error("Expected ServerID to be generated")
 	}
+
+	if cfg.HealthPort != "8081" {
+		t.Errorf("Expected default health port of 8081, got %s", cfg.HealthPort)
+	}
 }
 
 func TestLoad_CustomValues(t *testing.T) {
@@ -51,6 +55,7 @@ func TestLoad_CustomValues(t *testing.T) {
 	t.Setenv("COLLECTION_INTERVAL", "10s")
 	t.Setenv("HOSTNAME", "custom-host")
 	t.Setenv("SERVER_ID", "custom-id")
+	t.Setenv("HEALTH_PORT", "9090")
 
 	cfg, err := Load()
 	if err != nil {
@@ -75,6 +80,10 @@ func TestLoad_CustomValues(t *testing.T) {
 
 	if cfg.ServerID != "custom-id" {
 		t.Errorf("Expected custom server ID, got %s", cfg.ServerID)
+	}
+
+	if cfg.HealthPort != "9090" {
+		t.Errorf("Expected custom health port of 9090, got %s", cfg.HealthPort)
 	}
 }
 

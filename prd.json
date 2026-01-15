@@ -372,6 +372,145 @@
         "document usage in README (docker compose up)"
       ],
       "passes": true
+    },
+    {
+      "category": "security-backend-api",
+      "description": "Add backend API layer to secure database credentials",
+      "steps": [
+        "create api-server/ directory with Go HTTP server",
+        "implement /api/servers endpoint proxying Turso queries",
+        "implement /api/metrics/:type endpoint with server_id and time range params",
+        "move Turso credentials from frontend to backend environment",
+        "update dashboard to fetch from API instead of direct Turso connection",
+        "remove VITE_TURSO_* environment variables from frontend",
+        "add CORS configuration for dashboard origin"
+      ],
+      "passes": false
+    },
+    {
+      "category": "security-auth-improvements",
+      "description": "Fix authentication security vulnerabilities",
+      "steps": [
+        "replace SHA-256 with bcrypt for password hashing",
+        "implement JWT tokens with expiration (e.g., 24h)",
+        "add refresh token rotation mechanism",
+        "move auth validation to backend API",
+        "add rate limiting on login endpoint (max 5 attempts per minute)",
+        "implement audit logging for auth attempts",
+        "remove default password hash from docker-compose.yml"
+      ],
+      "passes": false
+    },
+    {
+      "category": "security-headers",
+      "description": "Add security headers to nginx configuration",
+      "steps": [
+        "add Content-Security-Policy header",
+        "add Strict-Transport-Security (HSTS) header",
+        "add Referrer-Policy header",
+        "add Permissions-Policy header",
+        "configure HTTPS with SSL/TLS certificates",
+        "add HTTP to HTTPS redirect"
+      ],
+      "passes": false
+    },
+    {
+      "category": "code-quality-refactor-duplication",
+      "description": "Refactor duplicated code patterns",
+      "steps": [
+        "create generic batch insert helper in server-agent/storage/turso.go",
+        "refactor 6+ InsertXMetrics functions to use generic helper",
+        "create useMetricQuery factory function in dashboard/src/hooks/",
+        "refactor 7 useXMetrics hooks to use factory",
+        "create generic fetchMetrics utility in dashboard/src/lib/turso.ts",
+        "refactor 8 fetch functions to use generic utility",
+        "create collector interface in server-agent for main loop"
+      ],
+      "passes": false
+    },
+    {
+      "category": "code-quality-test-coverage",
+      "description": "Increase test coverage to 70%+",
+      "steps": [
+        "add integration tests for Go storage layer (InsertX functions)",
+        "add edge case tests for collectors with mocked gopsutil",
+        "add component tests for MetricCard, DashboardHeader, ServerSelector",
+        "add tests for ProcessList component",
+        "add integration tests for TanStack Query data flow",
+        "add tests for turso.ts fetch functions with mocked client",
+        "configure coverage reporting in CI"
+      ],
+      "passes": false
+    },
+    {
+      "category": "code-quality-error-handling",
+      "description": "Improve error handling throughout codebase",
+      "steps": [
+        "wrap Go errors with context using fmt.Errorf",
+        "add retry logic with exponential backoff for failed inserts",
+        "aggregate and report error metrics in daemon",
+        "add Retry button to MetricCard component",
+        "implement error logging/analytics in dashboard",
+        "improve user-facing error messages"
+      ],
+      "passes": false
+    },
+    {
+      "category": "feature-health-check",
+      "description": "Add health check endpoint to Go daemon",
+      "steps": [
+        "add HTTP server to daemon (port 8080)",
+        "implement /health endpoint (liveness probe)",
+        "implement /ready endpoint (readiness probe)",
+        "return JSON with daemon status, last collection timestamp, error count",
+        "add health check to Docker container configuration",
+        "document health check usage in README"
+      ],
+      "passes": true
+    },
+    {
+      "category": "feature-dark-mode",
+      "description": "Implement dark mode theme toggle",
+      "steps": [
+        "configure Tailwind dark mode with class strategy",
+        "create ThemeContext provider with toggle function",
+        "add theme toggle button in DashboardHeader",
+        "update all components with dark: variants",
+        "store theme preference in localStorage",
+        "respect system preference as default"
+      ],
+      "passes": false
+    },
+    {
+      "category": "feature-alerting",
+      "description": "Implement basic threshold alerting system",
+      "steps": [
+        "add alerts table to schema (rule_id, metric_type, threshold, condition)",
+        "add alert_history table (server_id, rule_id, triggered_at, value)",
+        "implement alert evaluation logic in daemon after metric collection",
+        "create alert rules management page in dashboard",
+        "create alert history view with filtering",
+        "add visual indicator in header when alerts are active"
+      ],
+      "passes": false
+    },
+    {
+      "category": "feature-server-management",
+      "description": "Add server management page with setup wizard for new servers",
+      "steps": [
+        "create /servers route for server management page",
+        "display list of all registered servers with status (online/offline/last seen)",
+        "add server details view showing hostname, OS, uptime, agent version",
+        "create 'Add New Server' wizard with step-by-step instructions",
+        "generate unique server API key/token for each new server",
+        "display installation commands (curl/wget one-liner for agent setup)",
+        "show environment variable configuration template",
+        "add server rename and delete functionality",
+        "implement server health status polling (based on last metric timestamp)",
+        "add server grouping/tagging for organization",
+        "create navigation link to servers page in dashboard header"
+      ],
+      "passes": false
     }
   ]
 }

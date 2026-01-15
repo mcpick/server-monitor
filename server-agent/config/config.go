@@ -14,6 +14,7 @@ type Config struct {
 	CollectionInterval time.Duration
 	Hostname           string
 	ServerID           string
+	HealthPort         string
 }
 
 func Load() (*Config, error) {
@@ -53,6 +54,11 @@ func Load() (*Config, error) {
 	cfg.ServerID = os.Getenv("SERVER_ID")
 	if cfg.ServerID == "" {
 		cfg.ServerID = uuid.NewString()
+	}
+
+	cfg.HealthPort = os.Getenv("HEALTH_PORT")
+	if cfg.HealthPort == "" {
+		cfg.HealthPort = "8081"
 	}
 
 	return cfg, nil

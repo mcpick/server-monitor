@@ -31,6 +31,13 @@ services:
       - TURSO_AUTH_TOKEN=
       - COLLECTION_INTERVAL=5s
       - HOSTNAME=docker-agent
+      - HEALTH_PORT=8081
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/ready"]
+      interval: 30s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
     restart: unless-stopped
     networks:
       - server-monitor
