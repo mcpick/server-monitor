@@ -275,7 +275,7 @@
         "update src/lib/auth.ts to use router.navigate() for redirects",
         "remove conditional rendering logic and migrate pages to routes"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "react-tanstack-query",

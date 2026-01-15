@@ -1,13 +1,14 @@
 import { useState, useEffect, useMemo, type ReactElement } from 'react';
-import { DashboardHeader } from '../components/DashboardHeader';
-import { MetricCard } from '../components/MetricCard';
-import { CPUChart } from '../components/charts/CPUChart';
-import { MemoryChart } from '../components/charts/MemoryChart';
-import { SwapChart } from '../components/charts/SwapChart';
-import { DiskUsageChart } from '../components/charts/DiskUsageChart';
-import { DiskIOChart } from '../components/charts/DiskIOChart';
-import { NetworkChart } from '../components/charts/NetworkChart';
-import { ProcessList } from '../components/charts/ProcessList';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { DashboardHeader } from '../../components/DashboardHeader';
+import { MetricCard } from '../../components/MetricCard';
+import { CPUChart } from '../../components/charts/CPUChart';
+import { MemoryChart } from '../../components/charts/MemoryChart';
+import { SwapChart } from '../../components/charts/SwapChart';
+import { DiskUsageChart } from '../../components/charts/DiskUsageChart';
+import { DiskIOChart } from '../../components/charts/DiskIOChart';
+import { NetworkChart } from '../../components/charts/NetworkChart';
+import { ProcessList } from '../../components/charts/ProcessList';
 import {
   useServers,
   useCPUMetrics,
@@ -16,21 +17,20 @@ import {
   useDiskMetrics,
   useNetworkMetrics,
   useProcessMetrics,
-} from '../hooks/useMetrics';
-import { getTimeRange, type TimeRangePreset } from '../types/metrics';
+} from '../../hooks/useMetrics';
+import { getTimeRange, type TimeRangePreset } from '../../types/metrics';
+import { logout } from '../../lib/auth';
 
-interface DashboardProps {
-  onLogout: () => void;
-}
-
-export function Dashboard({ onLogout }: DashboardProps): ReactElement {
-  const [manuallySelectedServerId, setManuallySelectedServerId] = useState<string | null>(null);
+function DashboardPage(): ReactElement {
+  const navigate = useNavigate();
+  const [manuallySelectedServerId, setManuallySelectedServerId] = useState<
+    string | null
+  >(null);
   const [timeRangePreset, setTimeRangePreset] = useState<TimeRangePreset>('1h');
   const [timeRange, setTimeRange] = useState(() => getTimeRange('1h'));
 
   const { data: servers, loading: serversLoading } = useServers();
 
-  // Derive the effective server ID: use manually selected if set, otherwise default to first server
   const selectedServerId = useMemo(() => {
     if (manuallySelectedServerId) return manuallySelectedServerId;
     return servers && servers.length > 0 ? servers[0].id : null;
@@ -46,6 +46,11 @@ export function Dashboard({ onLogout }: DashboardProps): ReactElement {
   function handleTimeRangeChange(preset: TimeRangePreset): void {
     setTimeRangePreset(preset);
     setTimeRange(getTimeRange(preset));
+  }
+
+  function handleLogout(): void {
+    logout();
+    void navigate({ to: '/login' });
   }
 
   const cpu = useCPUMetrics(selectedServerId, timeRange);
@@ -66,7 +71,9 @@ export function Dashboard({ onLogout }: DashboardProps): ReactElement {
   if (!servers || servers.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">No servers found. Make sure the agent is running.</p>
+        <p className="text-gray-600">
+          No servers found. Make sure the agent is running.
+        </p>
       </div>
     );
   }
@@ -79,7 +86,7 @@ export function Dashboard({ onLogout }: DashboardProps): ReactElement {
         onServerChange={setManuallySelectedServerId}
         timeRangePreset={timeRangePreset}
         onTimeRangeChange={handleTimeRangeChange}
-        onLogout={onLogout}
+        onLogout={handleLogout}
       />
       <main className="max-w-7xl mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -87,28 +94,52 @@ export function Dashboard({ onLogout }: DashboardProps): ReactElement {
             {cpu.data && <CPUChart data={cpu.data} />}
           </MetricCard>
 
-          <MetricCard title="Memory Usage" loading={memory.loading} error={memory.error}>
+          <MetricCard
+            title="Memory Usage"
+            loading={memory.loading}
+            error={memory.error}
+          >
             {memory.data && <MemoryChart data={memory.data} />}
           </MetricCard>
 
-          <MetricCard title="Swap Usage" loading={swap.loading} error={swap.error}>
+          <MetricCard
+            title="Swap Usage"
+            loading={swap.loading}
+            error={swap.error}
+          >
             {swap.data && <SwapChart data={swap.data} />}
           </MetricCard>
 
-          <MetricCard title="Disk Usage" loading={disk.usage.loading} error={disk.usage.error}>
+          <MetricCard
+            title="Disk Usage"
+            loading={disk.usage.loading}
+            error={disk.usage.error}
+          >
             {disk.usage.data && <DiskUsageChart data={disk.usage.data} />}
           </MetricCard>
 
-          <MetricCard title="Disk I/O" loading={disk.io.loading} error={disk.io.error}>
+          <MetricCard
+            title="Disk I/O"
+            loading={disk.io.loading}
+            error={disk.io.error}
+          >
             {disk.io.data && <DiskIOChart data={disk.io.data} />}
           </MetricCard>
 
-          <MetricCard title="Network" loading={network.loading} error={network.error}>
+          <MetricCard
+            title="Network"
+            loading={network.loading}
+            error={network.error}
+          >
             {network.data && <NetworkChart data={network.data} />}
           </MetricCard>
 
           <div className="lg:col-span-2">
-            <MetricCard title="Top Processes" loading={process.loading} error={process.error}>
+            <MetricCard
+              title="Top Processes"
+              loading={process.loading}
+              error={process.error}
+            >
               {process.data && <ProcessList data={process.data} />}
             </MetricCard>
           </div>
@@ -117,3 +148,7 @@ export function Dashboard({ onLogout }: DashboardProps): ReactElement {
     </div>
   );
 }
+
+export const Route = createFileRoute('/_authenticated/')({
+  component: DashboardPage,
+});

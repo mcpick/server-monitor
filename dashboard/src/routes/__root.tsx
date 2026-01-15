@@ -1,7 +1,19 @@
-import { useState, Component, type ReactNode, type ReactElement } from 'react';
-import { isAuthenticated } from './lib/auth';
-import { Dashboard } from './pages/Dashboard';
-import { Login } from './pages/Login';
+import { Component, type ReactNode, type ReactElement } from 'react';
+import {
+  createRootRoute,
+  Outlet,
+  ScrollRestoration,
+} from '@tanstack/react-router';
+import { lazy, Suspense } from 'react';
+
+const TanStackRouterDevtools =
+  import.meta.env.PROD
+    ? () => null
+    : lazy(() =>
+        import('@tanstack/router-devtools').then((res) => ({
+          default: res.TanStackRouterDevtools,
+        })),
+      );
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -27,7 +39,9 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
           <div className="bg-white p-8 rounded-lg shadow-md max-w-md">
-            <h1 className="text-xl font-bold text-red-600 mb-4">Something went wrong</h1>
+            <h1 className="text-xl font-bold text-red-600 mb-4">
+              Something went wrong
+            </h1>
             <p className="text-gray-600 mb-4">{this.state.error?.message}</p>
             <button
               onClick={() => window.location.reload()}
@@ -44,26 +58,18 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 }
 
-function App(): ReactElement {
-  const [authenticated, setAuthenticated] = useState(() => isAuthenticated());
-
-  function handleLoginSuccess(): void {
-    setAuthenticated(true);
-  }
-
-  function handleLogout(): void {
-    setAuthenticated(false);
-  }
-
+function RootComponent(): ReactElement {
   return (
     <ErrorBoundary>
-      {authenticated ? (
-        <Dashboard onLogout={handleLogout} />
-      ) : (
-        <Login onSuccess={handleLoginSuccess} />
-      )}
+      <ScrollRestoration />
+      <Outlet />
+      <Suspense>
+        <TanStackRouterDevtools position="bottom-right" />
+      </Suspense>
     </ErrorBoundary>
   );
 }
 
-export { App };
+export const Route = createRootRoute({
+  component: RootComponent,
+});
