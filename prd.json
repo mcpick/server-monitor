@@ -440,7 +440,7 @@
         "add tests for turso.ts fetch functions with mocked client",
         "configure coverage reporting in CI"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "code-quality-error-handling",
