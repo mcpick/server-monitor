@@ -27,8 +27,8 @@ export function DashboardHeader({
     const { data: activeAlerts } = useActiveAlerts();
     const activeAlertCount = activeAlerts?.length ?? 0;
 
-    function handleLogout(): void {
-        logout();
+    async function handleLogout(): Promise<void> {
+        await logout();
         onLogout();
     }
 

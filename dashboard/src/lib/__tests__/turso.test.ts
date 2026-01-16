@@ -1,13 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-
-// Mock the @libsql/client module
-vi.mock('@libsql/client', () => ({
-    createClient: vi.fn(),
-}));
-
-import { createClient } from '@libsql/client';
 import {
-    createTursoClient,
     fetchServers,
     fetchCPUMetrics,
     fetchMemoryMetrics,
@@ -16,91 +8,73 @@ import {
     fetchDiskIOMetrics,
     fetchNetworkMetrics,
     fetchProcessMetrics,
+    fetchAlertRules,
+    fetchActiveAlerts,
+    createAlertRule,
+    updateAlertRule,
+    deleteAlertRule,
 } from '../turso';
 
-describe('turso', () => {
-    const mockExecute = vi.fn();
-    const mockClient = { execute: mockExecute };
+describe('turso API client', () => {
+    const mockFetch = vi.fn();
 
     beforeEach(() => {
-        vi.resetModules();
-        vi.stubEnv('VITE_TURSO_DATABASE_URL', 'libsql://test.turso.io');
-        vi.stubEnv('VITE_TURSO_AUTH_TOKEN', 'test-token');
-        vi.mocked(createClient).mockReturnValue(mockClient as never);
-        mockExecute.mockReset();
+        vi.stubGlobal('fetch', mockFetch);
+        mockFetch.mockReset();
     });
 
     afterEach(() => {
-        vi.unstubAllEnvs();
-    });
-
-    describe('createTursoClient', () => {
-        it('creates client with environment variables', () => {
-            createTursoClient();
-
-            expect(createClient).toHaveBeenCalledWith({
-                url: 'libsql://test.turso.io',
-                authToken: 'test-token',
-            });
-        });
-
-        it('returns same client instance on subsequent calls', () => {
-            const client1 = createTursoClient();
-            const client2 = createTursoClient();
-
-            expect(client1).toBe(client2);
-            expect(createClient).toHaveBeenCalledTimes(1);
-        });
+        vi.unstubAllGlobals();
     });
 
     describe('fetchServers', () => {
         it('returns mapped server data', async () => {
-            mockExecute.mockResolvedValue({
-                rows: [
-                    { id: 'server-1', hostname: 'web-01', created_at: 1700000000 },
-                    { id: 'server-2', hostname: 'db-01', created_at: 1700000100 },
-                ],
+            const mockServers = [
+                { id: 'server-1', hostname: 'web-01', created_at: 1700000000 },
+                { id: 'server-2', hostname: 'db-01', created_at: 1700000100 },
+            ];
+            mockFetch.mockResolvedValueOnce({
+                ok: true,
+                json: async () => mockServers,
             });
 
             const servers = await fetchServers();
 
-            expect(servers).toEqual([
-                { id: 'server-1', hostname: 'web-01', created_at: 1700000000 },
-                { id: 'server-2', hostname: 'db-01', created_at: 1700000100 },
-            ]);
+            expect(mockFetch).toHaveBeenCalledWith('/api/servers', undefined);
+            expect(servers).toEqual(mockServers);
         });
 
-        it('returns empty array when no servers', async () => {
-            mockExecute.mockResolvedValue({ rows: [] });
+        it('throws error when API fails', async () => {
+            mockFetch.mockResolvedValueOnce({ ok: false, status: 500, statusText: 'Internal Server Error' });
 
-            const servers = await fetchServers();
-
-            expect(servers).toEqual([]);
+            await expect(fetchServers()).rejects.toThrow('API request failed');
         });
     });
 
     describe('fetchCPUMetrics', () => {
         it('fetches CPU metrics with correct query parameters', async () => {
-            mockExecute.mockResolvedValue({
-                rows: [
-                    {
-                        id: 1,
-                        server_id: 'server-1',
-                        timestamp: 1700000000,
-                        usage_percent: 45.5,
-                        load_1m: 1.2,
-                        load_5m: 1.5,
-                        load_15m: 1.3,
-                    },
-                ],
+            const mockMetrics = [
+                {
+                    id: 1,
+                    server_id: 'server-1',
+                    timestamp: 1700000000,
+                    usage_percent: 45.5,
+                    load_1m: 1.2,
+                    load_5m: 1.5,
+                    load_15m: 1.3,
+                },
+            ];
+            mockFetch.mockResolvedValueOnce({
+                ok: true,
+                json: async () => mockMetrics,
             });
 
             const metrics = await fetchCPUMetrics('server-1', 1699999000, 1700001000);
 
-            expect(mockExecute).toHaveBeenCalledWith({
-                sql: expect.stringContaining('FROM cpu_metrics'),
-                args: ['server-1', 1699999000, 1700001000],
-            });
+            expect(mockFetch).toHaveBeenCalledWith(
+                '/api/metrics/cpu?server_id=server-1&start=1699999000&end=1700001000',
+                undefined,
+            );
             expect(metrics).toHaveLength(1);
             expect(metrics[0].usage_percent).toBe(45.5);
         });
@@ -108,18 +82,20 @@ describe('turso', () => {
 
     describe('fetchMemoryMetrics', () => {
         it('fetches memory metrics with correct mapping', async () => {
-            mockExecute.mockResolvedValue({
-                rows: [
-                    {
-                        id: 1,
-                        server_id: 'server-1',
-                        timestamp: 1700000000,
-                        total_bytes: 16000000000,
-                        used_bytes: 8000000000,
-                        available_bytes: 8000000000,
-                        cached_bytes: 2000000000,
-                    },
-                ],
+            const mockMetrics = [
+                {
+                    id: 1,
+                    server_id: 'server-1',
+                    timestamp: 1700000000,
+                    total_bytes: 16000000000,
+                    used_bytes: 8000000000,
+                    available_bytes: 8000000000,
+                    cached_bytes: 2000000000,
+                },
+            ];
+            mockFetch.mockResolvedValueOnce({
+                ok: true,
+                json: async () => mockMetrics,
             });
 
             const metrics = await fetchMemoryMetrics('server-1', 1699999000, 1700001000);
@@ -131,17 +107,19 @@ describe('turso', () => {
 
     describe('fetchSwapMetrics', () => {
         it('fetches swap metrics with correct mapping', async () => {
-            mockExecute.mockResolvedValue({
-                rows: [
-                    {
-                        id: 1,
-                        server_id: 'server-1',
-                        timestamp: 1700000000,
-                        total_bytes: 8000000000,
-                        used_bytes: 1000000000,
-                        free_bytes: 7000000000,
-                    },
-                ],
+            const mockMetrics = [
+                {
+                    id: 1,
+                    server_id: 'server-1',
+                    timestamp: 1700000000,
+                    total_bytes: 8000000000,
+                    used_bytes: 1000000000,
+                    free_bytes: 7000000000,
+                },
+            ];
+            mockFetch.mockResolvedValueOnce({
+                ok: true,
+                json: async () => mockMetrics,
             });
 
             const metrics = await fetchSwapMetrics('server-1', 1699999000, 1700001000);
@@ -153,18 +131,20 @@ describe('turso', () => {
 
     describe('fetchDiskUsageMetrics', () => {
         it('fetches disk usage metrics with mount point', async () => {
-            mockExecute.mockResolvedValue({
-                rows: [
-                    {
-                        id: 1,
-                        server_id: 'server-1',
-                        timestamp: 1700000000,
-                        mount_point: '/',
-                        total_bytes: 500000000000,
-                        used_bytes: 250000000000,
-                        free_bytes: 250000000000,
-                    },
-                ],
+            const mockMetrics = [
+                {
+                    id: 1,
+                    server_id: 'server-1',
+                    timestamp: 1700000000,
+                    mount_point: '/',
+                    total_bytes: 500000000000,
+                    used_bytes: 250000000000,
+                    free_bytes: 250000000000,
+                },
+            ];
+            mockFetch.mockResolvedValueOnce({
+                ok: true,
+                json: async () => mockMetrics,
             });
 
             const metrics = await fetchDiskUsageMetrics('server-1', 1699999000, 1700001000);
@@ -176,19 +156,21 @@ describe('turso', () => {
 
     describe('fetchDiskIOMetrics', () => {
         it('fetches disk IO metrics with device info', async () => {
-            mockExecute.mockResolvedValue({
-                rows: [
-                    {
-                        id: 1,
-                        server_id: 'server-1',
-                        timestamp: 1700000000,
-                        device: 'sda1',
-                        read_bytes: 1000000,
-                        write_bytes: 500000,
-                        read_count: 100,
-                        write_count: 50,
-                    },
-                ],
+            const mockMetrics = [
+                {
+                    id: 1,
+                    server_id: 'server-1',
+                    timestamp: 1700000000,
+                    device: 'sda1',
+                    read_bytes: 1000000,
+                    write_bytes: 500000,
+                    read_count: 100,
+                    write_count: 50,
+                },
+            ];
+            mockFetch.mockResolvedValueOnce({
+                ok: true,
+                json: async () => mockMetrics,
             });
 
             const metrics = await fetchDiskIOMetrics('server-1', 1699999000, 1700001000);
@@ -200,19 +182,21 @@ describe('turso', () => {
 
     describe('fetchNetworkMetrics', () => {
         it('fetches network metrics with interface info', async () => {
-            mockExecute.mockResolvedValue({
-                rows: [
-                    {
-                        id: 1,
-                        server_id: 'server-1',
-                        timestamp: 1700000000,
-                        interface: 'eth0',
-                        bytes_sent: 1000000,
-                        bytes_recv: 2000000,
-                        packets_sent: 1000,
-                        packets_recv: 2000,
-                    },
-                ],
+            const mockMetrics = [
+                {
+                    id: 1,
+                    server_id: 'server-1',
+                    timestamp: 1700000000,
+                    interface: 'eth0',
+                    bytes_sent: 1000000,
+                    bytes_recv: 2000000,
+                    packets_sent: 1000,
+                    packets_recv: 2000,
+                },
+            ];
+            mockFetch.mockResolvedValueOnce({
+                ok: true,
+                json: async () => mockMetrics,
             });
 
             const metrics = await fetchNetworkMetrics('server-1', 1699999000, 1700001000);
@@ -224,18 +208,20 @@ describe('turso', () => {
 
     describe('fetchProcessMetrics', () => {
         it('fetches process metrics with correct mapping', async () => {
-            mockExecute.mockResolvedValue({
-                rows: [
-                    {
-                        id: 1,
-                        server_id: 'server-1',
-                        timestamp: 1700000000,
-                        pid: 1234,
-                        name: 'node',
-                        cpu_percent: 25.5,
-                        memory_percent: 12.3,
-                    },
-                ],
+            const mockMetrics = [
+                {
+                    id: 1,
+                    server_id: 'server-1',
+                    timestamp: 1700000000,
+                    pid: 1234,
+                    name: 'node',
+                    cpu_percent: 25.5,
+                    memory_percent: 12.3,
+                },
+            ];
+            mockFetch.mockResolvedValueOnce({
+                ok: true,
+                json: async () => mockMetrics,
             });
 
             const metrics = await fetchProcessMetrics('server-1', 1699999000, 1700001000);
@@ -243,6 +229,109 @@ describe('turso', () => {
             expect(metrics[0].pid).toBe(1234);
             expect(metrics[0].name).toBe('node');
             expect(metrics[0].cpu_percent).toBe(25.5);
+        });
+    });
+
+    describe('fetchAlertRules', () => {
+        it('fetches alert rules', async () => {
+            const mockRules = [
+                {
+                    id: 'rule-1',
+                    name: 'High CPU',
+                    metric_type: 'cpu',
+                    condition: 'above',
+                    threshold: 80,
+                    server_id: null,
+                    enabled: true,
+                    created_at: 1700000000,
+                    updated_at: 1700000000,
+                },
+            ];
+            mockFetch.mockResolvedValueOnce({
+                ok: true,
+                json: async () => mockRules,
+            });
+
+            const rules = await fetchAlertRules();
+
+            expect(mockFetch).toHaveBeenCalledWith('/api/alerts/rules', undefined);
+            expect(rules).toEqual(mockRules);
+        });
+    });
+
+    describe('fetchActiveAlerts', () => {
+        it('fetches active alerts', async () => {
+            const mockAlerts = [
+                {
+                    id: 1,
+                    rule_id: 'rule-1',
+                    server_id: 'server-1',
+                    triggered_at: 1700000000,
+                    resolved_at: null,
+                    metric_value: 95,
+                    threshold: 80,
+                },
+            ];
+            mockFetch.mockResolvedValueOnce({
+                ok: true,
+                json: async () => mockAlerts,
+            });
+
+            const alerts = await fetchActiveAlerts();
+
+            expect(mockFetch).toHaveBeenCalledWith('/api/alerts/active', undefined);
+            expect(alerts).toEqual(mockAlerts);
+        });
+    });
+
+    describe('createAlertRule', () => {
+        it('creates an alert rule', async () => {
+            const rule = {
+                name: 'High Memory',
+                metric_type: 'memory' as const,
+                condition: 'above' as const,
+                threshold: 90,
+                server_id: null,
+                enabled: true,
+            };
+            mockFetch.mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({ ...rule, id: 'rule-2', created_at: 1700000000, updated_at: 1700000000 }),
+            });
+
+            await createAlertRule(rule);
+
+            expect(mockFetch).toHaveBeenCalledWith('/api/alerts/rules', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(rule),
+            });
+        });
+    });
+
+    describe('updateAlertRule', () => {
+        it('updates an alert rule', async () => {
+            mockFetch.mockResolvedValueOnce({ ok: true });
+
+            await updateAlertRule('rule-1', { enabled: false });
+
+            expect(mockFetch).toHaveBeenCalledWith('/api/alerts/rules/rule-1', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ enabled: false }),
+            });
+        });
+    });
+
+    describe('deleteAlertRule', () => {
+        it('deletes an alert rule', async () => {
+            mockFetch.mockResolvedValueOnce({ ok: true });
+
+            await deleteAlertRule('rule-1');
+
+            expect(mockFetch).toHaveBeenCalledWith('/api/alerts/rules/rule-1', {
+                method: 'DELETE',
+            });
         });
     });
 });

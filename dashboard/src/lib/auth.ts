@@ -1,59 +1,109 @@
-const AUTH_TOKEN_KEY = 'server_monitor_auth_token';
+const ACCESS_TOKEN_KEY = 'server_monitor_access_token';
+const REFRESH_TOKEN_KEY = 'server_monitor_refresh_token';
+const TOKEN_EXPIRY_KEY = 'server_monitor_token_expiry';
+
+interface LoginResponse {
+    accessToken: string;
+    refreshToken: string;
+    expiresIn: number;
+}
 
 export async function login(
     username: string,
     password: string,
 ): Promise<boolean> {
-    const expectedUsername = import.meta.env.VITE_AUTH_USERNAME;
-    const expectedPasswordHash = import.meta.env.VITE_AUTH_PASSWORD_HASH;
+    try {
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }),
+        });
 
-    if (!expectedUsername || !expectedPasswordHash) {
+        if (!response.ok) {
+            return false;
+        }
+
+        const data: LoginResponse = await response.json();
+        storeTokens(data);
+        return true;
+    } catch (error) {
+        console.error('Login failed:', error);
         return false;
     }
-
-    if (username !== expectedUsername) {
-        return false;
-    }
-
-    const passwordHash = await hashPassword(password);
-    if (passwordHash !== expectedPasswordHash) {
-        return false;
-    }
-
-    const token = generateToken();
-    localStorage.setItem(AUTH_TOKEN_KEY, token);
-    return true;
 }
 
-export function logout(): void {
-    localStorage.removeItem(AUTH_TOKEN_KEY);
+export async function logout(): Promise<void> {
+    try {
+        await fetch('/api/auth/logout', { method: 'POST' });
+    } catch {
+        // Ignore logout API errors
+    }
+    clearTokens();
 }
 
 export function isAuthenticated(): boolean {
-    const token = localStorage.getItem(AUTH_TOKEN_KEY);
-    return token !== null && token.length > 0;
+    const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+    const expiry = localStorage.getItem(TOKEN_EXPIRY_KEY);
+
+    if (!token || !expiry) {
+        return false;
+    }
+
+    // Check if token is expired (with 30 second buffer)
+    const expiryTime = Number(expiry);
+    if (Date.now() > expiryTime - 30000) {
+        // Token is expired or about to expire, try to refresh
+        void refreshTokens();
+        return false;
+    }
+
+    return true;
 }
 
 export function getAuthToken(): string | null {
-    return localStorage.getItem(AUTH_TOKEN_KEY);
+    return localStorage.getItem(ACCESS_TOKEN_KEY);
 }
 
-async function hashPassword(password: string): Promise<string> {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(password);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+export async function refreshTokens(): Promise<boolean> {
+    const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+
+    if (!refreshToken) {
+        clearTokens();
+        return false;
+    }
+
+    try {
+        const response = await fetch('/api/auth/refresh', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refreshToken }),
+        });
+
+        if (!response.ok) {
+            clearTokens();
+            return false;
+        }
+
+        const data: LoginResponse = await response.json();
+        storeTokens(data);
+        return true;
+    } catch {
+        clearTokens();
+        return false;
+    }
 }
 
-function generateToken(): string {
-    const array = new Uint8Array(32);
-    crypto.getRandomValues(array);
-    return Array.from(array)
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join('');
+function storeTokens(data: LoginResponse): void {
+    localStorage.setItem(ACCESS_TOKEN_KEY, data.accessToken);
+    localStorage.setItem(REFRESH_TOKEN_KEY, data.refreshToken);
+    localStorage.setItem(
+        TOKEN_EXPIRY_KEY,
+        String(Date.now() + data.expiresIn * 1000),
+    );
 }
 
-export async function generatePasswordHash(password: string): Promise<string> {
-    return hashPassword(password);
+function clearTokens(): void {
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    localStorage.removeItem(TOKEN_EXPIRY_KEY);
 }

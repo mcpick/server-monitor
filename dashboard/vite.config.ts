@@ -1,24 +1,11 @@
 /// <reference types="vitest/config" />
 
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
-import tailwindcss from '@tailwindcss/vite';
-import { tanstackRouter } from '@tanstack/router-plugin/vite';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
-// https://vite.dev/config/
+// Vitest configuration only - TanStack Start uses app.config.ts for build
 export default defineConfig({
-    plugins: [
-        tanstackRouter({
-            target: 'react',
-            autoCodeSplitting: true,
-        }),
-        react(),
-        tailwindcss(),
-    ],
+    plugins: [react()],
     test: {
         globals: true,
         environment: 'jsdom',

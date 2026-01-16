@@ -385,7 +385,7 @@
         "remove VITE_TURSO_* environment variables from frontend",
         "add CORS configuration for dashboard origin"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "security-auth-improvements",
@@ -399,7 +399,7 @@
         "implement audit logging for auth attempts",
         "remove default password hash from docker-compose.yml"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "security-headers",

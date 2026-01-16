@@ -12,8 +12,17 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as ApiServersRouteImport } from './routes/api/servers'
 import { Route as AuthenticatedServersRouteImport } from './routes/_authenticated/servers'
 import { Route as AuthenticatedAlertsRouteImport } from './routes/_authenticated/alerts'
+import { Route as ApiMetricsTypeRouteImport } from './routes/api/metrics.$type'
+import { Route as ApiAuthRefreshRouteImport } from './routes/api/auth/refresh'
+import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth/logout'
+import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
+import { Route as ApiAlertsRulesRouteImport } from './routes/api/alerts/rules'
+import { Route as ApiAlertsHistoryRouteImport } from './routes/api/alerts/history'
+import { Route as ApiAlertsActiveRouteImport } from './routes/api/alerts/active'
+import { Route as ApiAlertsRulesIdRouteImport } from './routes/api/alerts/rules.$id'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -29,6 +38,11 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const ApiServersRoute = ApiServersRouteImport.update({
+  id: '/api/servers',
+  path: '/api/servers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedServersRoute = AuthenticatedServersRouteImport.update({
   id: '/servers',
   path: '/servers',
@@ -39,18 +53,76 @@ const AuthenticatedAlertsRoute = AuthenticatedAlertsRouteImport.update({
   path: '/alerts',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const ApiMetricsTypeRoute = ApiMetricsTypeRouteImport.update({
+  id: '/api/metrics/$type',
+  path: '/api/metrics/$type',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthRefreshRoute = ApiAuthRefreshRouteImport.update({
+  id: '/api/auth/refresh',
+  path: '/api/auth/refresh',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthLogoutRoute = ApiAuthLogoutRouteImport.update({
+  id: '/api/auth/logout',
+  path: '/api/auth/logout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthLoginRoute = ApiAuthLoginRouteImport.update({
+  id: '/api/auth/login',
+  path: '/api/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAlertsRulesRoute = ApiAlertsRulesRouteImport.update({
+  id: '/api/alerts/rules',
+  path: '/api/alerts/rules',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAlertsHistoryRoute = ApiAlertsHistoryRouteImport.update({
+  id: '/api/alerts/history',
+  path: '/api/alerts/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAlertsActiveRoute = ApiAlertsActiveRouteImport.update({
+  id: '/api/alerts/active',
+  path: '/api/alerts/active',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAlertsRulesIdRoute = ApiAlertsRulesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiAlertsRulesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/alerts': typeof AuthenticatedAlertsRoute
   '/servers': typeof AuthenticatedServersRoute
+  '/api/servers': typeof ApiServersRoute
   '/': typeof AuthenticatedIndexRoute
+  '/api/alerts/active': typeof ApiAlertsActiveRoute
+  '/api/alerts/history': typeof ApiAlertsHistoryRoute
+  '/api/alerts/rules': typeof ApiAlertsRulesRouteWithChildren
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/logout': typeof ApiAuthLogoutRoute
+  '/api/auth/refresh': typeof ApiAuthRefreshRoute
+  '/api/metrics/$type': typeof ApiMetricsTypeRoute
+  '/api/alerts/rules/$id': typeof ApiAlertsRulesIdRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/alerts': typeof AuthenticatedAlertsRoute
   '/servers': typeof AuthenticatedServersRoute
+  '/api/servers': typeof ApiServersRoute
   '/': typeof AuthenticatedIndexRoute
+  '/api/alerts/active': typeof ApiAlertsActiveRoute
+  '/api/alerts/history': typeof ApiAlertsHistoryRoute
+  '/api/alerts/rules': typeof ApiAlertsRulesRouteWithChildren
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/logout': typeof ApiAuthLogoutRoute
+  '/api/auth/refresh': typeof ApiAuthRefreshRoute
+  '/api/metrics/$type': typeof ApiMetricsTypeRoute
+  '/api/alerts/rules/$id': typeof ApiAlertsRulesIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -58,25 +130,77 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_authenticated/alerts': typeof AuthenticatedAlertsRoute
   '/_authenticated/servers': typeof AuthenticatedServersRoute
+  '/api/servers': typeof ApiServersRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/api/alerts/active': typeof ApiAlertsActiveRoute
+  '/api/alerts/history': typeof ApiAlertsHistoryRoute
+  '/api/alerts/rules': typeof ApiAlertsRulesRouteWithChildren
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/logout': typeof ApiAuthLogoutRoute
+  '/api/auth/refresh': typeof ApiAuthRefreshRoute
+  '/api/metrics/$type': typeof ApiMetricsTypeRoute
+  '/api/alerts/rules/$id': typeof ApiAlertsRulesIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/login' | '/alerts' | '/servers' | '/'
+  fullPaths:
+    | '/login'
+    | '/alerts'
+    | '/servers'
+    | '/api/servers'
+    | '/'
+    | '/api/alerts/active'
+    | '/api/alerts/history'
+    | '/api/alerts/rules'
+    | '/api/auth/login'
+    | '/api/auth/logout'
+    | '/api/auth/refresh'
+    | '/api/metrics/$type'
+    | '/api/alerts/rules/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/alerts' | '/servers' | '/'
+  to:
+    | '/login'
+    | '/alerts'
+    | '/servers'
+    | '/api/servers'
+    | '/'
+    | '/api/alerts/active'
+    | '/api/alerts/history'
+    | '/api/alerts/rules'
+    | '/api/auth/login'
+    | '/api/auth/logout'
+    | '/api/auth/refresh'
+    | '/api/metrics/$type'
+    | '/api/alerts/rules/$id'
   id:
     | '__root__'
     | '/_authenticated'
     | '/login'
     | '/_authenticated/alerts'
     | '/_authenticated/servers'
+    | '/api/servers'
     | '/_authenticated/'
+    | '/api/alerts/active'
+    | '/api/alerts/history'
+    | '/api/alerts/rules'
+    | '/api/auth/login'
+    | '/api/auth/logout'
+    | '/api/auth/refresh'
+    | '/api/metrics/$type'
+    | '/api/alerts/rules/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  ApiServersRoute: typeof ApiServersRoute
+  ApiAlertsActiveRoute: typeof ApiAlertsActiveRoute
+  ApiAlertsHistoryRoute: typeof ApiAlertsHistoryRoute
+  ApiAlertsRulesRoute: typeof ApiAlertsRulesRouteWithChildren
+  ApiAuthLoginRoute: typeof ApiAuthLoginRoute
+  ApiAuthLogoutRoute: typeof ApiAuthLogoutRoute
+  ApiAuthRefreshRoute: typeof ApiAuthRefreshRoute
+  ApiMetricsTypeRoute: typeof ApiMetricsTypeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -102,6 +226,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/api/servers': {
+      id: '/api/servers'
+      path: '/api/servers'
+      fullPath: '/api/servers'
+      preLoaderRoute: typeof ApiServersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/servers': {
       id: '/_authenticated/servers'
       path: '/servers'
@@ -115,6 +246,62 @@ declare module '@tanstack/react-router' {
       fullPath: '/alerts'
       preLoaderRoute: typeof AuthenticatedAlertsRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/api/metrics/$type': {
+      id: '/api/metrics/$type'
+      path: '/api/metrics/$type'
+      fullPath: '/api/metrics/$type'
+      preLoaderRoute: typeof ApiMetricsTypeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/refresh': {
+      id: '/api/auth/refresh'
+      path: '/api/auth/refresh'
+      fullPath: '/api/auth/refresh'
+      preLoaderRoute: typeof ApiAuthRefreshRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/logout': {
+      id: '/api/auth/logout'
+      path: '/api/auth/logout'
+      fullPath: '/api/auth/logout'
+      preLoaderRoute: typeof ApiAuthLogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/login': {
+      id: '/api/auth/login'
+      path: '/api/auth/login'
+      fullPath: '/api/auth/login'
+      preLoaderRoute: typeof ApiAuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/alerts/rules': {
+      id: '/api/alerts/rules'
+      path: '/api/alerts/rules'
+      fullPath: '/api/alerts/rules'
+      preLoaderRoute: typeof ApiAlertsRulesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/alerts/history': {
+      id: '/api/alerts/history'
+      path: '/api/alerts/history'
+      fullPath: '/api/alerts/history'
+      preLoaderRoute: typeof ApiAlertsHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/alerts/active': {
+      id: '/api/alerts/active'
+      path: '/api/alerts/active'
+      fullPath: '/api/alerts/active'
+      preLoaderRoute: typeof ApiAlertsActiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/alerts/rules/$id': {
+      id: '/api/alerts/rules/$id'
+      path: '/$id'
+      fullPath: '/api/alerts/rules/$id'
+      preLoaderRoute: typeof ApiAlertsRulesIdRouteImport
+      parentRoute: typeof ApiAlertsRulesRoute
     }
   }
 }
@@ -135,9 +322,29 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface ApiAlertsRulesRouteChildren {
+  ApiAlertsRulesIdRoute: typeof ApiAlertsRulesIdRoute
+}
+
+const ApiAlertsRulesRouteChildren: ApiAlertsRulesRouteChildren = {
+  ApiAlertsRulesIdRoute: ApiAlertsRulesIdRoute,
+}
+
+const ApiAlertsRulesRouteWithChildren = ApiAlertsRulesRoute._addFileChildren(
+  ApiAlertsRulesRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
+  ApiServersRoute: ApiServersRoute,
+  ApiAlertsActiveRoute: ApiAlertsActiveRoute,
+  ApiAlertsHistoryRoute: ApiAlertsHistoryRoute,
+  ApiAlertsRulesRoute: ApiAlertsRulesRouteWithChildren,
+  ApiAuthLoginRoute: ApiAuthLoginRoute,
+  ApiAuthLogoutRoute: ApiAuthLogoutRoute,
+  ApiAuthRefreshRoute: ApiAuthRefreshRoute,
+  ApiMetricsTypeRoute: ApiMetricsTypeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

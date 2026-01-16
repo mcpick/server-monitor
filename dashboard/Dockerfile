@@ -1,21 +1,45 @@
-FROM nginx:alpine
+# Build stage
+FROM cgr.dev/chainguard/node:latest-dev AS build
 
 LABEL maintainer="Server Monitor"
-LABEL description="React dashboard for server monitoring"
+LABEL description="TanStack Start dashboard for server monitoring"
 
-# Copy built static files
-COPY dist/ /usr/share/nginx/html/
+USER root
+WORKDIR /app
 
-# Copy nginx configuration for SPA routing
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Set production environment
+ENV NODE_ENV="production"
 
-# Environment variable injection script
-COPY docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
+# Install pnpm
+ARG PNPM_VERSION=10.17.1
+RUN npm install -g pnpm@$PNPM_VERSION
 
-# Expose port 80
-EXPOSE 80
+# Install dependencies
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile --prod=false
 
-# Use custom entrypoint for env var injection
-ENTRYPOINT ["/docker-entrypoint.sh"]
-CMD ["nginx", "-g", "daemon off;"]
+# Copy application code
+COPY . .
+
+# Build application
+RUN pnpm run build
+
+# Remove development dependencies
+RUN pnpm prune --prod
+
+# Production stage
+FROM cgr.dev/chainguard/node:latest
+
+WORKDIR /app
+
+# Copy built application
+COPY --from=build --chown=node:node /app/.output /app/.output
+COPY --from=build --chown=node:node /app/node_modules /app/node_modules
+
+# Expose port 3000
+EXPOSE 3000
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# Start the application
+CMD [".output/server/index.mjs"]

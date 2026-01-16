@@ -42,7 +42,7 @@ services:
     networks:
       - server-monitor
 
-  # React dashboard with nginx
+  # TanStack Start dashboard with Node.js
   dashboard:
     build:
       context: ./dashboard
@@ -52,12 +52,16 @@ services:
       sqld:
         condition: service_healthy
     ports:
-      - "3000:80"
+      - "3000:3000"
     environment:
-      - VITE_TURSO_DATABASE_URL=http://localhost:8080
-      - VITE_TURSO_AUTH_TOKEN=
-      - VITE_AUTH_USERNAME=admin
-      - VITE_AUTH_PASSWORD_HASH=${VITE_AUTH_PASSWORD_HASH:-8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918}
+      # Server-side only environment variables (not exposed to client)
+      - TURSO_DATABASE_URL=http://sqld:8080
+      - TURSO_AUTH_TOKEN=
+      - AUTH_USERNAME=admin
+      # bcrypt hash for "admin" - generate with: npx bcrypt-cli hash your-password
+      - AUTH_PASSWORD_HASH=${AUTH_PASSWORD_HASH:-\$2b\$12\$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.GZPzL5q7HYPcIa}
+      # JWT secret - generate with: openssl rand -hex 32
+      - JWT_SECRET=${JWT_SECRET:-change-me-to-a-random-256-bit-secret-key-in-production}
     networks:
       - server-monitor
 

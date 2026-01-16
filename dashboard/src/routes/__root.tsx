@@ -3,8 +3,14 @@ import {
     createRootRoute,
     Outlet,
     ScrollRestoration,
+    HeadContent,
+    Scripts,
 } from '@tanstack/react-router';
 import { lazy, Suspense } from 'react';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '../lib/queryClient';
+import { ThemeProvider } from '../lib/theme';
+import appCss from '../index.css?url';
 
 const TanStackRouterDevtools = import.meta.env.PROD
     ? () => null
@@ -69,14 +75,33 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
 function RootComponent(): ReactElement {
     return (
-        <ErrorBoundary>
-            <ScrollRestoration />
-            <Outlet />
-            <Suspense>
-                <TanStackRouterDevtools position="bottom-right" />
-                <ReactQueryDevtools buttonPosition="bottom-left" />
-            </Suspense>
-        </ErrorBoundary>
+        <html lang="en">
+            <head>
+                <meta charSet="utf-8" />
+                <meta
+                    name="viewport"
+                    content="width=device-width, initial-scale=1"
+                />
+                <title>Server Monitor</title>
+                <link rel="stylesheet" href={appCss} />
+                <HeadContent />
+            </head>
+            <body className="bg-gray-100 dark:bg-gray-900 min-h-screen">
+                <ThemeProvider>
+                    <QueryClientProvider client={queryClient}>
+                        <ErrorBoundary>
+                            <ScrollRestoration />
+                            <Outlet />
+                            <Suspense>
+                                <TanStackRouterDevtools position="bottom-right" />
+                                <ReactQueryDevtools buttonPosition="bottom-left" />
+                            </Suspense>
+                        </ErrorBoundary>
+                    </QueryClientProvider>
+                </ThemeProvider>
+                <Scripts />
+            </body>
+        </html>
     );
 }
 
