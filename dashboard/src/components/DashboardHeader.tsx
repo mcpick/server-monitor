@@ -1,4 +1,5 @@
 import type { ReactElement } from 'react';
+import { Link } from '@tanstack/react-router';
 import { logout } from '../lib/auth';
 import { ServerSelector } from './ServerSelector';
 import { TimeRangeSelector } from './TimeRangeSelector';
@@ -46,6 +47,12 @@ export function DashboardHeader({
                             value={timeRangePreset}
                             onChange={onTimeRangeChange}
                         />
+                        <Link
+                            to="/servers"
+                            className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                        >
+                            Servers
+                        </Link>
                         <ThemeToggle />
                         <button
                             onClick={handleLogout}

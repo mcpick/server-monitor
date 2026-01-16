@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedServersRouteImport } from './routes/_authenticated/servers'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -27,27 +28,40 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedServersRoute = AuthenticatedServersRouteImport.update({
+  id: '/servers',
+  path: '/servers',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
+  '/servers': typeof AuthenticatedServersRoute
   '/': typeof AuthenticatedIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/servers': typeof AuthenticatedServersRoute
   '/': typeof AuthenticatedIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
+  '/_authenticated/servers': typeof AuthenticatedServersRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/login' | '/'
+  fullPaths: '/login' | '/servers' | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/'
-  id: '__root__' | '/_authenticated' | '/login' | '/_authenticated/'
+  to: '/login' | '/servers' | '/'
+  id:
+    | '__root__'
+    | '/_authenticated'
+    | '/login'
+    | '/_authenticated/servers'
+    | '/_authenticated/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -78,14 +92,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/servers': {
+      id: '/_authenticated/servers'
+      path: '/servers'
+      fullPath: '/servers'
+      preLoaderRoute: typeof AuthenticatedServersRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedServersRoute: typeof AuthenticatedServersRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedServersRoute: AuthenticatedServersRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 

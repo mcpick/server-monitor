@@ -510,7 +510,7 @@
         "add server grouping/tagging for organization",
         "create navigation link to servers page in dashboard header"
       ],
-      "passes": false
+      "passes": true
     }
   ]
 }
