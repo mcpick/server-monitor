@@ -59,6 +59,15 @@ const queryKeys = {
             timeRange.startTime,
             timeRange.endTime,
         ] as const,
+    alertRules: () => [...queryKeys.all, 'alertRules'] as const,
+    alertHistory: (timeRange: TimeRange) =>
+        [
+            ...queryKeys.all,
+            'alertHistory',
+            timeRange.startTime,
+            timeRange.endTime,
+        ] as const,
+    activeAlerts: () => [...queryKeys.all, 'activeAlerts'] as const,
 };
 
 export { queryKeys };

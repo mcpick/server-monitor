@@ -75,6 +75,31 @@ export interface ProcessMetric {
     memory_percent: number;
 }
 
+export type MetricType = 'cpu' | 'memory' | 'swap' | 'disk_usage';
+export type AlertCondition = 'gt' | 'lt' | 'gte' | 'lte';
+
+export interface AlertRule {
+    id: string;
+    name: string;
+    metric_type: MetricType;
+    condition: AlertCondition;
+    threshold: number;
+    server_id: string | null;
+    enabled: boolean;
+    created_at: number;
+    updated_at: number;
+}
+
+export interface AlertHistory {
+    id: number;
+    rule_id: string;
+    server_id: string;
+    triggered_at: number;
+    resolved_at: number | null;
+    metric_value: number;
+    threshold: number;
+}
+
 export type TimeRangePreset = '1h' | '6h' | '24h' | '7d' | '30d' | 'custom';
 
 export interface TimeRange {

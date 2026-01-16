@@ -492,7 +492,7 @@
         "create alert history view with filtering",
         "add visual indicator in header when alerts are active"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "feature-server-management",

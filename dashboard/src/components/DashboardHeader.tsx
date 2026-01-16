@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import { Link } from '@tanstack/react-router';
 import { logout } from '../lib/auth';
+import { useActiveAlerts } from '../hooks/useMetrics';
 import { ServerSelector } from './ServerSelector';
 import { TimeRangeSelector } from './TimeRangeSelector';
 import { ThemeToggle } from './ThemeToggle';
@@ -23,6 +24,9 @@ export function DashboardHeader({
     onTimeRangeChange,
     onLogout,
 }: DashboardHeaderProps): ReactElement {
+    const { data: activeAlerts } = useActiveAlerts();
+    const activeAlertCount = activeAlerts?.length ?? 0;
+
     function handleLogout(): void {
         logout();
         onLogout();
@@ -52,6 +56,17 @@ export function DashboardHeader({
                             className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
                         >
                             Servers
+                        </Link>
+                        <Link
+                            to="/alerts"
+                            className="relative px-3 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                        >
+                            Alerts
+                            {activeAlertCount > 0 && (
+                                <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                                    {activeAlertCount}
+                                </span>
+                            )}
                         </Link>
                         <ThemeToggle />
                         <button

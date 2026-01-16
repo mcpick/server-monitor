@@ -8,6 +8,10 @@ import type {
     DiskIOMetric,
     NetworkMetric,
     ProcessMetric,
+    AlertRule,
+    AlertHistory,
+    MetricType,
+    AlertCondition,
 } from '../types/metrics';
 
 let client: Client | null = null;
@@ -240,4 +244,133 @@ export async function fetchProcessMetrics(
             memory_percent: row.memory_percent as number,
         }),
     );
+}
+
+export async function fetchAlertRules(): Promise<AlertRule[]> {
+    const db = createTursoClient();
+    const result = await db.execute(
+        'SELECT id, name, metric_type, condition, threshold, server_id, enabled, created_at, updated_at FROM alert_rules ORDER BY created_at DESC',
+    );
+    return result.rows.map((row) => ({
+        id: row.id as string,
+        name: row.name as string,
+        metric_type: row.metric_type as MetricType,
+        condition: row.condition as AlertCondition,
+        threshold: row.threshold as number,
+        server_id: row.server_id as string | null,
+        enabled: Boolean(row.enabled),
+        created_at: row.created_at as number,
+        updated_at: row.updated_at as number,
+    }));
+}
+
+export async function fetchAlertHistory(
+    startTime: number,
+    endTime: number,
+): Promise<AlertHistory[]> {
+    const db = createTursoClient();
+    const result = await db.execute({
+        sql: `SELECT id, rule_id, server_id, triggered_at, resolved_at, metric_value, threshold
+              FROM alert_history
+              WHERE triggered_at >= ? AND triggered_at <= ?
+              ORDER BY triggered_at DESC`,
+        args: [startTime, endTime],
+    });
+    return result.rows.map((row) => ({
+        id: row.id as number,
+        rule_id: row.rule_id as string,
+        server_id: row.server_id as string,
+        triggered_at: row.triggered_at as number,
+        resolved_at: row.resolved_at as number | null,
+        metric_value: row.metric_value as number,
+        threshold: row.threshold as number,
+    }));
+}
+
+export async function fetchActiveAlerts(): Promise<AlertHistory[]> {
+    const db = createTursoClient();
+    const result = await db.execute(
+        'SELECT id, rule_id, server_id, triggered_at, resolved_at, metric_value, threshold FROM alert_history WHERE resolved_at IS NULL ORDER BY triggered_at DESC',
+    );
+    return result.rows.map((row) => ({
+        id: row.id as number,
+        rule_id: row.rule_id as string,
+        server_id: row.server_id as string,
+        triggered_at: row.triggered_at as number,
+        resolved_at: row.resolved_at as number | null,
+        metric_value: row.metric_value as number,
+        threshold: row.threshold as number,
+    }));
+}
+
+export async function createAlertRule(
+    rule: Omit<AlertRule, 'id' | 'created_at' | 'updated_at'>,
+): Promise<void> {
+    const db = createTursoClient();
+    const id = crypto.randomUUID();
+    const now = Math.floor(Date.now() / 1000);
+    await db.execute({
+        sql: `INSERT INTO alert_rules (id, name, metric_type, condition, threshold, server_id, enabled, created_at, updated_at)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        args: [
+            id,
+            rule.name,
+            rule.metric_type,
+            rule.condition,
+            rule.threshold,
+            rule.server_id,
+            rule.enabled ? 1 : 0,
+            now,
+            now,
+        ],
+    });
+}
+
+export async function updateAlertRule(
+    id: string,
+    rule: Partial<Omit<AlertRule, 'id' | 'created_at' | 'updated_at'>>,
+): Promise<void> {
+    const db = createTursoClient();
+    const now = Math.floor(Date.now() / 1000);
+    const updates: string[] = ['updated_at = ?'];
+    const args: (string | number | null)[] = [now];
+
+    if (rule.name !== undefined) {
+        updates.push('name = ?');
+        args.push(rule.name);
+    }
+    if (rule.metric_type !== undefined) {
+        updates.push('metric_type = ?');
+        args.push(rule.metric_type);
+    }
+    if (rule.condition !== undefined) {
+        updates.push('condition = ?');
+        args.push(rule.condition);
+    }
+    if (rule.threshold !== undefined) {
+        updates.push('threshold = ?');
+        args.push(rule.threshold);
+    }
+    if (rule.server_id !== undefined) {
+        updates.push('server_id = ?');
+        args.push(rule.server_id);
+    }
+    if (rule.enabled !== undefined) {
+        updates.push('enabled = ?');
+        args.push(rule.enabled ? 1 : 0);
+    }
+
+    args.push(id);
+    await db.execute({
+        sql: `UPDATE alert_rules SET ${updates.join(', ')} WHERE id = ?`,
+        args,
+    });
+}
+
+export async function deleteAlertRule(id: string): Promise<void> {
+    const db = createTursoClient();
+    await db.execute({
+        sql: 'DELETE FROM alert_rules WHERE id = ?',
+        args: [id],
+    });
 }

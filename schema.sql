@@ -93,6 +93,33 @@ CREATE TABLE IF NOT EXISTS process_metrics (
     FOREIGN KEY (server_id) REFERENCES servers(id)
 );
 
+-- Alert rules for threshold-based alerting
+CREATE TABLE IF NOT EXISTS alert_rules (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    metric_type TEXT NOT NULL,  -- cpu, memory, swap, disk_usage
+    condition TEXT NOT NULL,     -- gt (greater than), lt (less than), gte, lte
+    threshold REAL NOT NULL,
+    server_id TEXT,              -- NULL means applies to all servers
+    enabled INTEGER NOT NULL DEFAULT 1,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    FOREIGN KEY (server_id) REFERENCES servers(id)
+);
+
+-- Alert history for triggered alerts
+CREATE TABLE IF NOT EXISTS alert_history (
+    id INTEGER PRIMARY KEY,
+    rule_id TEXT NOT NULL,
+    server_id TEXT NOT NULL,
+    triggered_at INTEGER NOT NULL,
+    resolved_at INTEGER,
+    metric_value REAL NOT NULL,
+    threshold REAL NOT NULL,
+    FOREIGN KEY (rule_id) REFERENCES alert_rules(id),
+    FOREIGN KEY (server_id) REFERENCES servers(id)
+);
+
 -- Indexes for time-range queries
 CREATE INDEX IF NOT EXISTS idx_cpu_timestamp ON cpu_metrics(server_id, timestamp);
 CREATE INDEX IF NOT EXISTS idx_memory_timestamp ON memory_metrics(server_id, timestamp);
@@ -101,3 +128,8 @@ CREATE INDEX IF NOT EXISTS idx_disk_usage_timestamp ON disk_usage_metrics(server
 CREATE INDEX IF NOT EXISTS idx_disk_io_timestamp ON disk_io_metrics(server_id, timestamp);
 CREATE INDEX IF NOT EXISTS idx_network_timestamp ON network_metrics(server_id, timestamp);
 CREATE INDEX IF NOT EXISTS idx_process_timestamp ON process_metrics(server_id, timestamp);
+
+-- Indexes for alert queries
+CREATE INDEX IF NOT EXISTS idx_alert_rules_metric ON alert_rules(metric_type, enabled);
+CREATE INDEX IF NOT EXISTS idx_alert_history_rule ON alert_history(rule_id, triggered_at);
+CREATE INDEX IF NOT EXISTS idx_alert_history_server ON alert_history(server_id, triggered_at);
