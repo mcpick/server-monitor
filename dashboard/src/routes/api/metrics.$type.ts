@@ -8,6 +8,7 @@ import {
     fetchNetworkMetrics,
     fetchProcessMetrics,
 } from '../../lib/server/db';
+import { verifyAuthToken, unauthorizedResponse } from '../../lib/server/middleware';
 
 type MetricTypeParam =
     | 'cpu'
@@ -35,15 +36,46 @@ export const Route = createFileRoute('/api/metrics/$type')({
     server: {
         handlers: {
             GET: async ({ request, params }) => {
+                // Verify authentication
+                const auth = await verifyAuthToken(request);
+                if (!auth) {
+                    return unauthorizedResponse();
+                }
+
                 const url = new URL(request.url);
                 const serverId = url.searchParams.get('server_id');
-                const startTime = url.searchParams.get('start');
-                const endTime = url.searchParams.get('end');
+                let startTime = url.searchParams.get('start');
+                let endTime = url.searchParams.get('end');
 
-                if (!serverId || !startTime || !endTime) {
+                if (!serverId) {
+                    return new Response('Missing required parameter: server_id', { status: 400 });
+                }
+
+                // Default to last 1 hour if not specified
+                const now = Math.floor(Date.now() / 1000);
+                const oneHourAgo = now - 3600;
+                
+                if (!startTime) startTime = oneHourAgo.toString();
+                if (!endTime) endTime = now.toString();
+
+                const startTimeNum = Number(startTime);
+                const endTimeNum = Number(endTime);
+
+                // Validate time parameters
+                if (isNaN(startTimeNum) || isNaN(endTimeNum)) {
+                    return new Response('Invalid time format. Times must be Unix timestamps.', { status: 400 });
+                }
+
+                if (startTimeNum >= endTimeNum) {
+                    return new Response('startTime must be before endTime', { status: 400 });
+                }
+
+                // Max range of 30 days (30 * 24 * 60 * 60 = 2592000 seconds)
+                const maxRange = 30 * 24 * 60 * 60;
+                if (endTimeNum - startTimeNum > maxRange) {
                     return new Response(
-                        'Missing required parameters: server_id, start, end',
-                        { status: 400 },
+                        'Time range too large. Maximum range is 30 days.',
+                        { status: 400 }
                     );
                 }
 
@@ -58,11 +90,7 @@ export const Route = createFileRoute('/api/metrics/$type')({
                 }
 
                 try {
-                    const metrics = await fetcher(
-                        serverId,
-                        Number(startTime),
-                        Number(endTime),
-                    );
+                    const metrics = await fetcher(serverId, startTimeNum, endTimeNum);
                     return Response.json(metrics);
                 } catch (error) {
                     console.error(`Failed to fetch ${metricType} metrics:`, error);

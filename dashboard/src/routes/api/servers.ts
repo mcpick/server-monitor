@@ -1,10 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { fetchServers } from '../../lib/server/db';
+import { verifyAuthToken, unauthorizedResponse } from '../../lib/server/middleware';
 
 export const Route = createFileRoute('/api/servers')({
     server: {
         handlers: {
-            GET: async () => {
+            GET: async ({ request }) => {
+                // Verify authentication
+                const auth = await verifyAuthToken(request);
+                if (!auth) {
+                    return unauthorizedResponse();
+                }
+
                 try {
                     const servers = await fetchServers();
                     return Response.json(servers);

@@ -3,6 +3,8 @@ package config
 import (
 	"errors"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -15,6 +17,15 @@ type Config struct {
 	Hostname           string
 	ServerID           string
 	HealthPort         string
+	DBMaxOpenConns     int
+	DBMaxIdleConns     int
+}
+
+// isLocalURL checks if the database URL is for local development
+func isLocalURL(url string) bool {
+	return strings.Contains(url, "localhost") || 
+		   strings.Contains(url, "127.0.0.1") ||
+		   strings.Contains(url, "sqld:")
 }
 
 func Load() (*Config, error) {
@@ -26,8 +37,9 @@ func Load() (*Config, error) {
 	}
 
 	cfg.TursoAuthToken = os.Getenv("TURSO_AUTH_TOKEN")
-	if cfg.TursoAuthToken == "" {
-		return nil, errors.New("TURSO_AUTH_TOKEN environment variable is required")
+	// Make auth token optional for local development (localhost, 127.0.0.1)
+	if cfg.TursoAuthToken == "" && !isLocalURL(cfg.TursoDatabaseURL) {
+		return nil, errors.New("TURSO_AUTH_TOKEN environment variable is required for remote databases")
 	}
 
 	intervalStr := os.Getenv("COLLECTION_INTERVAL")
@@ -59,6 +71,25 @@ func Load() (*Config, error) {
 	cfg.HealthPort = os.Getenv("HEALTH_PORT")
 	if cfg.HealthPort == "" {
 		cfg.HealthPort = "8081"
+	}
+
+	// DB connection pool configuration
+	cfg.DBMaxOpenConns = 5 // default
+	if maxOpenConnsStr := os.Getenv("DB_MAX_OPEN_CONNS"); maxOpenConnsStr != "" {
+		if maxOpenConns, err := strconv.Atoi(maxOpenConnsStr); err != nil {
+			return nil, errors.New("DB_MAX_OPEN_CONNS must be a valid integer")
+		} else {
+			cfg.DBMaxOpenConns = maxOpenConns
+		}
+	}
+
+	cfg.DBMaxIdleConns = 2 // default
+	if maxIdleConnsStr := os.Getenv("DB_MAX_IDLE_CONNS"); maxIdleConnsStr != "" {
+		if maxIdleConns, err := strconv.Atoi(maxIdleConnsStr); err != nil {
+			return nil, errors.New("DB_MAX_IDLE_CONNS must be a valid integer")
+		} else {
+			cfg.DBMaxIdleConns = maxIdleConns
+		}
 	}
 
 	return cfg, nil

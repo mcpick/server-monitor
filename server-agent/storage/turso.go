@@ -37,15 +37,15 @@ type TursoClient struct {
 	db *sql.DB
 }
 
-func NewTursoClient(databaseURL, authToken string) (*TursoClient, error) {
+func NewTursoClient(databaseURL, authToken string, maxOpenConns, maxIdleConns int) (*TursoClient, error) {
 	connector, err := libsql.NewConnector(databaseURL, libsql.WithAuthToken(authToken))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create connector: %w", err)
 	}
 
 	db := sql.OpenDB(connector)
-	db.SetMaxOpenConns(1)
-	db.SetMaxIdleConns(1)
+	db.SetMaxOpenConns(maxOpenConns)
+	db.SetMaxIdleConns(maxIdleConns)
 	db.SetConnMaxLifetime(time.Hour)
 
 	if err := db.Ping(); err != nil {

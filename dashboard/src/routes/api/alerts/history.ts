@@ -1,10 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { fetchAlertHistory } from '../../../lib/server/db';
+import { verifyAuthToken, unauthorizedResponse } from '../../../lib/server/middleware';
 
 export const Route = createFileRoute('/api/alerts/history')({
     server: {
         handlers: {
             GET: async ({ request }) => {
+                // Verify authentication
+                const auth = await verifyAuthToken(request);
+                if (!auth) {
+                    return unauthorizedResponse();
+                }
+
                 const url = new URL(request.url);
                 const startTime = url.searchParams.get('start');
                 const endTime = url.searchParams.get('end');

@@ -30,7 +30,7 @@ func main() {
 		}
 	}()
 
-	client, err := storage.NewTursoClient(cfg.TursoDatabaseURL, cfg.TursoAuthToken)
+	client, err := storage.NewTursoClient(cfg.TursoDatabaseURL, cfg.TursoAuthToken, cfg.DBMaxOpenConns, cfg.DBMaxIdleConns)
 	if err != nil {
 		log.Fatalf("Failed to connect to Turso: %v", err)
 	}
@@ -73,84 +73,144 @@ func main() {
 	}
 }
 
-func collectAndStoreWithHealth(client *storage.TursoClient, serverID string, healthServer *health.Server) {
-	timestamp := time.Now().Unix()
-	var hasError bool
-
+// collectCPUMetrics collects and stores CPU metrics
+func collectCPUMetrics(client *storage.TursoClient, serverID string, timestamp int64, healthServer *health.Server) bool {
 	cpuMetrics, err := collector.CollectCPU()
 	if err != nil {
 		log.Printf("Error collecting CPU metrics: %v", err)
 		healthServer.RecordError(err)
-		hasError = true
-	} else if err := client.InsertCPUMetrics(serverID, timestamp, cpuMetrics); err != nil {
+		return false
+	}
+	
+	if err := client.InsertCPUMetrics(serverID, timestamp, cpuMetrics); err != nil {
 		log.Printf("Error storing CPU metrics: %v", err)
 		healthServer.RecordError(err)
-		hasError = true
+		return false
 	}
+	
+	return true
+}
 
+// collectMemoryMetrics collects and stores memory metrics
+func collectMemoryMetrics(client *storage.TursoClient, serverID string, timestamp int64, healthServer *health.Server) bool {
 	memMetrics, err := collector.CollectMemory()
 	if err != nil {
 		log.Printf("Error collecting memory metrics: %v", err)
 		healthServer.RecordError(err)
-		hasError = true
-	} else if err := client.InsertMemoryMetrics(serverID, timestamp, memMetrics); err != nil {
+		return false
+	}
+	
+	if err := client.InsertMemoryMetrics(serverID, timestamp, memMetrics); err != nil {
 		log.Printf("Error storing memory metrics: %v", err)
 		healthServer.RecordError(err)
-		hasError = true
+		return false
 	}
 
 	swapMetrics, err := collector.CollectSwap()
 	if err != nil {
 		log.Printf("Error collecting swap metrics: %v", err)
 		healthServer.RecordError(err)
-		hasError = true
-	} else if err := client.InsertSwapMetrics(serverID, timestamp, swapMetrics); err != nil {
+		return false
+	}
+	
+	if err := client.InsertSwapMetrics(serverID, timestamp, swapMetrics); err != nil {
 		log.Printf("Error storing swap metrics: %v", err)
 		healthServer.RecordError(err)
-		hasError = true
+		return false
 	}
+	
+	return true
+}
 
+// collectDiskMetrics collects and stores disk usage and I/O metrics
+func collectDiskMetrics(client *storage.TursoClient, serverID string, timestamp int64, healthServer *health.Server) bool {
 	diskUsage, err := collector.CollectDiskUsage()
 	if err != nil {
 		log.Printf("Error collecting disk usage metrics: %v", err)
 		healthServer.RecordError(err)
-		hasError = true
-	} else if err := client.InsertDiskUsageMetrics(serverID, timestamp, diskUsage); err != nil {
+		return false
+	}
+	
+	if err := client.InsertDiskUsageMetrics(serverID, timestamp, diskUsage); err != nil {
 		log.Printf("Error storing disk usage metrics: %v", err)
 		healthServer.RecordError(err)
-		hasError = true
+		return false
 	}
 
 	diskIO, err := collector.CollectDiskIO()
 	if err != nil {
 		log.Printf("Error collecting disk I/O metrics: %v", err)
 		healthServer.RecordError(err)
-		hasError = true
-	} else if err := client.InsertDiskIOMetrics(serverID, timestamp, diskIO); err != nil {
+		return false
+	}
+	
+	if err := client.InsertDiskIOMetrics(serverID, timestamp, diskIO); err != nil {
 		log.Printf("Error storing disk I/O metrics: %v", err)
 		healthServer.RecordError(err)
-		hasError = true
+		return false
 	}
+	
+	return true
+}
 
+// collectNetworkMetrics collects and stores network metrics
+func collectNetworkMetrics(client *storage.TursoClient, serverID string, timestamp int64, healthServer *health.Server) bool {
 	netMetrics, err := collector.CollectNetwork()
 	if err != nil {
 		log.Printf("Error collecting network metrics: %v", err)
 		healthServer.RecordError(err)
-		hasError = true
-	} else if err := client.InsertNetworkMetrics(serverID, timestamp, netMetrics); err != nil {
+		return false
+	}
+	
+	if err := client.InsertNetworkMetrics(serverID, timestamp, netMetrics); err != nil {
 		log.Printf("Error storing network metrics: %v", err)
 		healthServer.RecordError(err)
-		hasError = true
+		return false
 	}
+	
+	return true
+}
 
+// collectProcessMetrics collects and stores process metrics
+func collectProcessMetrics(client *storage.TursoClient, serverID string, timestamp int64, healthServer *health.Server) bool {
 	procMetrics, err := collector.CollectTopProcesses(10)
 	if err != nil {
 		log.Printf("Error collecting process metrics: %v", err)
 		healthServer.RecordError(err)
-		hasError = true
-	} else if err := client.InsertProcessMetrics(serverID, timestamp, procMetrics); err != nil {
+		return false
+	}
+	
+	if err := client.InsertProcessMetrics(serverID, timestamp, procMetrics); err != nil {
 		log.Printf("Error storing process metrics: %v", err)
 		healthServer.RecordError(err)
+		return false
+	}
+	
+	return true
+}
+
+func collectAndStoreWithHealth(client *storage.TursoClient, serverID string, healthServer *health.Server) {
+	timestamp := time.Now().Unix()
+	var hasError bool
+
+	// Collect all metrics using the individual functions
+	if !collectCPUMetrics(client, serverID, timestamp, healthServer) {
+		hasError = true
+	}
+	
+	if !collectMemoryMetrics(client, serverID, timestamp, healthServer) {
+		hasError = true
+	}
+	
+	if !collectDiskMetrics(client, serverID, timestamp, healthServer) {
+		hasError = true
+	}
+	
+	if !collectNetworkMetrics(client, serverID, timestamp, healthServer) {
+		hasError = true
+	}
+	
+	if !collectProcessMetrics(client, serverID, timestamp, healthServer) {
 		hasError = true
 	}
 

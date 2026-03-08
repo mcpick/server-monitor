@@ -16,6 +16,29 @@ import type {
 
 let client: Client | null = null;
 
+function isLocalURL(url: string): boolean {
+    return url.includes('localhost') || url.includes('127.0.0.1') || url.includes('sqld:');
+}
+
+// Validate environment variables at module load time
+(function validateEnvVars() {
+    const url = process.env.TURSO_DATABASE_URL;
+    const authToken = process.env.TURSO_AUTH_TOKEN;
+
+    if (!url) {
+        throw new Error(
+            'TURSO_DATABASE_URL environment variable is required. Please set it in your environment.'
+        );
+    }
+
+    // Auth token is only required for remote databases
+    if (!authToken && !isLocalURL(url)) {
+        throw new Error(
+            'TURSO_AUTH_TOKEN environment variable is required for remote databases. Please set it in your environment.'
+        );
+    }
+})();
+
 export function getTursoClient(): Client {
     if (client) {
         return client;
@@ -24,15 +47,20 @@ export function getTursoClient(): Client {
     const url = process.env.TURSO_DATABASE_URL;
     const authToken = process.env.TURSO_AUTH_TOKEN;
 
-    if (!url || !authToken) {
+    if (!url) {
+        throw new Error('Missing TURSO_DATABASE_URL environment variable');
+    }
+
+    // Auth token is only required for remote databases
+    if (!authToken && !isLocalURL(url)) {
         throw new Error(
-            'Missing TURSO_DATABASE_URL or TURSO_AUTH_TOKEN environment variables',
+            'TURSO_AUTH_TOKEN environment variable is required for remote databases',
         );
     }
 
     client = createClient({
         url,
-        authToken,
+        authToken: authToken || '',
     });
 
     return client;

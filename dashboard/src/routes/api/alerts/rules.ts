@@ -1,11 +1,18 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { fetchAlertRules, createAlertRule } from '../../../lib/server/db';
+import { verifyAuthToken, unauthorizedResponse } from '../../../lib/server/middleware';
 import type { AlertRule } from '../../../types/metrics';
 
 export const Route = createFileRoute('/api/alerts/rules')({
     server: {
         handlers: {
-            GET: async () => {
+            GET: async ({ request }) => {
+                // Verify authentication
+                const auth = await verifyAuthToken(request);
+                if (!auth) {
+                    return unauthorizedResponse();
+                }
+
                 try {
                     const rules = await fetchAlertRules();
                     return Response.json(rules);
@@ -15,6 +22,12 @@ export const Route = createFileRoute('/api/alerts/rules')({
                 }
             },
             POST: async ({ request }) => {
+                // Verify authentication
+                const auth = await verifyAuthToken(request);
+                if (!auth) {
+                    return unauthorizedResponse();
+                }
+
                 try {
                     const body = (await request.json()) as Omit<
                         AlertRule,
