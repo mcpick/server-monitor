@@ -7,6 +7,9 @@
 
   // Enable workers.dev subdomain
   "workers_dev": true,
+  "routes": [
+    { "pattern": "monitor.mcpick.link", "custom_domain": true },
+  ],
   "vars": {
     "TURSO_DATABASE_URL": "libsql://server-monitor-jackmcpickle.turso.io",
     "AUTH_USERNAME": "jackmcpickle",
