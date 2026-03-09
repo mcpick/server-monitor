@@ -9,15 +9,10 @@ import {
     fetchProcessMetrics,
 } from '../../lib/server/db';
 import { verifyAuthToken, unauthorizedResponse } from '../../lib/server/middleware';
+import { metricsQuerySchema, metricTypeSchema } from '../../lib/server/validation';
+import type { z } from 'zod';
 
-type MetricTypeParam =
-    | 'cpu'
-    | 'memory'
-    | 'swap'
-    | 'disk-usage'
-    | 'disk-io'
-    | 'network'
-    | 'process';
+type MetricTypeParam = z.infer<typeof metricTypeSchema>;
 
 const metricFetchers: Record<
     MetricTypeParam,
@@ -30,7 +25,7 @@ const metricFetchers: Record<
     'disk-io': fetchDiskIOMetrics,
     network: fetchNetworkMetrics,
     process: fetchProcessMetrics,
-};
+} satisfies Record<MetricTypeParam, unknown>;
 
 export const Route = createFileRoute('/api/metrics/$type')({
     server: {
@@ -42,55 +37,46 @@ export const Route = createFileRoute('/api/metrics/$type')({
                     return unauthorizedResponse();
                 }
 
+                const typeResult = metricTypeSchema.safeParse(params.type);
+                if (!typeResult.success) {
+                    return new Response(
+                        `Invalid metric type: ${params.type}. Valid types: ${metricTypeSchema.options.join(', ')}`,
+                        { status: 400 },
+                    );
+                }
+                const metricType = typeResult.data;
+                const fetcher = metricFetchers[metricType];
+
                 const url = new URL(request.url);
-                const serverId = url.searchParams.get('server_id');
-                let startTime = url.searchParams.get('start');
-                let endTime = url.searchParams.get('end');
+                const queryResult = metricsQuerySchema.safeParse({
+                    server_id: url.searchParams.get('server_id'),
+                    start: url.searchParams.get('start') || undefined,
+                    end: url.searchParams.get('end') || undefined,
+                });
 
-                if (!serverId) {
-                    return new Response('Missing required parameter: server_id', { status: 400 });
+                if (!queryResult.success) {
+                    const messages = queryResult.error.issues.map((i) => i.message).join(', ');
+                    return new Response(messages, { status: 400 });
                 }
 
-                // Default to last 1 hour if not specified
                 const now = Math.floor(Date.now() / 1000);
-                const oneHourAgo = now - 3600;
-                
-                if (!startTime) startTime = oneHourAgo.toString();
-                if (!endTime) endTime = now.toString();
-
-                const startTimeNum = Number(startTime);
-                const endTimeNum = Number(endTime);
-
-                // Validate time parameters
-                if (isNaN(startTimeNum) || isNaN(endTimeNum)) {
-                    return new Response('Invalid time format. Times must be Unix timestamps.', { status: 400 });
-                }
+                const startTimeNum = queryResult.data.start ?? now - 3600;
+                const endTimeNum = queryResult.data.end ?? now;
 
                 if (startTimeNum >= endTimeNum) {
                     return new Response('startTime must be before endTime', { status: 400 });
                 }
 
-                // Max range of 30 days (30 * 24 * 60 * 60 = 2592000 seconds)
                 const maxRange = 30 * 24 * 60 * 60;
                 if (endTimeNum - startTimeNum > maxRange) {
                     return new Response(
                         'Time range too large. Maximum range is 30 days.',
-                        { status: 400 }
-                    );
-                }
-
-                const metricType = params.type as MetricTypeParam;
-                const fetcher = metricFetchers[metricType];
-
-                if (!fetcher) {
-                    return new Response(
-                        `Invalid metric type: ${metricType}. Valid types: ${Object.keys(metricFetchers).join(', ')}`,
                         { status: 400 },
                     );
                 }
 
                 try {
-                    const metrics = await fetcher(serverId, startTimeNum, endTimeNum);
+                    const metrics = await fetcher(queryResult.data.server_id, startTimeNum, endTimeNum);
                     return Response.json(metrics);
                 } catch (error) {
                     console.error(`Failed to fetch ${metricType} metrics:`, error);

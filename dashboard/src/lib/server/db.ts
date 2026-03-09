@@ -1,5 +1,5 @@
-import { createClient } from '@libsql/client/web';
-import { drizzle, type LibSQLDatabase } from 'drizzle-orm/libsql';
+import { drizzle } from 'drizzle-orm/libsql/web';
+import type { LibSQLDatabase } from 'drizzle-orm/libsql';
 import { and, desc, eq, gte, isNull, lte } from 'drizzle-orm';
 import { env } from './env';
 import {
@@ -25,8 +25,6 @@ import type {
     ProcessMetric,
     AlertRule,
     AlertHistory,
-    MetricType,
-    AlertCondition,
 } from '../../types/metrics';
 
 let db: LibSQLDatabase | null = null;
@@ -34,12 +32,12 @@ let db: LibSQLDatabase | null = null;
 export function getDb(): LibSQLDatabase {
     if (db) return db;
 
-    const client = createClient({
-        url: env.TURSO_DATABASE_URL,
-        authToken: env.TURSO_AUTH_TOKEN,
+    db = drizzle({
+        connection: {
+            url: env.TURSO_DATABASE_URL,
+            authToken: env.TURSO_AUTH_TOKEN,
+        },
     });
-
-    db = drizzle(client);
     return db;
 }
 

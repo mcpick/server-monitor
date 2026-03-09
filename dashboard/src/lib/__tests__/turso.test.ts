@@ -289,7 +289,7 @@ describe('turso API client', () => {
             const rule = {
                 name: 'High Memory',
                 metric_type: 'memory' as const,
-                condition: 'above' as const,
+                condition: 'gt' as const,
                 threshold: 90,
                 server_id: null,
                 enabled: true,

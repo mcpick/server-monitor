@@ -4,31 +4,24 @@ import {
     generateAccessToken,
     generateRefreshToken,
 } from '../../../lib/server/jwt';
-
-interface RefreshRequest {
-    refreshToken: string;
-}
-
-interface RefreshResponse {
-    accessToken: string;
-    refreshToken: string;
-    expiresIn: number;
-}
+import { refreshSchema, parseRequestBody } from '../../../lib/server/validation';
 
 export const Route = createFileRoute('/api/auth/refresh')({
     server: {
         handlers: {
             POST: async ({ request }) => {
-                let body: RefreshRequest;
+                let rawBody: unknown;
                 try {
-                    body = (await request.json()) as RefreshRequest;
+                    rawBody = await request.json();
                 } catch {
                     return new Response('Invalid request body', { status: 400 });
                 }
 
-                if (!body.refreshToken) {
-                    return new Response('Refresh token is required', { status: 400 });
+                const parsed = parseRequestBody(refreshSchema, rawBody);
+                if (!parsed.success) {
+                    return new Response(parsed.error, { status: 400 });
                 }
+                const body = parsed.data;
 
                 try {
                     const payload = await verifyRefreshToken(body.refreshToken);
@@ -43,7 +36,7 @@ export const Route = createFileRoute('/api/auth/refresh')({
                         generateRefreshToken(payload.sub),
                     ]);
 
-                    const response: RefreshResponse = {
+                    const response = {
                         accessToken,
                         refreshToken,
                         expiresIn: 15 * 60, // 15 minutes in seconds

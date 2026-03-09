@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { fetchAlertRules, createAlertRule } from '../../../lib/server/db';
 import { verifyAuthToken, unauthorizedResponse } from '../../../lib/server/middleware';
-import type { AlertRule } from '../../../types/metrics';
+import { insertAlertRuleSchema, parseRequestBody } from '../../../lib/server/validation';
 
 export const Route = createFileRoute('/api/alerts/rules')({
     server: {
@@ -28,25 +28,27 @@ export const Route = createFileRoute('/api/alerts/rules')({
                     return unauthorizedResponse();
                 }
 
+                let rawBody: unknown;
                 try {
-                    const body = (await request.json()) as Omit<
-                        AlertRule,
-                        'id' | 'created_at' | 'updated_at'
-                    >;
+                    rawBody = await request.json();
+                } catch {
+                    return new Response('Invalid request body', { status: 400 });
+                }
 
-                    if (
-                        !body.name ||
-                        !body.metric_type ||
-                        !body.condition ||
-                        body.threshold === undefined
-                    ) {
-                        return new Response(
-                            'Missing required fields: name, metric_type, condition, threshold',
-                            { status: 400 },
-                        );
-                    }
+                const parsed = parseRequestBody(insertAlertRuleSchema, rawBody);
+                if (!parsed.success) {
+                    return new Response(parsed.error, { status: 400 });
+                }
 
-                    const rule = await createAlertRule(body);
+                try {
+                    const rule = await createAlertRule({
+                        name: parsed.data.name,
+                        metric_type: parsed.data.metricType,
+                        condition: parsed.data.condition,
+                        threshold: parsed.data.threshold,
+                        server_id: parsed.data.serverId ?? null,
+                        enabled: parsed.data.enabled ?? true,
+                    });
                     return Response.json(rule, { status: 201 });
                 } catch (error) {
                     console.error('Failed to create alert rule:', error);

@@ -3,17 +3,7 @@ import { verifyPassword, getAuthCredentials } from '../../../lib/server/auth';
 import { generateAccessToken, generateRefreshToken } from '../../../lib/server/jwt';
 import { checkRateLimit } from '../../../lib/server/rateLimit';
 import { logAuthAttempt } from '../../../lib/server/audit';
-
-interface LoginRequest {
-    username: string;
-    password: string;
-}
-
-interface LoginResponse {
-    accessToken: string;
-    refreshToken: string;
-    expiresIn: number;
-}
+import { loginSchema, parseRequestBody } from '../../../lib/server/validation';
 
 function getClientIP(request: Request): string {
     const forwarded = request.headers.get('x-forwarded-for');
@@ -42,17 +32,19 @@ export const Route = createFileRoute('/api/auth/login')({
 
                 const credentials = getAuthCredentials();
 
-                let body: LoginRequest;
+                let rawBody: unknown;
                 try {
-                    body = (await request.json()) as LoginRequest;
+                    rawBody = await request.json();
                 } catch {
                     return new Response('Invalid request body', { status: 400 });
                 }
 
-                if (!body.username || !body.password) {
-                    await logAuthAttempt(clientIP, body.username || '', false, 'missing_credentials');
-                    return new Response('Username and password are required', { status: 400 });
+                const parsed = parseRequestBody(loginSchema, rawBody);
+                if (!parsed.success) {
+                    await logAuthAttempt(clientIP, '', false, 'missing_credentials');
+                    return new Response(parsed.error, { status: 400 });
                 }
+                const body = parsed.data;
 
                 // Verify username
                 if (body.username !== credentials.username) {
@@ -76,7 +68,7 @@ export const Route = createFileRoute('/api/auth/login')({
 
                     await logAuthAttempt(clientIP, body.username, true);
 
-                    const response: LoginResponse = {
+                    const response = {
                         accessToken,
                         refreshToken,
                         expiresIn: 15 * 60, // 15 minutes in seconds

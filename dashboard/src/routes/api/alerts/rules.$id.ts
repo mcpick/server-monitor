@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { updateAlertRule, deleteAlertRule } from '../../../lib/server/db';
 import { verifyAuthToken, unauthorizedResponse } from '../../../lib/server/middleware';
-import type { AlertRule } from '../../../types/metrics';
+import { updateAlertRuleSchema, parseRequestBody } from '../../../lib/server/validation';
 
 export const Route = createFileRoute('/api/alerts/rules/$id')({
     server: {
@@ -13,11 +13,27 @@ export const Route = createFileRoute('/api/alerts/rules/$id')({
                     return unauthorizedResponse();
                 }
 
+                let rawBody: unknown;
                 try {
-                    const body = (await request.json()) as Partial<
-                        Omit<AlertRule, 'id' | 'created_at' | 'updated_at'>
-                    >;
-                    await updateAlertRule(params.id, body);
+                    rawBody = await request.json();
+                } catch {
+                    return new Response('Invalid request body', { status: 400 });
+                }
+
+                const parsed = parseRequestBody(updateAlertRuleSchema, rawBody);
+                if (!parsed.success) {
+                    return new Response(parsed.error, { status: 400 });
+                }
+
+                try {
+                    await updateAlertRule(params.id, {
+                        name: parsed.data.name,
+                        metric_type: parsed.data.metricType,
+                        condition: parsed.data.condition,
+                        threshold: parsed.data.threshold,
+                        server_id: parsed.data.serverId,
+                        enabled: parsed.data.enabled,
+                    });
                     return new Response(null, { status: 204 });
                 } catch (error) {
                     console.error('Failed to update alert rule:', error);

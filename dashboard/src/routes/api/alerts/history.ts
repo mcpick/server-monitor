@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { fetchAlertHistory } from '../../../lib/server/db';
 import { verifyAuthToken, unauthorizedResponse } from '../../../lib/server/middleware';
+import { alertHistoryQuerySchema } from '../../../lib/server/validation';
 
 export const Route = createFileRoute('/api/alerts/history')({
     server: {
@@ -13,20 +14,20 @@ export const Route = createFileRoute('/api/alerts/history')({
                 }
 
                 const url = new URL(request.url);
-                const startTime = url.searchParams.get('start');
-                const endTime = url.searchParams.get('end');
+                const queryResult = alertHistoryQuerySchema.safeParse({
+                    start: url.searchParams.get('start'),
+                    end: url.searchParams.get('end'),
+                });
 
-                if (!startTime || !endTime) {
-                    return new Response(
-                        'Missing required parameters: start, end',
-                        { status: 400 },
-                    );
+                if (!queryResult.success) {
+                    const messages = queryResult.error.issues.map((i) => i.message).join(', ');
+                    return new Response(messages, { status: 400 });
                 }
 
                 try {
                     const history = await fetchAlertHistory(
-                        Number(startTime),
-                        Number(endTime),
+                        queryResult.data.start,
+                        queryResult.data.end,
                     );
                     return Response.json(history);
                 } catch (error) {

@@ -49,8 +49,8 @@ function DashboardPage(): ReactElement {
         setTimeRange(getTimeRange(preset));
     }
 
-    function handleLogout(): void {
-        logout();
+    async function handleLogout(): Promise<void> {
+        await logout();
         void navigate({ to: '/login' });
     }
 
