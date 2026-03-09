@@ -19,7 +19,7 @@ import {
     useNetworkMetrics,
     useProcessMetrics,
 } from '@/hooks/useMetrics';
-import { getTimeRange, type TimeRangePreset } from '@/types/metrics';
+import { getTimeRange, type TimeRangePreset } from '@/lib/schemas';
 
 function DashboardPage(): ReactElement {
     const [manuallySelectedServerId, setManuallySelectedServerId] = useState<

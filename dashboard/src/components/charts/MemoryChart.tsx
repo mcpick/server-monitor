@@ -10,7 +10,7 @@ import {
     Legend,
 } from 'recharts';
 import { format } from 'date-fns';
-import type { MemoryMetric } from '@/types/metrics';
+import type { MemoryMetric } from '@/lib/schemas';
 import { formatBytes } from '@/lib/formatting';
 
 interface MemoryChartProps {
@@ -20,10 +20,10 @@ interface MemoryChartProps {
 export function MemoryChart({ data }: MemoryChartProps): ReactElement {
     const chartData = data.map((m) => ({
         time: m.timestamp * 1000,
-        used: m.used_bytes / (1024 * 1024 * 1024),
-        cached: (m.cached_bytes || 0) / (1024 * 1024 * 1024),
-        available: m.available_bytes / (1024 * 1024 * 1024),
-        total: m.total_bytes / (1024 * 1024 * 1024),
+        used: m.usedBytes / (1024 * 1024 * 1024),
+        cached: (m.cachedBytes || 0) / (1024 * 1024 * 1024),
+        available: m.availableBytes / (1024 * 1024 * 1024),
+        total: m.totalBytes / (1024 * 1024 * 1024),
     }));
 
     const maxTotal = Math.max(...chartData.map((d) => d.total), 1);

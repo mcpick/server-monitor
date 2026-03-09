@@ -53,16 +53,16 @@ describe('useMetrics hooks', () => {
                 {
                     id: 'server-1',
                     hostname: 'server1.example.com',
-                    display_name: 'Server 1',
-                    created_at: 1700000000,
-                    last_seen_at: 1700000000,
+                    displayName: 'Server 1',
+                    createdAt: 1700000000,
+                    lastSeenAt: 1700000000,
                 },
                 {
                     id: 'server-2',
                     hostname: 'server2.example.com',
-                    display_name: 'Server 2',
-                    created_at: 1700000001,
-                    last_seen_at: 1700000001,
+                    displayName: 'Server 2',
+                    createdAt: 1700000001,
+                    lastSeenAt: 1700000001,
                 },
             ];
 
@@ -78,12 +78,12 @@ describe('useMetrics hooks', () => {
             const mockMetrics = [
                 {
                     id: 1,
-                    server_id: 'server-1',
+                    serverId: 'server-1',
                     timestamp: 1700000000,
-                    usage_percent: 45.5,
-                    load_1m: 1.2,
-                    load_5m: 1.5,
-                    load_15m: 1.3,
+                    usagePercent: 45.5,
+                    load1m: 1.2,
+                    load5m: 1.5,
+                    load15m: 1.3,
                 },
             ];
 

@@ -15,7 +15,10 @@
     "fmt:check": "oxfmt --check",
     "routes-gen": "tsr generate",
     "test:run": "vitest run",
-    "hash-password": "tsx scripts/hash-password.ts"
+    "hash-password": "tsx scripts/hash-password.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate:local": "wrangler d1 migrations apply server-monitor-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply server-monitor-db --remote"
   },
   "dependencies": {
     "@t3-oss/env-core": "^0.13.10",

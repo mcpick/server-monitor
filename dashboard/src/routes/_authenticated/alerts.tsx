@@ -10,8 +10,8 @@ import {
     useUpdateAlertRuleMutation,
     useDeleteAlertRuleMutation,
 } from '@/hooks/useAlertMutations';
-import type { AlertRule, AlertRuleInput, TimeRange } from '@/types/metrics';
-import { getTimeRange } from '@/types/metrics';
+import type { AlertRule, AlertRuleInput, TimeRange } from '@/lib/schemas';
+import { getTimeRange } from '@/lib/schemas';
 import { AlertRuleForm } from '@/components/alerts/AlertRuleForm';
 import { AlertRulesList } from '@/components/alerts/AlertRulesList';
 import { AlertHistoryList } from '@/components/alerts/AlertHistoryList';

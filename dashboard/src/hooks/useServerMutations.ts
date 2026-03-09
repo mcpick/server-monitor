@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { ServerRegistration } from '@/types/metrics';
+import type { ServerRegistration } from '@/lib/schemas';
 import {
     createServer,
     deleteServer,

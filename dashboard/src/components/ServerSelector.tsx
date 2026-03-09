@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import type { Server } from '@/types/metrics';
+import type { Server } from '@/lib/schemas';
 
 interface ServerSelectorProps {
     servers: Server[];
@@ -29,7 +29,7 @@ export function ServerSelector({
                     key={server.id}
                     value={server.id}
                 >
-                    {server.display_name}{server.hostname ? ` (${server.hostname})` : ''}
+                    {server.displayName}{server.hostname ? ` (${server.hostname})` : ''}
                 </option>
             ))}
         </select>

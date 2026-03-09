@@ -10,7 +10,7 @@ import {
     Legend,
 } from 'recharts';
 import { format } from 'date-fns';
-import type { SwapMetric } from '@/types/metrics';
+import type { SwapMetric } from '@/lib/schemas';
 import { formatBytes } from '@/lib/formatting';
 
 interface SwapChartProps {
@@ -20,9 +20,9 @@ interface SwapChartProps {
 export function SwapChart({ data }: SwapChartProps): ReactElement {
     const chartData = data.map((m) => ({
         time: m.timestamp * 1000,
-        used: m.used_bytes / (1024 * 1024 * 1024),
-        free: m.free_bytes / (1024 * 1024 * 1024),
-        total: m.total_bytes / (1024 * 1024 * 1024),
+        used: m.usedBytes / (1024 * 1024 * 1024),
+        free: m.freeBytes / (1024 * 1024 * 1024),
+        total: m.totalBytes / (1024 * 1024 * 1024),
     }));
 
     const maxTotal = Math.max(...chartData.map((d) => d.total), 0.1);

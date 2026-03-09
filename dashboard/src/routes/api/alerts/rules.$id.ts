@@ -28,10 +28,10 @@ export const Route = createFileRoute('/api/alerts/rules/$id')({
                 try {
                     await updateAlertRule(params.id, {
                         name: parsed.data.name,
-                        metric_type: parsed.data.metricType,
+                        metricType: parsed.data.metricType,
                         condition: parsed.data.condition,
                         threshold: parsed.data.threshold,
-                        server_id: parsed.data.serverId,
+                        serverId: parsed.data.serverId,
                         enabled: parsed.data.enabled,
                     });
                     return new Response(null, { status: 204 });

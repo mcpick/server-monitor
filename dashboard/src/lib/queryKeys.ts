@@ -1,4 +1,4 @@
-import type { TimeRange } from '@/types/metrics';
+import type { TimeRange } from '@/lib/schemas';
 
 const queryKeys = {
     all: ['metrics'] as const,

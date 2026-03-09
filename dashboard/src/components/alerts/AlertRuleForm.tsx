@@ -1,7 +1,7 @@
 import { useState, type ReactElement, type FormEvent } from 'react';
 import { useServers } from '@/hooks/useMetrics';
 import { METRIC_TYPES, CONDITIONS, isMetricType, isAlertCondition } from '@/lib/alertHelpers';
-import type { AlertRule, AlertRuleInput, MetricType, AlertCondition as AlertConditionType } from '@/types/metrics';
+import type { AlertRule, AlertRuleInput, MetricType, AlertCondition as AlertConditionType } from '@/lib/schemas';
 
 export function AlertRuleForm({
     onSubmit,
@@ -17,7 +17,7 @@ export function AlertRuleForm({
     const { data: servers } = useServers();
     const [name, setName] = useState(initialRule?.name ?? '');
     const [metricType, setMetricType] = useState<MetricType>(
-        initialRule?.metric_type ?? 'cpu',
+        initialRule?.metricType ?? 'cpu',
     );
     const [condition, setCondition] = useState<AlertConditionType>(
         initialRule?.condition ?? 'gt',
@@ -26,7 +26,7 @@ export function AlertRuleForm({
         initialRule?.threshold?.toString() ?? '80',
     );
     const [serverId, setServerId] = useState<string | null>(
-        initialRule?.server_id ?? null,
+        initialRule?.serverId ?? null,
     );
     const [enabled, setEnabled] = useState(initialRule?.enabled ?? true);
 
@@ -46,10 +46,10 @@ export function AlertRuleForm({
         e.preventDefault();
         onSubmit({
             name,
-            metric_type: metricType,
+            metricType,
             condition,
             threshold: parseFloat(threshold),
-            server_id: serverId,
+            serverId,
             enabled,
         });
     }

@@ -10,7 +10,7 @@ import {
     Legend,
 } from 'recharts';
 import { format } from 'date-fns';
-import type { DiskIOMetric } from '@/types/metrics';
+import type { DiskIOMetric } from '@/lib/schemas';
 import { formatRate } from '@/lib/formatting';
 
 interface DiskIOChartProps {
@@ -23,12 +23,12 @@ export function DiskIOChart({ data }: DiskIOChartProps): ReactElement {
     for (const m of data) {
         const existing = byTimestamp.get(m.timestamp);
         if (existing) {
-            existing.read += m.read_bytes;
-            existing.write += m.write_bytes;
+            existing.read += m.readBytes;
+            existing.write += m.writeBytes;
         } else {
             byTimestamp.set(m.timestamp, {
-                read: m.read_bytes,
-                write: m.write_bytes,
+                read: m.readBytes,
+                write: m.writeBytes,
             });
         }
     }

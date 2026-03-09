@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { AlertRuleInput } from '@/types/metrics';
+import type { AlertRuleInput } from '@/lib/schemas';
 import {
     createAlertRule,
     updateAlertRule,

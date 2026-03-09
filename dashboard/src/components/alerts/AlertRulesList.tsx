@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import { useServers } from '@/hooks/useMetrics';
 import { METRIC_TYPES, formatCondition } from '@/lib/alertHelpers';
-import type { AlertRule } from '@/types/metrics';
+import type { AlertRule } from '@/lib/schemas';
 
 export function AlertRulesList({
     rules,
@@ -56,11 +56,11 @@ export function AlertRulesList({
                                 </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                                {METRIC_TYPES.find((m) => m.value === rule.metric_type)?.label}{' '}
+                                {METRIC_TYPES.find((m) => m.value === rule.metricType)?.label}{' '}
                                 {formatCondition(rule.condition)} {rule.threshold}%
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                                {getServerName(rule.server_id)}
+                                {getServerName(rule.serverId)}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                                 <button

@@ -10,7 +10,7 @@ import {
     Legend,
 } from 'recharts';
 import { format } from 'date-fns';
-import type { NetworkMetric } from '@/types/metrics';
+import type { NetworkMetric } from '@/lib/schemas';
 import { formatRate } from '@/lib/formatting';
 
 interface NetworkChartProps {
@@ -23,12 +23,12 @@ export function NetworkChart({ data }: NetworkChartProps): ReactElement {
     for (const m of data) {
         const existing = byTimestamp.get(m.timestamp);
         if (existing) {
-            existing.sent += m.bytes_sent;
-            existing.recv += m.bytes_recv;
+            existing.sent += m.bytesSent;
+            existing.recv += m.bytesRecv;
         } else {
             byTimestamp.set(m.timestamp, {
-                sent: m.bytes_sent,
-                recv: m.bytes_recv,
+                sent: m.bytesSent,
+                recv: m.bytesRecv,
             });
         }
     }

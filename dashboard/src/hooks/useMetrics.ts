@@ -11,7 +11,7 @@ import type {
     TimeRange,
     AlertRule,
     AlertHistory,
-} from '@/types/metrics';
+} from '@/lib/schemas';
 import {
     fetchServers,
     fetchCPUMetrics,

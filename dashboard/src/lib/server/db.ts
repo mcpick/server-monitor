@@ -36,7 +36,8 @@ import type {
     ProcessMetric,
     AlertRule,
     AlertHistory,
-} from '@/types/metrics';
+} from '@/lib/server/schemas';
+import type { AlertRuleInput } from '@/lib/schemas';
 
 let db: DrizzleD1Database | null = null;
 
@@ -52,9 +53,9 @@ export async function fetchServers(): Promise<Server[]> {
         .select({
             id: servers.id,
             hostname: servers.hostname,
-            display_name: servers.displayName,
-            created_at: servers.createdAt,
-            last_seen_at: servers.lastSeenAt,
+            displayName: servers.displayName,
+            createdAt: servers.createdAt,
+            lastSeenAt: servers.lastSeenAt,
         })
         .from(servers)
         .orderBy(servers.displayName);
@@ -78,9 +79,9 @@ export async function findServerById(id: string): Promise<Server | undefined> {
         .select({
             id: servers.id,
             hostname: servers.hostname,
-            display_name: servers.displayName,
-            created_at: servers.createdAt,
-            last_seen_at: servers.lastSeenAt,
+            displayName: servers.displayName,
+            createdAt: servers.createdAt,
+            lastSeenAt: servers.lastSeenAt,
         })
         .from(servers)
         .where(eq(servers.id, id))
@@ -113,9 +114,9 @@ export async function findServerByTokenHash(tokenHash: string): Promise<Server |
         .select({
             id: servers.id,
             hostname: servers.hostname,
-            display_name: servers.displayName,
-            created_at: servers.createdAt,
-            last_seen_at: servers.lastSeenAt,
+            displayName: servers.displayName,
+            createdAt: servers.createdAt,
+            lastSeenAt: servers.lastSeenAt,
         })
         .from(servers)
         .where(eq(servers.tokenHash, tokenHash))
@@ -131,12 +132,12 @@ export async function fetchCPUMetrics(
     return getDb()
         .select({
             id: cpuMetrics.id,
-            server_id: cpuMetrics.serverId,
+            serverId: cpuMetrics.serverId,
             timestamp: cpuMetrics.timestamp,
-            usage_percent: cpuMetrics.usagePercent,
-            load_1m: cpuMetrics.load1m,
-            load_5m: cpuMetrics.load5m,
-            load_15m: cpuMetrics.load15m,
+            usagePercent: cpuMetrics.usagePercent,
+            load1m: cpuMetrics.load1m,
+            load5m: cpuMetrics.load5m,
+            load15m: cpuMetrics.load15m,
         })
         .from(cpuMetrics)
         .where(
@@ -157,12 +158,12 @@ export async function fetchMemoryMetrics(
     return getDb()
         .select({
             id: memoryMetrics.id,
-            server_id: memoryMetrics.serverId,
+            serverId: memoryMetrics.serverId,
             timestamp: memoryMetrics.timestamp,
-            total_bytes: memoryMetrics.totalBytes,
-            used_bytes: memoryMetrics.usedBytes,
-            available_bytes: memoryMetrics.availableBytes,
-            cached_bytes: memoryMetrics.cachedBytes,
+            totalBytes: memoryMetrics.totalBytes,
+            usedBytes: memoryMetrics.usedBytes,
+            availableBytes: memoryMetrics.availableBytes,
+            cachedBytes: memoryMetrics.cachedBytes,
         })
         .from(memoryMetrics)
         .where(
@@ -183,11 +184,11 @@ export async function fetchSwapMetrics(
     return getDb()
         .select({
             id: swapMetrics.id,
-            server_id: swapMetrics.serverId,
+            serverId: swapMetrics.serverId,
             timestamp: swapMetrics.timestamp,
-            total_bytes: swapMetrics.totalBytes,
-            used_bytes: swapMetrics.usedBytes,
-            free_bytes: swapMetrics.freeBytes,
+            totalBytes: swapMetrics.totalBytes,
+            usedBytes: swapMetrics.usedBytes,
+            freeBytes: swapMetrics.freeBytes,
         })
         .from(swapMetrics)
         .where(
@@ -208,12 +209,12 @@ export async function fetchDiskUsageMetrics(
     return getDb()
         .select({
             id: diskUsageMetrics.id,
-            server_id: diskUsageMetrics.serverId,
+            serverId: diskUsageMetrics.serverId,
             timestamp: diskUsageMetrics.timestamp,
-            mount_point: diskUsageMetrics.mountPoint,
-            total_bytes: diskUsageMetrics.totalBytes,
-            used_bytes: diskUsageMetrics.usedBytes,
-            free_bytes: diskUsageMetrics.freeBytes,
+            mountPoint: diskUsageMetrics.mountPoint,
+            totalBytes: diskUsageMetrics.totalBytes,
+            usedBytes: diskUsageMetrics.usedBytes,
+            freeBytes: diskUsageMetrics.freeBytes,
         })
         .from(diskUsageMetrics)
         .where(
@@ -234,13 +235,13 @@ export async function fetchDiskIOMetrics(
     return getDb()
         .select({
             id: diskIOMetrics.id,
-            server_id: diskIOMetrics.serverId,
+            serverId: diskIOMetrics.serverId,
             timestamp: diskIOMetrics.timestamp,
             device: diskIOMetrics.device,
-            read_bytes: diskIOMetrics.readBytes,
-            write_bytes: diskIOMetrics.writeBytes,
-            read_count: diskIOMetrics.readCount,
-            write_count: diskIOMetrics.writeCount,
+            readBytes: diskIOMetrics.readBytes,
+            writeBytes: diskIOMetrics.writeBytes,
+            readCount: diskIOMetrics.readCount,
+            writeCount: diskIOMetrics.writeCount,
         })
         .from(diskIOMetrics)
         .where(
@@ -261,13 +262,13 @@ export async function fetchNetworkMetrics(
     return getDb()
         .select({
             id: networkMetrics.id,
-            server_id: networkMetrics.serverId,
+            serverId: networkMetrics.serverId,
             timestamp: networkMetrics.timestamp,
-            interface: networkMetrics.iface,
-            bytes_sent: networkMetrics.bytesSent,
-            bytes_recv: networkMetrics.bytesRecv,
-            packets_sent: networkMetrics.packetsSent,
-            packets_recv: networkMetrics.packetsRecv,
+            iface: networkMetrics.iface,
+            bytesSent: networkMetrics.bytesSent,
+            bytesRecv: networkMetrics.bytesRecv,
+            packetsSent: networkMetrics.packetsSent,
+            packetsRecv: networkMetrics.packetsRecv,
         })
         .from(networkMetrics)
         .where(
@@ -288,12 +289,12 @@ export async function fetchProcessMetrics(
     return getDb()
         .select({
             id: processMetrics.id,
-            server_id: processMetrics.serverId,
+            serverId: processMetrics.serverId,
             timestamp: processMetrics.timestamp,
             pid: processMetrics.pid,
             name: processMetrics.name,
-            cpu_percent: processMetrics.cpuPercent,
-            memory_percent: processMetrics.memoryPercent,
+            cpuPercent: processMetrics.cpuPercent,
+            memoryPercent: processMetrics.memoryPercent,
         })
         .from(processMetrics)
         .where(
@@ -315,17 +316,18 @@ export async function fetchAlertRules(): Promise<AlertRule[]> {
         .select({
             id: alertRules.id,
             name: alertRules.name,
-            metric_type: alertRules.metricType,
+            metricType: alertRules.metricType,
             condition: alertRules.condition,
             threshold: alertRules.threshold,
-            server_id: alertRules.serverId,
+            serverId: alertRules.serverId,
             enabled: alertRules.enabled,
-            created_at: alertRules.createdAt,
-            updated_at: alertRules.updatedAt,
+            createdAt: alertRules.createdAt,
+            updatedAt: alertRules.updatedAt,
         })
         .from(alertRules)
         .orderBy(desc(alertRules.createdAt));
-    return rows as AlertRule[];
+    // DB values are validated on insert via insertAlertRuleSchema
+    return rows as unknown as AlertRule[];
 }
 
 export async function fetchAlertHistory(
@@ -335,11 +337,11 @@ export async function fetchAlertHistory(
     return getDb()
         .select({
             id: alertHistory.id,
-            rule_id: alertHistory.ruleId,
-            server_id: alertHistory.serverId,
-            triggered_at: alertHistory.triggeredAt,
-            resolved_at: alertHistory.resolvedAt,
-            metric_value: alertHistory.metricValue,
+            ruleId: alertHistory.ruleId,
+            serverId: alertHistory.serverId,
+            triggeredAt: alertHistory.triggeredAt,
+            resolvedAt: alertHistory.resolvedAt,
+            metricValue: alertHistory.metricValue,
             threshold: alertHistory.threshold,
         })
         .from(alertHistory)
@@ -356,11 +358,11 @@ export async function fetchActiveAlerts(): Promise<AlertHistory[]> {
     return getDb()
         .select({
             id: alertHistory.id,
-            rule_id: alertHistory.ruleId,
-            server_id: alertHistory.serverId,
-            triggered_at: alertHistory.triggeredAt,
-            resolved_at: alertHistory.resolvedAt,
-            metric_value: alertHistory.metricValue,
+            ruleId: alertHistory.ruleId,
+            serverId: alertHistory.serverId,
+            triggeredAt: alertHistory.triggeredAt,
+            resolvedAt: alertHistory.resolvedAt,
+            metricValue: alertHistory.metricValue,
             threshold: alertHistory.threshold,
         })
         .from(alertHistory)
@@ -369,7 +371,7 @@ export async function fetchActiveAlerts(): Promise<AlertHistory[]> {
 }
 
 export async function createAlertRule(
-    rule: Omit<AlertRule, 'id' | 'created_at' | 'updated_at'>,
+    rule: AlertRuleInput,
 ): Promise<AlertRule> {
     const id = nanoid();
     const now = Math.floor(Date.now() / 1000);
@@ -377,10 +379,10 @@ export async function createAlertRule(
     await getDb().insert(alertRules).values({
         id,
         name: rule.name,
-        metricType: rule.metric_type,
+        metricType: rule.metricType,
         condition: rule.condition,
         threshold: rule.threshold,
-        serverId: rule.server_id,
+        serverId: rule.serverId,
         enabled: rule.enabled,
         createdAt: now,
         updatedAt: now,
@@ -389,23 +391,23 @@ export async function createAlertRule(
     return {
         ...rule,
         id,
-        created_at: now,
-        updated_at: now,
+        createdAt: now,
+        updatedAt: now,
     };
 }
 
 export async function updateAlertRule(
     id: string,
-    rule: Partial<Omit<AlertRule, 'id' | 'created_at' | 'updated_at'>>,
+    rule: Partial<AlertRuleInput>,
 ): Promise<void> {
     const now = Math.floor(Date.now() / 1000);
 
     const values: Record<string, unknown> = { updatedAt: now };
     if (rule.name !== undefined) values.name = rule.name;
-    if (rule.metric_type !== undefined) values.metricType = rule.metric_type;
+    if (rule.metricType !== undefined) values.metricType = rule.metricType;
     if (rule.condition !== undefined) values.condition = rule.condition;
     if (rule.threshold !== undefined) values.threshold = rule.threshold;
-    if (rule.server_id !== undefined) values.serverId = rule.server_id;
+    if (rule.serverId !== undefined) values.serverId = rule.serverId;
     if (rule.enabled !== undefined) values.enabled = rule.enabled;
 
     await getDb().update(alertRules).set(values).where(eq(alertRules.id, id));

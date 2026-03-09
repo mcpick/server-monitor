@@ -2,7 +2,7 @@ import { useState, type ReactElement } from 'react';
 import { useServers } from '@/hooks/useMetrics';
 import { useCreateServerMutation } from '@/hooks/useServerMutations';
 import { CopyButton } from '@/components/CopyButton';
-import type { ServerRegistration } from '@/types/metrics';
+import type { ServerRegistration } from '@/lib/schemas';
 
 export function AddServerWizard({ onBack }: { onBack: () => void }): ReactElement {
     const [step, setStep] = useState(1);

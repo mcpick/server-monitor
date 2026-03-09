@@ -91,9 +91,9 @@ describe('middleware', () => {
             mockFindServerByTokenHash.mockResolvedValueOnce({
                 id: 'server-1',
                 hostname: 'web-01',
-                display_name: 'Web Server',
-                created_at: 1700000000,
-                last_seen_at: 1700000000,
+                displayName: 'Web Server',
+                createdAt: 1700000000,
+                lastSeenAt: 1700000000,
             });
             const request = new Request('http://localhost/api/ingest', {
                 headers: { Authorization: 'Bearer valid-token' },

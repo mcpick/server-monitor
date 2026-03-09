@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import type { ProcessMetric } from '@/types/metrics';
+import type { ProcessMetric } from '@/lib/schemas';
 import { getStatusColor } from '@/lib/formatting';
 
 interface ProcessListProps {
@@ -13,9 +13,9 @@ export function ProcessList({ data }: ProcessListProps): ReactElement {
     ]
         .sort(
             (a, b) =>
-                b.cpu_percent +
-                b.memory_percent -
-                (a.cpu_percent + a.memory_percent),
+                b.cpuPercent +
+                b.memoryPercent -
+                (a.cpuPercent + a.memoryPercent),
         )
         .slice(0, 10);
 
@@ -52,16 +52,16 @@ export function ProcessList({ data }: ProcessListProps): ReactElement {
                             </td>
                             <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 text-right">
                                 <span
-                                    className={`inline-block px-2 py-1 rounded ${getStatusColor(proc.cpu_percent)}`}
+                                    className={`inline-block px-2 py-1 rounded ${getStatusColor(proc.cpuPercent)}`}
                                 >
-                                    {proc.cpu_percent.toFixed(1)}%
+                                    {proc.cpuPercent.toFixed(1)}%
                                 </span>
                             </td>
                             <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 text-right">
                                 <span
-                                    className={`inline-block px-2 py-1 rounded ${getStatusColor(proc.memory_percent)}`}
+                                    className={`inline-block px-2 py-1 rounded ${getStatusColor(proc.memoryPercent)}`}
                                 >
-                                    {proc.memory_percent.toFixed(1)}%
+                                    {proc.memoryPercent.toFixed(1)}%
                                 </span>
                             </td>
                         </tr>

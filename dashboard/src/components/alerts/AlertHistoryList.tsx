@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { useServers } from '@/hooks/useMetrics';
-import type { AlertRule, AlertHistory } from '@/types/metrics';
+import type { AlertRule, AlertHistory } from '@/lib/schemas';
 
 export function AlertHistoryList({
     history,
@@ -50,26 +50,26 @@ export function AlertHistoryList({
                             className="hover:bg-gray-50 dark:hover:bg-gray-700"
                         >
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                                {getRuleName(alert.rule_id)}
+                                {getRuleName(alert.ruleId)}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                                {getServerName(alert.server_id)}
+                                {getServerName(alert.serverId)}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                                {new Date(alert.triggered_at * 1000).toLocaleString()}
+                                {new Date(alert.triggeredAt * 1000).toLocaleString()}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                                {alert.metric_value.toFixed(1)}% (threshold: {alert.threshold}%)
+                                {alert.metricValue.toFixed(1)}% (threshold: {alert.threshold}%)
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                                 <span
                                     className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                        alert.resolved_at
+                                        alert.resolvedAt
                                             ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
                                             : 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'
                                     }`}
                                 >
-                                    {alert.resolved_at ? 'Resolved' : 'Active'}
+                                    {alert.resolvedAt ? 'Resolved' : 'Active'}
                                 </span>
                             </td>
                         </tr>

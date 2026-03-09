@@ -33,8 +33,8 @@ describe('API client', () => {
     describe('fetchServers', () => {
         it('returns mapped server data', async () => {
             const mockServers = [
-                { id: 'server-1', hostname: 'web-01', created_at: 1700000000, last_seen_at: 1700000000 },
-                { id: 'server-2', hostname: 'db-01', created_at: 1700000100, last_seen_at: 1700000100 },
+                { id: 'server-1', hostname: 'web-01', createdAt: 1700000000, lastSeenAt: 1700000000 },
+                { id: 'server-2', hostname: 'db-01', createdAt: 1700000100, lastSeenAt: 1700000100 },
             ];
             mockFetch.mockResolvedValueOnce({
                 ok: true,
@@ -59,12 +59,12 @@ describe('API client', () => {
             const mockMetrics = [
                 {
                     id: 1,
-                    server_id: 'server-1',
+                    serverId: 'server-1',
                     timestamp: 1700000000,
-                    usage_percent: 45.5,
-                    load_1m: 1.2,
-                    load_5m: 1.5,
-                    load_15m: 1.3,
+                    usagePercent: 45.5,
+                    load1m: 1.2,
+                    load5m: 1.5,
+                    load15m: 1.3,
                 },
             ];
             mockFetch.mockResolvedValueOnce({
@@ -79,7 +79,7 @@ describe('API client', () => {
                 undefined,
             );
             expect(metrics).toHaveLength(1);
-            expect(metrics[0].usage_percent).toBe(45.5);
+            expect(metrics[0].usagePercent).toBe(45.5);
         });
     });
 
@@ -88,12 +88,12 @@ describe('API client', () => {
             const mockMetrics = [
                 {
                     id: 1,
-                    server_id: 'server-1',
+                    serverId: 'server-1',
                     timestamp: 1700000000,
-                    total_bytes: 16000000000,
-                    used_bytes: 8000000000,
-                    available_bytes: 8000000000,
-                    cached_bytes: 2000000000,
+                    totalBytes: 16000000000,
+                    usedBytes: 8000000000,
+                    availableBytes: 8000000000,
+                    cachedBytes: 2000000000,
                 },
             ];
             mockFetch.mockResolvedValueOnce({
@@ -103,8 +103,8 @@ describe('API client', () => {
 
             const metrics = await fetchMemoryMetrics('server-1', 1699999000, 1700001000);
 
-            expect(metrics[0].total_bytes).toBe(16000000000);
-            expect(metrics[0].cached_bytes).toBe(2000000000);
+            expect(metrics[0].totalBytes).toBe(16000000000);
+            expect(metrics[0].cachedBytes).toBe(2000000000);
         });
     });
 
@@ -113,11 +113,11 @@ describe('API client', () => {
             const mockMetrics = [
                 {
                     id: 1,
-                    server_id: 'server-1',
+                    serverId: 'server-1',
                     timestamp: 1700000000,
-                    total_bytes: 8000000000,
-                    used_bytes: 1000000000,
-                    free_bytes: 7000000000,
+                    totalBytes: 8000000000,
+                    usedBytes: 1000000000,
+                    freeBytes: 7000000000,
                 },
             ];
             mockFetch.mockResolvedValueOnce({
@@ -127,8 +127,8 @@ describe('API client', () => {
 
             const metrics = await fetchSwapMetrics('server-1', 1699999000, 1700001000);
 
-            expect(metrics[0].total_bytes).toBe(8000000000);
-            expect(metrics[0].free_bytes).toBe(7000000000);
+            expect(metrics[0].totalBytes).toBe(8000000000);
+            expect(metrics[0].freeBytes).toBe(7000000000);
         });
     });
 
@@ -137,12 +137,12 @@ describe('API client', () => {
             const mockMetrics = [
                 {
                     id: 1,
-                    server_id: 'server-1',
+                    serverId: 'server-1',
                     timestamp: 1700000000,
-                    mount_point: '/',
-                    total_bytes: 500000000000,
-                    used_bytes: 250000000000,
-                    free_bytes: 250000000000,
+                    mountPoint: '/',
+                    totalBytes: 500000000000,
+                    usedBytes: 250000000000,
+                    freeBytes: 250000000000,
                 },
             ];
             mockFetch.mockResolvedValueOnce({
@@ -152,8 +152,8 @@ describe('API client', () => {
 
             const metrics = await fetchDiskUsageMetrics('server-1', 1699999000, 1700001000);
 
-            expect(metrics[0].mount_point).toBe('/');
-            expect(metrics[0].total_bytes).toBe(500000000000);
+            expect(metrics[0].mountPoint).toBe('/');
+            expect(metrics[0].totalBytes).toBe(500000000000);
         });
     });
 
@@ -162,13 +162,13 @@ describe('API client', () => {
             const mockMetrics = [
                 {
                     id: 1,
-                    server_id: 'server-1',
+                    serverId: 'server-1',
                     timestamp: 1700000000,
                     device: 'sda1',
-                    read_bytes: 1000000,
-                    write_bytes: 500000,
-                    read_count: 100,
-                    write_count: 50,
+                    readBytes: 1000000,
+                    writeBytes: 500000,
+                    readCount: 100,
+                    writeCount: 50,
                 },
             ];
             mockFetch.mockResolvedValueOnce({
@@ -179,7 +179,7 @@ describe('API client', () => {
             const metrics = await fetchDiskIOMetrics('server-1', 1699999000, 1700001000);
 
             expect(metrics[0].device).toBe('sda1');
-            expect(metrics[0].read_bytes).toBe(1000000);
+            expect(metrics[0].readBytes).toBe(1000000);
         });
     });
 
@@ -188,13 +188,13 @@ describe('API client', () => {
             const mockMetrics = [
                 {
                     id: 1,
-                    server_id: 'server-1',
+                    serverId: 'server-1',
                     timestamp: 1700000000,
-                    interface: 'eth0',
-                    bytes_sent: 1000000,
-                    bytes_recv: 2000000,
-                    packets_sent: 1000,
-                    packets_recv: 2000,
+                    iface: 'eth0',
+                    bytesSent: 1000000,
+                    bytesRecv: 2000000,
+                    packetsSent: 1000,
+                    packetsRecv: 2000,
                 },
             ];
             mockFetch.mockResolvedValueOnce({
@@ -204,8 +204,8 @@ describe('API client', () => {
 
             const metrics = await fetchNetworkMetrics('server-1', 1699999000, 1700001000);
 
-            expect(metrics[0].interface).toBe('eth0');
-            expect(metrics[0].bytes_sent).toBe(1000000);
+            expect(metrics[0].iface).toBe('eth0');
+            expect(metrics[0].bytesSent).toBe(1000000);
         });
     });
 
@@ -214,12 +214,12 @@ describe('API client', () => {
             const mockMetrics = [
                 {
                     id: 1,
-                    server_id: 'server-1',
+                    serverId: 'server-1',
                     timestamp: 1700000000,
                     pid: 1234,
                     name: 'node',
-                    cpu_percent: 25.5,
-                    memory_percent: 12.3,
+                    cpuPercent: 25.5,
+                    memoryPercent: 12.3,
                 },
             ];
             mockFetch.mockResolvedValueOnce({
@@ -231,7 +231,7 @@ describe('API client', () => {
 
             expect(metrics[0].pid).toBe(1234);
             expect(metrics[0].name).toBe('node');
-            expect(metrics[0].cpu_percent).toBe(25.5);
+            expect(metrics[0].cpuPercent).toBe(25.5);
         });
     });
 
@@ -241,13 +241,13 @@ describe('API client', () => {
                 {
                     id: 'rule-1',
                     name: 'High CPU',
-                    metric_type: 'cpu',
+                    metricType: 'cpu',
                     condition: 'above',
                     threshold: 80,
-                    server_id: null,
+                    serverId: null,
                     enabled: true,
-                    created_at: 1700000000,
-                    updated_at: 1700000000,
+                    createdAt: 1700000000,
+                    updatedAt: 1700000000,
                 },
             ];
             mockFetch.mockResolvedValueOnce({
@@ -267,11 +267,11 @@ describe('API client', () => {
             const mockAlerts = [
                 {
                     id: 1,
-                    rule_id: 'rule-1',
-                    server_id: 'server-1',
-                    triggered_at: 1700000000,
-                    resolved_at: null,
-                    metric_value: 95,
+                    ruleId: 'rule-1',
+                    serverId: 'server-1',
+                    triggeredAt: 1700000000,
+                    resolvedAt: null,
+                    metricValue: 95,
                     threshold: 80,
                 },
             ];
@@ -291,15 +291,15 @@ describe('API client', () => {
         it('creates an alert rule', async () => {
             const rule = {
                 name: 'High Memory',
-                metric_type: 'memory' as const,
+                metricType: 'memory' as const,
                 condition: 'gt' as const,
                 threshold: 90,
-                server_id: null,
+                serverId: null,
                 enabled: true,
             };
             mockFetch.mockResolvedValueOnce({
                 ok: true,
-                json: async () => ({ ...rule, id: 'rule-2', created_at: 1700000000, updated_at: 1700000000 }),
+                json: async () => ({ ...rule, id: 'rule-2', createdAt: 1700000000, updatedAt: 1700000000 }),
             });
 
             await createAlertRule(rule);

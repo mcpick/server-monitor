@@ -5,7 +5,7 @@ import { useDeleteServerMutation } from '@/hooks/useServerMutations';
 import { ServerList } from '@/components/ServerList';
 import { ServerDetails } from '@/components/ServerDetails';
 import { AddServerWizard } from '@/components/AddServerWizard';
-import type { Server } from '@/types/metrics';
+import type { Server } from '@/lib/schemas';
 import type { ServerStatus } from '@/components/StatusBadge';
 
 type ViewMode = 'list' | 'details' | 'add';
@@ -49,7 +49,7 @@ function ServersPage(): ReactElement {
 
     const serversWithStatus: ServerWithStatus[] = (servers || []).map((server) => ({
         ...server,
-        ...getServerStatus(server.last_seen_at),
+        ...getServerStatus(server.lastSeenAt),
     }));
 
     function handleSelectServer(server: ServerWithStatus): void {

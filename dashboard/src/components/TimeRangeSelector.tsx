@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import type { TimeRangePreset } from '@/types/metrics';
+import type { TimeRangePreset } from '@/lib/schemas';
 
 interface TimeRangeSelectorProps {
     value: TimeRangePreset;

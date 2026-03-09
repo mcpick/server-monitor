@@ -11,7 +11,7 @@ import type {
     AlertRule,
     AlertRuleInput,
     AlertHistory,
-} from '@/types/metrics';
+} from '@/lib/schemas';
 
 /**
  * Generic fetch utility for API requests.

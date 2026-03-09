@@ -10,7 +10,7 @@ import {
     Legend,
 } from 'recharts';
 import { format } from 'date-fns';
-import type { CPUMetric } from '@/types/metrics';
+import type { CPUMetric } from '@/lib/schemas';
 
 interface CPUChartProps {
     data: CPUMetric[];
@@ -19,10 +19,10 @@ interface CPUChartProps {
 export function CPUChart({ data }: CPUChartProps): ReactElement {
     const chartData = data.map((m) => ({
         time: m.timestamp * 1000,
-        usage: m.usage_percent,
-        load1m: m.load_1m,
-        load5m: m.load_5m,
-        load15m: m.load_15m,
+        usage: m.usagePercent,
+        load1m: m.load1m,
+        load5m: m.load5m,
+        load15m: m.load15m,
     }));
 
     return (

@@ -43,10 +43,10 @@ export const Route = createFileRoute('/api/alerts/rules')({
                 try {
                     const rule = await createAlertRule({
                         name: parsed.data.name,
-                        metric_type: parsed.data.metricType,
+                        metricType: parsed.data.metricType,
                         condition: parsed.data.condition,
                         threshold: parsed.data.threshold,
-                        server_id: parsed.data.serverId ?? null,
+                        serverId: parsed.data.serverId ?? null,
                         enabled: parsed.data.enabled ?? true,
                     });
                     return Response.json(rule, { status: 201 });

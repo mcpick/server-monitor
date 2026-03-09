@@ -10,7 +10,7 @@ import {
     Legend,
     Cell,
 } from 'recharts';
-import type { DiskUsageMetric } from '@/types/metrics';
+import type { DiskUsageMetric } from '@/lib/schemas';
 import { formatBytes } from '@/lib/formatting';
 
 interface DiskUsageChartProps {
@@ -20,18 +20,18 @@ interface DiskUsageChartProps {
 export function DiskUsageChart({ data }: DiskUsageChartProps): ReactElement {
     const latestByMount = new Map<string, DiskUsageMetric>();
     for (const m of data) {
-        const existing = latestByMount.get(m.mount_point);
+        const existing = latestByMount.get(m.mountPoint);
         if (!existing || m.timestamp > existing.timestamp) {
-            latestByMount.set(m.mount_point, m);
+            latestByMount.set(m.mountPoint, m);
         }
     }
 
     const chartData = Array.from(latestByMount.values()).map((m) => ({
-        mount: m.mount_point,
-        used: m.used_bytes / (1024 * 1024 * 1024),
-        free: m.free_bytes / (1024 * 1024 * 1024),
-        total: m.total_bytes / (1024 * 1024 * 1024),
-        usedPercent: (m.used_bytes / m.total_bytes) * 100,
+        mount: m.mountPoint,
+        used: m.usedBytes / (1024 * 1024 * 1024),
+        free: m.freeBytes / (1024 * 1024 * 1024),
+        total: m.totalBytes / (1024 * 1024 * 1024),
+        usedPercent: (m.usedBytes / m.totalBytes) * 100,
     }));
 
     function getBarColor(percent: number): string {

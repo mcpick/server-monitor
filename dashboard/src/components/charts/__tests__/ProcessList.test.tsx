@@ -1,36 +1,36 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ProcessList } from '../ProcessList';
-import type { ProcessMetric } from '../../../types/metrics';
+import type { ProcessMetric } from '@/lib/schemas';
 
 describe('ProcessList', () => {
     const mockData: ProcessMetric[] = [
         {
             id: 1,
-            server_id: 'server-1',
+            serverId: 'server-1',
             timestamp: 1700000000,
             pid: 1234,
             name: 'chrome',
-            cpu_percent: 45.5,
-            memory_percent: 12.3,
+            cpuPercent: 45.5,
+            memoryPercent: 12.3,
         },
         {
             id: 2,
-            server_id: 'server-1',
+            serverId: 'server-1',
             timestamp: 1700000000,
             pid: 5678,
             name: 'node',
-            cpu_percent: 25.0,
-            memory_percent: 8.5,
+            cpuPercent: 25.0,
+            memoryPercent: 8.5,
         },
         {
             id: 3,
-            server_id: 'server-1',
+            serverId: 'server-1',
             timestamp: 1700000000,
             pid: 9012,
             name: 'postgres',
-            cpu_percent: 5.2,
-            memory_percent: 35.0,
+            cpuPercent: 5.2,
+            memoryPercent: 35.0,
         },
     ];
 
@@ -81,12 +81,12 @@ describe('ProcessList', () => {
             ...mockData,
             {
                 id: 4,
-                server_id: 'server-1',
+                serverId: 'server-1',
                 timestamp: 1700000005,
                 pid: 1111,
                 name: 'latest-process',
-                cpu_percent: 10.0,
-                memory_percent: 5.0,
+                cpuPercent: 10.0,
+                memoryPercent: 5.0,
             },
         ];
 
@@ -103,12 +103,12 @@ describe('ProcessList', () => {
             { length: 15 },
             (_, i) => ({
                 id: i,
-                server_id: 'server-1',
+                serverId: 'server-1',
                 timestamp: 1700000000,
                 pid: 1000 + i,
                 name: `process-${i}`,
-                cpu_percent: 10 - i * 0.5,
-                memory_percent: 5,
+                cpuPercent: 10 - i * 0.5,
+                memoryPercent: 5,
             }),
         );
 
@@ -123,12 +123,12 @@ describe('ProcessList', () => {
         const highCPUData: ProcessMetric[] = [
             {
                 id: 1,
-                server_id: 'server-1',
+                serverId: 'server-1',
                 timestamp: 1700000000,
                 pid: 1234,
                 name: 'heavy-process',
-                cpu_percent: 75.0,
-                memory_percent: 10.0,
+                cpuPercent: 75.0,
+                memoryPercent: 10.0,
             },
         ];
 
@@ -142,12 +142,12 @@ describe('ProcessList', () => {
         const mediumCPUData: ProcessMetric[] = [
             {
                 id: 1,
-                server_id: 'server-1',
+                serverId: 'server-1',
                 timestamp: 1700000000,
                 pid: 1234,
                 name: 'medium-process',
-                cpu_percent: 35.0,
-                memory_percent: 10.0,
+                cpuPercent: 35.0,
+                memoryPercent: 10.0,
             },
         ];
 
@@ -161,12 +161,12 @@ describe('ProcessList', () => {
         const lowCPUData: ProcessMetric[] = [
             {
                 id: 1,
-                server_id: 'server-1',
+                serverId: 'server-1',
                 timestamp: 1700000000,
                 pid: 1234,
                 name: 'light-process',
-                cpu_percent: 10.0,
-                memory_percent: 5.0,
+                cpuPercent: 10.0,
+                memoryPercent: 5.0,
             },
         ];
 

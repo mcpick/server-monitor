@@ -36,7 +36,7 @@ export function ServerDetails({
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
             <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    {server.display_name}
+                    {server.displayName}
                 </h2>
                 <button
                     onClick={onBack}
@@ -65,7 +65,7 @@ export function ServerDetails({
                                 Display Name
                             </dt>
                             <dd className="text-sm text-gray-900 dark:text-white">
-                                {server.display_name}
+                                {server.displayName}
                             </dd>
                         </div>
                         <div className="flex justify-between">
@@ -97,7 +97,7 @@ export function ServerDetails({
                                 Registered
                             </dt>
                             <dd className="text-sm text-gray-900 dark:text-white">
-                                {new Date(server.created_at * 1000).toLocaleString()}
+                                {new Date(server.createdAt * 1000).toLocaleString()}
                             </dd>
                         </div>
                     </dl>

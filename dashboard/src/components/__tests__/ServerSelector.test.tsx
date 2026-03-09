@@ -1,13 +1,13 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ServerSelector } from '../ServerSelector';
-import type { Server } from '../../types/metrics';
+import type { Server } from '@/lib/schemas';
 
 describe('ServerSelector', () => {
     const mockServers: Server[] = [
-        { id: 'server-1', hostname: 'web-server-01', display_name: 'Web Server 01', created_at: 1700000000, last_seen_at: 1700000000 },
-        { id: 'server-2', hostname: 'db-server-01', display_name: 'DB Server 01', created_at: 1700000000, last_seen_at: 1700000000 },
-        { id: 'server-3', hostname: 'api-server-01', display_name: 'API Server 01', created_at: 1700000000, last_seen_at: 1700000000 },
+        { id: 'server-1', hostname: 'web-server-01', displayName: 'Web Server 01', createdAt: 1700000000, lastSeenAt: 1700000000 },
+        { id: 'server-2', hostname: 'db-server-01', displayName: 'DB Server 01', createdAt: 1700000000, lastSeenAt: 1700000000 },
+        { id: 'server-3', hostname: 'api-server-01', displayName: 'API Server 01', createdAt: 1700000000, lastSeenAt: 1700000000 },
     ];
 
     it('renders all servers as options', () => {

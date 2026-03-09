@@ -3,7 +3,7 @@ import { fetchServers, createServer } from '@/lib/server/db';
 import { verifyAuthToken, unauthorizedResponse } from '@/lib/server/middleware';
 import { createServerSchema, parseRequestBody } from '@/lib/server/validation';
 import { generateServerToken, hashToken } from '@/lib/server/token';
-import type { ServerRegistration } from '@/types/metrics';
+import type { ServerRegistration } from '@/lib/schemas';
 
 export const Route = createFileRoute('/api/servers')({
     server: {
@@ -47,7 +47,7 @@ export const Route = createFileRoute('/api/servers')({
 
                     const result = {
                         id,
-                        display_name: parsed.data.displayName,
+                        displayName: parsed.data.displayName,
                         token,
                     } satisfies ServerRegistration;
 

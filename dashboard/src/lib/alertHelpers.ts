@@ -1,4 +1,4 @@
-import type { MetricType, AlertCondition } from '@/types/metrics';
+import type { MetricType, AlertCondition } from '@/lib/schemas';
 
 export const METRIC_TYPES: { value: MetricType; label: string }[] = [
     { value: 'cpu', label: 'CPU Usage (%)' },
