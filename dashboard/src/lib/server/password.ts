@@ -1,10 +1,10 @@
-const ITERATIONS = 600_000;
+const ITERATIONS = 100_000;
 const KEY_LENGTH = 32;
 const SALT_LENGTH = 16;
 const ALGORITHM = 'SHA-256';
 
-function toBase64(buffer: ArrayBuffer): string {
-    return btoa(String.fromCharCode(...new Uint8Array(buffer)));
+function toBase64(bytes: Uint8Array): string {
+    return btoa(String.fromCharCode(...bytes));
 }
 
 function fromBase64(base64: string): Uint8Array {
@@ -48,7 +48,7 @@ function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean {
 export async function hashPassword(password: string): Promise<string> {
     const salt = crypto.getRandomValues(new Uint8Array(SALT_LENGTH));
     const hash = await deriveKey(password, salt, ITERATIONS);
-    return `pbkdf2:${ITERATIONS}:${toBase64(salt.buffer as ArrayBuffer)}:${toBase64(hash)}`;
+    return `pbkdf2:${ITERATIONS}:${toBase64(salt)}:${toBase64(new Uint8Array(hash))}`;
 }
 
 export async function verifyPassword(

@@ -53,7 +53,13 @@ export const Route = createFileRoute('/api/auth/login')({
                 }
 
                 // Verify password
-                const isValid = await verifyPassword(body.password, credentials.passwordHash);
+                let isValid: boolean;
+                try {
+                    isValid = await verifyPassword(body.password, credentials.passwordHash);
+                } catch (error) {
+                    console.error('Password verification failed:', error);
+                    return new Response('Internal server error', { status: 500 });
+                }
                 if (!isValid) {
                     await logAuthAttempt(clientIP, body.username, false, 'invalid_password');
                     return new Response('Invalid credentials', { status: 401 });
