@@ -14,7 +14,8 @@
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
     "routes-gen": "tsr generate",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "hash-password": "tsx scripts/hash-password.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.17.0",
@@ -23,7 +24,6 @@
     "@tanstack/react-router": "^1.150.0",
     "@tanstack/react-start": "^1.150.0",
     "@tanstack/router-devtools": "^1.150.0",
-    "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
