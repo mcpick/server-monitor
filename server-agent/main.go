@@ -16,6 +16,8 @@ import (
 	"server-agent/storage"
 )
 
+var version = "dev"
+
 func main() {
 	cfg, err := config.Load()
 	if err != nil {
@@ -35,7 +37,7 @@ func main() {
 	// Mark as ready immediately — no DB connection to establish
 	healthServer.SetDBReady(true)
 
-	log.Printf("Server agent started for %s (ID: %s)", cfg.Hostname, cfg.ServerID)
+	log.Printf("Server agent v%s started for %s (ID: %s)", version, cfg.Hostname, cfg.ServerID)
 	log.Printf("Collecting metrics every %s", cfg.CollectionInterval)
 	log.Printf("Ingesting to %s", cfg.IngestURL)
 	log.Printf("Health check endpoint available at http://localhost:%s/health", cfg.HealthPort)

@@ -1,0 +1,56 @@
+version: 2
+
+builds:
+  - id: server-agent
+    binary: server-agent
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+
+archives:
+  - id: server-agent
+    formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+nfpms:
+  - id: server-agent
+    package_name: server-agent
+    vendor: mcpick
+    homepage: https://github.com/mcpick/server-monitor
+    maintainer: mcpick <mcpick@users.noreply.github.com>
+    description: Server monitoring agent that collects system metrics
+    license: MIT
+    formats:
+      - deb
+    bindir: /usr/local/bin
+    contents:
+      - src: server-agent.service
+        dst: /etc/systemd/system/server-agent.service
+        type: config
+      - src: server-agent.env.example
+        dst: /etc/server-agent/server-agent.env.example
+    dependencies:
+      - ca-certificates
+    scripts:
+      preinstall: scripts/preinstall.sh
+      postinstall: scripts/postinstall.sh
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+
+release:
+  name_template: "Agent {{.Tag}}"
