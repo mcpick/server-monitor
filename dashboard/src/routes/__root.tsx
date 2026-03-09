@@ -2,7 +2,6 @@ import { Component, type ReactNode, type ReactElement } from 'react';
 import {
     createRootRoute,
     Outlet,
-    ScrollRestoration,
     HeadContent,
     Scripts,
 } from '@tanstack/react-router';
@@ -90,7 +89,6 @@ function RootComponent(): ReactElement {
                 <ThemeProvider>
                     <QueryClientProvider client={queryClient}>
                         <ErrorBoundary>
-                            <ScrollRestoration />
                             <Outlet />
                             <Suspense>
                                 <TanStackRouterDevtools position="bottom-right" />
