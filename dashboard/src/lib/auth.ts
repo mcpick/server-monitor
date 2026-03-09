@@ -61,6 +61,32 @@ export function isAuthenticated(): boolean {
     return true;
 }
 
+export async function ensureAuthenticated(): Promise<boolean> {
+    if (typeof globalThis.localStorage === 'undefined') return false;
+    const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+    const expiry = localStorage.getItem(TOKEN_EXPIRY_KEY);
+
+    if (!token || !expiry) {
+        return false;
+    }
+
+    const expiryTime = Number(expiry);
+
+    // Token still valid and not near expiry
+    if (Date.now() <= expiryTime - 30000) {
+        return true;
+    }
+
+    // Token expired or near-expiry — try refresh
+    const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+    if (!refreshToken) {
+        clearTokens();
+        return false;
+    }
+
+    return refreshTokens();
+}
+
 export function getAuthToken(): string | null {
     if (typeof globalThis.localStorage === 'undefined') return null;
     return localStorage.getItem(ACCESS_TOKEN_KEY);

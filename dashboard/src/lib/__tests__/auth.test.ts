@@ -1,5 +1,12 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { login, logout, isAuthenticated, getAuthToken, refreshTokens } from '../auth';
+import {
+    login,
+    logout,
+    isAuthenticated,
+    ensureAuthenticated,
+    getAuthToken,
+    refreshTokens,
+} from '../auth';
 
 const ACCESS_TOKEN_KEY = 'server_monitor_access_token';
 const REFRESH_TOKEN_KEY = 'server_monitor_refresh_token';
@@ -33,6 +40,56 @@ describe('auth', () => {
             localStorage.setItem(ACCESS_TOKEN_KEY, 'valid-token');
             localStorage.setItem(TOKEN_EXPIRY_KEY, String(Date.now() - 60000));
             expect(isAuthenticated()).toBe(false);
+        });
+    });
+
+    describe('ensureAuthenticated', () => {
+        it('returns false when no token is stored', async () => {
+            expect(await ensureAuthenticated()).toBe(false);
+        });
+
+        it('returns true when token is valid and not near expiry', async () => {
+            localStorage.setItem(ACCESS_TOKEN_KEY, 'valid-token');
+            localStorage.setItem(TOKEN_EXPIRY_KEY, String(Date.now() + 60000));
+            expect(await ensureAuthenticated()).toBe(true);
+        });
+
+        it('attempts refresh when token is near expiry and succeeds', async () => {
+            localStorage.setItem(ACCESS_TOKEN_KEY, 'old-token');
+            localStorage.setItem(REFRESH_TOKEN_KEY, 'refresh-token');
+            localStorage.setItem(TOKEN_EXPIRY_KEY, String(Date.now() + 10000));
+
+            const mockResponse = {
+                accessToken: 'new-access-token',
+                refreshToken: 'new-refresh-token',
+                expiresIn: 900,
+            };
+            mockFetch.mockResolvedValueOnce({
+                ok: true,
+                json: async () => mockResponse,
+            });
+
+            expect(await ensureAuthenticated()).toBe(true);
+            expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBe('new-access-token');
+        });
+
+        it('returns false when token is near expiry and no refresh token', async () => {
+            localStorage.setItem(ACCESS_TOKEN_KEY, 'old-token');
+            localStorage.setItem(TOKEN_EXPIRY_KEY, String(Date.now() + 10000));
+
+            expect(await ensureAuthenticated()).toBe(false);
+            expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBeNull();
+        });
+
+        it('returns false when token is expired and refresh fails', async () => {
+            localStorage.setItem(ACCESS_TOKEN_KEY, 'old-token');
+            localStorage.setItem(REFRESH_TOKEN_KEY, 'refresh-token');
+            localStorage.setItem(TOKEN_EXPIRY_KEY, String(Date.now() - 60000));
+
+            mockFetch.mockResolvedValueOnce({ ok: false, status: 401 });
+
+            expect(await ensureAuthenticated()).toBe(false);
+            expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBeNull();
         });
     });
 
