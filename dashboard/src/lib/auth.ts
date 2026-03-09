@@ -42,6 +42,7 @@ export async function logout(): Promise<void> {
 }
 
 export function isAuthenticated(): boolean {
+    if (typeof globalThis.localStorage === 'undefined') return false;
     const token = localStorage.getItem(ACCESS_TOKEN_KEY);
     const expiry = localStorage.getItem(TOKEN_EXPIRY_KEY);
 
@@ -61,10 +62,12 @@ export function isAuthenticated(): boolean {
 }
 
 export function getAuthToken(): string | null {
+    if (typeof globalThis.localStorage === 'undefined') return null;
     return localStorage.getItem(ACCESS_TOKEN_KEY);
 }
 
 export async function refreshTokens(): Promise<boolean> {
+    if (typeof globalThis.localStorage === 'undefined') return false;
     const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
 
     if (!refreshToken) {
@@ -94,6 +97,7 @@ export async function refreshTokens(): Promise<boolean> {
 }
 
 function storeTokens(data: LoginResponse): void {
+    if (typeof globalThis.localStorage === 'undefined') return;
     localStorage.setItem(ACCESS_TOKEN_KEY, data.accessToken);
     localStorage.setItem(REFRESH_TOKEN_KEY, data.refreshToken);
     localStorage.setItem(
@@ -103,6 +107,7 @@ function storeTokens(data: LoginResponse): void {
 }
 
 function clearTokens(): void {
+    if (typeof globalThis.localStorage === 'undefined') return;
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(TOKEN_EXPIRY_KEY);
