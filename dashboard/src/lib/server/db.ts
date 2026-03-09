@@ -1,5 +1,19 @@
-import { createClient, type Client, type Row } from '@libsql/client/web';
+import { createClient } from '@libsql/client/web';
+import { drizzle, type LibSQLDatabase } from 'drizzle-orm/libsql';
+import { and, desc, eq, gte, isNull, lte } from 'drizzle-orm';
 import { env } from './env';
+import {
+    servers,
+    cpuMetrics,
+    memoryMetrics,
+    swapMetrics,
+    diskUsageMetrics,
+    diskIOMetrics,
+    networkMetrics,
+    processMetrics,
+    alertRules,
+    alertHistory,
+} from './schema';
 import type {
     Server,
     CPUMetric,
@@ -15,50 +29,29 @@ import type {
     AlertCondition,
 } from '../../types/metrics';
 
-let client: Client | null = null;
+let db: LibSQLDatabase | null = null;
 
-export function getTursoClient(): Client {
-    if (client) {
-        return client;
-    }
+export function getDb(): LibSQLDatabase {
+    if (db) return db;
 
-    client = createClient({
+    const client = createClient({
         url: env.TURSO_DATABASE_URL,
         authToken: env.TURSO_AUTH_TOKEN,
     });
 
-    return client;
-}
-
-/**
- * Generic fetch utility for time-range based metrics queries.
- * Reduces duplication across metric fetch functions.
- */
-async function fetchTimeRangeMetrics<T>(
-    sql: string,
-    serverId: string,
-    startTime: number,
-    endTime: number,
-    mapper: (row: Row) => T,
-): Promise<T[]> {
-    const db = getTursoClient();
-    const result = await db.execute({
-        sql,
-        args: [serverId, startTime, endTime],
-    });
-    return result.rows.map(mapper);
+    db = drizzle(client);
+    return db;
 }
 
 export async function fetchServers(): Promise<Server[]> {
-    const db = getTursoClient();
-    const result = await db.execute(
-        'SELECT id, hostname, created_at FROM servers ORDER BY hostname',
-    );
-    return result.rows.map((row) => ({
-        id: row.id as string,
-        hostname: row.hostname as string,
-        created_at: row.created_at as number,
-    }));
+    return getDb()
+        .select({
+            id: servers.id,
+            hostname: servers.hostname,
+            created_at: servers.createdAt,
+        })
+        .from(servers)
+        .orderBy(servers.hostname);
 }
 
 export async function fetchCPUMetrics(
@@ -66,24 +59,25 @@ export async function fetchCPUMetrics(
     startTime: number,
     endTime: number,
 ): Promise<CPUMetric[]> {
-    return fetchTimeRangeMetrics(
-        `SELECT id, server_id, timestamp, usage_percent, load_1m, load_5m, load_15m
-          FROM cpu_metrics
-          WHERE server_id = ? AND timestamp >= ? AND timestamp <= ?
-          ORDER BY timestamp`,
-        serverId,
-        startTime,
-        endTime,
-        (row) => ({
-            id: row.id as number,
-            server_id: row.server_id as string,
-            timestamp: row.timestamp as number,
-            usage_percent: row.usage_percent as number,
-            load_1m: row.load_1m as number | null,
-            load_5m: row.load_5m as number | null,
-            load_15m: row.load_15m as number | null,
-        }),
-    );
+    return getDb()
+        .select({
+            id: cpuMetrics.id,
+            server_id: cpuMetrics.serverId,
+            timestamp: cpuMetrics.timestamp,
+            usage_percent: cpuMetrics.usagePercent,
+            load_1m: cpuMetrics.load1m,
+            load_5m: cpuMetrics.load5m,
+            load_15m: cpuMetrics.load15m,
+        })
+        .from(cpuMetrics)
+        .where(
+            and(
+                eq(cpuMetrics.serverId, serverId),
+                gte(cpuMetrics.timestamp, startTime),
+                lte(cpuMetrics.timestamp, endTime),
+            ),
+        )
+        .orderBy(cpuMetrics.timestamp);
 }
 
 export async function fetchMemoryMetrics(
@@ -91,24 +85,25 @@ export async function fetchMemoryMetrics(
     startTime: number,
     endTime: number,
 ): Promise<MemoryMetric[]> {
-    return fetchTimeRangeMetrics(
-        `SELECT id, server_id, timestamp, total_bytes, used_bytes, available_bytes, cached_bytes
-          FROM memory_metrics
-          WHERE server_id = ? AND timestamp >= ? AND timestamp <= ?
-          ORDER BY timestamp`,
-        serverId,
-        startTime,
-        endTime,
-        (row) => ({
-            id: row.id as number,
-            server_id: row.server_id as string,
-            timestamp: row.timestamp as number,
-            total_bytes: row.total_bytes as number,
-            used_bytes: row.used_bytes as number,
-            available_bytes: row.available_bytes as number,
-            cached_bytes: row.cached_bytes as number | null,
-        }),
-    );
+    return getDb()
+        .select({
+            id: memoryMetrics.id,
+            server_id: memoryMetrics.serverId,
+            timestamp: memoryMetrics.timestamp,
+            total_bytes: memoryMetrics.totalBytes,
+            used_bytes: memoryMetrics.usedBytes,
+            available_bytes: memoryMetrics.availableBytes,
+            cached_bytes: memoryMetrics.cachedBytes,
+        })
+        .from(memoryMetrics)
+        .where(
+            and(
+                eq(memoryMetrics.serverId, serverId),
+                gte(memoryMetrics.timestamp, startTime),
+                lte(memoryMetrics.timestamp, endTime),
+            ),
+        )
+        .orderBy(memoryMetrics.timestamp);
 }
 
 export async function fetchSwapMetrics(
@@ -116,23 +111,24 @@ export async function fetchSwapMetrics(
     startTime: number,
     endTime: number,
 ): Promise<SwapMetric[]> {
-    return fetchTimeRangeMetrics(
-        `SELECT id, server_id, timestamp, total_bytes, used_bytes, free_bytes
-          FROM swap_metrics
-          WHERE server_id = ? AND timestamp >= ? AND timestamp <= ?
-          ORDER BY timestamp`,
-        serverId,
-        startTime,
-        endTime,
-        (row) => ({
-            id: row.id as number,
-            server_id: row.server_id as string,
-            timestamp: row.timestamp as number,
-            total_bytes: row.total_bytes as number,
-            used_bytes: row.used_bytes as number,
-            free_bytes: row.free_bytes as number,
-        }),
-    );
+    return getDb()
+        .select({
+            id: swapMetrics.id,
+            server_id: swapMetrics.serverId,
+            timestamp: swapMetrics.timestamp,
+            total_bytes: swapMetrics.totalBytes,
+            used_bytes: swapMetrics.usedBytes,
+            free_bytes: swapMetrics.freeBytes,
+        })
+        .from(swapMetrics)
+        .where(
+            and(
+                eq(swapMetrics.serverId, serverId),
+                gte(swapMetrics.timestamp, startTime),
+                lte(swapMetrics.timestamp, endTime),
+            ),
+        )
+        .orderBy(swapMetrics.timestamp);
 }
 
 export async function fetchDiskUsageMetrics(
@@ -140,24 +136,25 @@ export async function fetchDiskUsageMetrics(
     startTime: number,
     endTime: number,
 ): Promise<DiskUsageMetric[]> {
-    return fetchTimeRangeMetrics(
-        `SELECT id, server_id, timestamp, mount_point, total_bytes, used_bytes, free_bytes
-          FROM disk_usage_metrics
-          WHERE server_id = ? AND timestamp >= ? AND timestamp <= ?
-          ORDER BY timestamp, mount_point`,
-        serverId,
-        startTime,
-        endTime,
-        (row) => ({
-            id: row.id as number,
-            server_id: row.server_id as string,
-            timestamp: row.timestamp as number,
-            mount_point: row.mount_point as string,
-            total_bytes: row.total_bytes as number,
-            used_bytes: row.used_bytes as number,
-            free_bytes: row.free_bytes as number,
-        }),
-    );
+    return getDb()
+        .select({
+            id: diskUsageMetrics.id,
+            server_id: diskUsageMetrics.serverId,
+            timestamp: diskUsageMetrics.timestamp,
+            mount_point: diskUsageMetrics.mountPoint,
+            total_bytes: diskUsageMetrics.totalBytes,
+            used_bytes: diskUsageMetrics.usedBytes,
+            free_bytes: diskUsageMetrics.freeBytes,
+        })
+        .from(diskUsageMetrics)
+        .where(
+            and(
+                eq(diskUsageMetrics.serverId, serverId),
+                gte(diskUsageMetrics.timestamp, startTime),
+                lte(diskUsageMetrics.timestamp, endTime),
+            ),
+        )
+        .orderBy(diskUsageMetrics.timestamp, diskUsageMetrics.mountPoint);
 }
 
 export async function fetchDiskIOMetrics(
@@ -165,25 +162,26 @@ export async function fetchDiskIOMetrics(
     startTime: number,
     endTime: number,
 ): Promise<DiskIOMetric[]> {
-    return fetchTimeRangeMetrics(
-        `SELECT id, server_id, timestamp, device, read_bytes, write_bytes, read_count, write_count
-          FROM disk_io_metrics
-          WHERE server_id = ? AND timestamp >= ? AND timestamp <= ?
-          ORDER BY timestamp, device`,
-        serverId,
-        startTime,
-        endTime,
-        (row) => ({
-            id: row.id as number,
-            server_id: row.server_id as string,
-            timestamp: row.timestamp as number,
-            device: row.device as string,
-            read_bytes: row.read_bytes as number,
-            write_bytes: row.write_bytes as number,
-            read_count: row.read_count as number | null,
-            write_count: row.write_count as number | null,
-        }),
-    );
+    return getDb()
+        .select({
+            id: diskIOMetrics.id,
+            server_id: diskIOMetrics.serverId,
+            timestamp: diskIOMetrics.timestamp,
+            device: diskIOMetrics.device,
+            read_bytes: diskIOMetrics.readBytes,
+            write_bytes: diskIOMetrics.writeBytes,
+            read_count: diskIOMetrics.readCount,
+            write_count: diskIOMetrics.writeCount,
+        })
+        .from(diskIOMetrics)
+        .where(
+            and(
+                eq(diskIOMetrics.serverId, serverId),
+                gte(diskIOMetrics.timestamp, startTime),
+                lte(diskIOMetrics.timestamp, endTime),
+            ),
+        )
+        .orderBy(diskIOMetrics.timestamp, diskIOMetrics.device);
 }
 
 export async function fetchNetworkMetrics(
@@ -191,25 +189,26 @@ export async function fetchNetworkMetrics(
     startTime: number,
     endTime: number,
 ): Promise<NetworkMetric[]> {
-    return fetchTimeRangeMetrics(
-        `SELECT id, server_id, timestamp, interface, bytes_sent, bytes_recv, packets_sent, packets_recv
-          FROM network_metrics
-          WHERE server_id = ? AND timestamp >= ? AND timestamp <= ?
-          ORDER BY timestamp, interface`,
-        serverId,
-        startTime,
-        endTime,
-        (row) => ({
-            id: row.id as number,
-            server_id: row.server_id as string,
-            timestamp: row.timestamp as number,
-            interface: row.interface as string,
-            bytes_sent: row.bytes_sent as number,
-            bytes_recv: row.bytes_recv as number,
-            packets_sent: row.packets_sent as number | null,
-            packets_recv: row.packets_recv as number | null,
-        }),
-    );
+    return getDb()
+        .select({
+            id: networkMetrics.id,
+            server_id: networkMetrics.serverId,
+            timestamp: networkMetrics.timestamp,
+            interface: networkMetrics.iface,
+            bytes_sent: networkMetrics.bytesSent,
+            bytes_recv: networkMetrics.bytesRecv,
+            packets_sent: networkMetrics.packetsSent,
+            packets_recv: networkMetrics.packetsRecv,
+        })
+        .from(networkMetrics)
+        .where(
+            and(
+                eq(networkMetrics.serverId, serverId),
+                gte(networkMetrics.timestamp, startTime),
+                lte(networkMetrics.timestamp, endTime),
+            ),
+        )
+        .orderBy(networkMetrics.timestamp, networkMetrics.iface);
 }
 
 export async function fetchProcessMetrics(
@@ -217,105 +216,107 @@ export async function fetchProcessMetrics(
     startTime: number,
     endTime: number,
 ): Promise<ProcessMetric[]> {
-    return fetchTimeRangeMetrics(
-        `SELECT id, server_id, timestamp, pid, name, cpu_percent, memory_percent
-          FROM process_metrics
-          WHERE server_id = ? AND timestamp >= ? AND timestamp <= ?
-          ORDER BY timestamp DESC, cpu_percent DESC
-          LIMIT 100`,
-        serverId,
-        startTime,
-        endTime,
-        (row) => ({
-            id: row.id as number,
-            server_id: row.server_id as string,
-            timestamp: row.timestamp as number,
-            pid: row.pid as number,
-            name: row.name as string,
-            cpu_percent: row.cpu_percent as number,
-            memory_percent: row.memory_percent as number,
-        }),
-    );
+    return getDb()
+        .select({
+            id: processMetrics.id,
+            server_id: processMetrics.serverId,
+            timestamp: processMetrics.timestamp,
+            pid: processMetrics.pid,
+            name: processMetrics.name,
+            cpu_percent: processMetrics.cpuPercent,
+            memory_percent: processMetrics.memoryPercent,
+        })
+        .from(processMetrics)
+        .where(
+            and(
+                eq(processMetrics.serverId, serverId),
+                gte(processMetrics.timestamp, startTime),
+                lte(processMetrics.timestamp, endTime),
+            ),
+        )
+        .orderBy(
+            desc(processMetrics.timestamp),
+            desc(processMetrics.cpuPercent),
+        )
+        .limit(100);
 }
 
 export async function fetchAlertRules(): Promise<AlertRule[]> {
-    const db = getTursoClient();
-    const result = await db.execute(
-        'SELECT id, name, metric_type, condition, threshold, server_id, enabled, created_at, updated_at FROM alert_rules ORDER BY created_at DESC',
-    );
-    return result.rows.map((row) => ({
-        id: row.id as string,
-        name: row.name as string,
-        metric_type: row.metric_type as MetricType,
-        condition: row.condition as AlertCondition,
-        threshold: row.threshold as number,
-        server_id: row.server_id as string | null,
-        enabled: Boolean(row.enabled),
-        created_at: row.created_at as number,
-        updated_at: row.updated_at as number,
-    }));
+    const rows = await getDb()
+        .select({
+            id: alertRules.id,
+            name: alertRules.name,
+            metric_type: alertRules.metricType,
+            condition: alertRules.condition,
+            threshold: alertRules.threshold,
+            server_id: alertRules.serverId,
+            enabled: alertRules.enabled,
+            created_at: alertRules.createdAt,
+            updated_at: alertRules.updatedAt,
+        })
+        .from(alertRules)
+        .orderBy(desc(alertRules.createdAt));
+    return rows as AlertRule[];
 }
 
 export async function fetchAlertHistory(
     startTime: number,
     endTime: number,
 ): Promise<AlertHistory[]> {
-    const db = getTursoClient();
-    const result = await db.execute({
-        sql: `SELECT id, rule_id, server_id, triggered_at, resolved_at, metric_value, threshold
-              FROM alert_history
-              WHERE triggered_at >= ? AND triggered_at <= ?
-              ORDER BY triggered_at DESC`,
-        args: [startTime, endTime],
-    });
-    return result.rows.map((row) => ({
-        id: row.id as number,
-        rule_id: row.rule_id as string,
-        server_id: row.server_id as string,
-        triggered_at: row.triggered_at as number,
-        resolved_at: row.resolved_at as number | null,
-        metric_value: row.metric_value as number,
-        threshold: row.threshold as number,
-    }));
+    return getDb()
+        .select({
+            id: alertHistory.id,
+            rule_id: alertHistory.ruleId,
+            server_id: alertHistory.serverId,
+            triggered_at: alertHistory.triggeredAt,
+            resolved_at: alertHistory.resolvedAt,
+            metric_value: alertHistory.metricValue,
+            threshold: alertHistory.threshold,
+        })
+        .from(alertHistory)
+        .where(
+            and(
+                gte(alertHistory.triggeredAt, startTime),
+                lte(alertHistory.triggeredAt, endTime),
+            ),
+        )
+        .orderBy(desc(alertHistory.triggeredAt));
 }
 
 export async function fetchActiveAlerts(): Promise<AlertHistory[]> {
-    const db = getTursoClient();
-    const result = await db.execute(
-        'SELECT id, rule_id, server_id, triggered_at, resolved_at, metric_value, threshold FROM alert_history WHERE resolved_at IS NULL ORDER BY triggered_at DESC',
-    );
-    return result.rows.map((row) => ({
-        id: row.id as number,
-        rule_id: row.rule_id as string,
-        server_id: row.server_id as string,
-        triggered_at: row.triggered_at as number,
-        resolved_at: row.resolved_at as number | null,
-        metric_value: row.metric_value as number,
-        threshold: row.threshold as number,
-    }));
+    return getDb()
+        .select({
+            id: alertHistory.id,
+            rule_id: alertHistory.ruleId,
+            server_id: alertHistory.serverId,
+            triggered_at: alertHistory.triggeredAt,
+            resolved_at: alertHistory.resolvedAt,
+            metric_value: alertHistory.metricValue,
+            threshold: alertHistory.threshold,
+        })
+        .from(alertHistory)
+        .where(isNull(alertHistory.resolvedAt))
+        .orderBy(desc(alertHistory.triggeredAt));
 }
 
 export async function createAlertRule(
     rule: Omit<AlertRule, 'id' | 'created_at' | 'updated_at'>,
 ): Promise<AlertRule> {
-    const db = getTursoClient();
     const id = crypto.randomUUID();
     const now = Math.floor(Date.now() / 1000);
-    await db.execute({
-        sql: `INSERT INTO alert_rules (id, name, metric_type, condition, threshold, server_id, enabled, created_at, updated_at)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        args: [
-            id,
-            rule.name,
-            rule.metric_type,
-            rule.condition,
-            rule.threshold,
-            rule.server_id,
-            rule.enabled ? 1 : 0,
-            now,
-            now,
-        ],
+
+    await getDb().insert(alertRules).values({
+        id,
+        name: rule.name,
+        metricType: rule.metric_type,
+        condition: rule.condition,
+        threshold: rule.threshold,
+        serverId: rule.server_id,
+        enabled: rule.enabled,
+        createdAt: now,
+        updatedAt: now,
     });
+
     return {
         ...rule,
         id,
@@ -328,47 +329,19 @@ export async function updateAlertRule(
     id: string,
     rule: Partial<Omit<AlertRule, 'id' | 'created_at' | 'updated_at'>>,
 ): Promise<void> {
-    const db = getTursoClient();
     const now = Math.floor(Date.now() / 1000);
-    const updates: string[] = ['updated_at = ?'];
-    const args: (string | number | null)[] = [now];
 
-    if (rule.name !== undefined) {
-        updates.push('name = ?');
-        args.push(rule.name);
-    }
-    if (rule.metric_type !== undefined) {
-        updates.push('metric_type = ?');
-        args.push(rule.metric_type);
-    }
-    if (rule.condition !== undefined) {
-        updates.push('condition = ?');
-        args.push(rule.condition);
-    }
-    if (rule.threshold !== undefined) {
-        updates.push('threshold = ?');
-        args.push(rule.threshold);
-    }
-    if (rule.server_id !== undefined) {
-        updates.push('server_id = ?');
-        args.push(rule.server_id);
-    }
-    if (rule.enabled !== undefined) {
-        updates.push('enabled = ?');
-        args.push(rule.enabled ? 1 : 0);
-    }
+    const values: Record<string, unknown> = { updatedAt: now };
+    if (rule.name !== undefined) values.name = rule.name;
+    if (rule.metric_type !== undefined) values.metricType = rule.metric_type;
+    if (rule.condition !== undefined) values.condition = rule.condition;
+    if (rule.threshold !== undefined) values.threshold = rule.threshold;
+    if (rule.server_id !== undefined) values.serverId = rule.server_id;
+    if (rule.enabled !== undefined) values.enabled = rule.enabled;
 
-    args.push(id);
-    await db.execute({
-        sql: `UPDATE alert_rules SET ${updates.join(', ')} WHERE id = ?`,
-        args,
-    });
+    await getDb().update(alertRules).set(values).where(eq(alertRules.id, id));
 }
 
 export async function deleteAlertRule(id: string): Promise<void> {
-    const db = getTursoClient();
-    await db.execute({
-        sql: 'DELETE FROM alert_rules WHERE id = ?',
-        args: [id],
-    });
+    await getDb().delete(alertRules).where(eq(alertRules.id, id));
 }
