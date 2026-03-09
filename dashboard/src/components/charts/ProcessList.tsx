@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import type { ProcessMetric } from '../../types/metrics';
+import type { ProcessMetric } from '@/types/metrics';
 import { getStatusColor } from '@/lib/formatting';
 
 interface ProcessListProps {

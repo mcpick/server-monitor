@@ -10,7 +10,7 @@ import {
     Legend,
 } from 'recharts';
 import { format } from 'date-fns';
-import type { CPUMetric } from '../../types/metrics';
+import type { CPUMetric } from '@/types/metrics';
 
 interface CPUChartProps {
     data: CPUMetric[];

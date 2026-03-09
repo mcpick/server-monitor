@@ -1,14 +1,14 @@
 import { useState, useEffect, useMemo, type ReactElement } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { DashboardHeader } from '../../components/DashboardHeader';
-import { MetricCard } from '../../components/MetricCard';
-import { CPUChart } from '../../components/charts/CPUChart';
-import { MemoryChart } from '../../components/charts/MemoryChart';
-import { SwapChart } from '../../components/charts/SwapChart';
-import { DiskUsageChart } from '../../components/charts/DiskUsageChart';
-import { DiskIOChart } from '../../components/charts/DiskIOChart';
-import { NetworkChart } from '../../components/charts/NetworkChart';
-import { ProcessList } from '../../components/charts/ProcessList';
+import { DashboardHeader } from '@/components/DashboardHeader';
+import { MetricCard } from '@/components/MetricCard';
+import { CPUChart } from '@/components/charts/CPUChart';
+import { MemoryChart } from '@/components/charts/MemoryChart';
+import { SwapChart } from '@/components/charts/SwapChart';
+import { DiskUsageChart } from '@/components/charts/DiskUsageChart';
+import { DiskIOChart } from '@/components/charts/DiskIOChart';
+import { NetworkChart } from '@/components/charts/NetworkChart';
+import { ProcessList } from '@/components/charts/ProcessList';
 import {
     useServers,
     useCPUMetrics,
@@ -17,9 +17,9 @@ import {
     useDiskMetrics,
     useNetworkMetrics,
     useProcessMetrics,
-} from '../../hooks/useMetrics';
-import { getTimeRange, type TimeRangePreset } from '../../types/metrics';
-import { logout } from '../../lib/auth';
+} from '@/hooks/useMetrics';
+import { getTimeRange, type TimeRangePreset } from '@/types/metrics';
+import { logout } from '@/lib/auth';
 
 function DashboardPage(): ReactElement {
     const navigate = useNavigate();

@@ -1,6 +1,6 @@
 import { useState, type ReactNode, type ReactElement } from 'react';
-import { isAuthenticated } from '../lib/auth';
-import { LoginForm } from './LoginForm';
+import { isAuthenticated } from '@/lib/auth';
+import { LoginForm } from '@/components/LoginForm';
 
 interface ProtectedRouteProps {
     children: ReactNode;

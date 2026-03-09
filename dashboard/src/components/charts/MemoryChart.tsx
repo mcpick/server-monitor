@@ -10,7 +10,7 @@ import {
     Legend,
 } from 'recharts';
 import { format } from 'date-fns';
-import type { MemoryMetric } from '../../types/metrics';
+import type { MemoryMetric } from '@/types/metrics';
 import { formatBytes } from '@/lib/formatting';
 
 interface MemoryChartProps {

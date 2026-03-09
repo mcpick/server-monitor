@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { fetchActiveAlerts } from '../../../lib/server/db';
-import { verifyAuthToken, unauthorizedResponse } from '../../../lib/server/middleware';
+import { fetchActiveAlerts } from '@/lib/server/db';
+import { verifyAuthToken, unauthorizedResponse } from '@/lib/server/middleware';
 
 export const Route = createFileRoute('/api/alerts/active')({
     server: {

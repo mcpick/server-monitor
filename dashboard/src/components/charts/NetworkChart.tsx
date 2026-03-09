@@ -10,7 +10,7 @@ import {
     Legend,
 } from 'recharts';
 import { format } from 'date-fns';
-import type { NetworkMetric } from '../../types/metrics';
+import type { NetworkMetric } from '@/types/metrics';
 import { formatRate } from '@/lib/formatting';
 
 interface NetworkChartProps {

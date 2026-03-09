@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
-import { useServers } from '../../hooks/useMetrics';
-import type { AlertRule, AlertHistory } from '../../types/metrics';
+import { useServers } from '@/hooks/useMetrics';
+import type { AlertRule, AlertHistory } from '@/types/metrics';
 
 export function AlertHistoryList({
     history,

@@ -1,7 +1,7 @@
 import { useState, type ReactElement, type FormEvent } from 'react';
-import { useServers } from '../../hooks/useMetrics';
-import { METRIC_TYPES, CONDITIONS, isMetricType, isAlertCondition } from '../../lib/alertHelpers';
-import type { AlertRule, MetricType, AlertCondition as AlertConditionType } from '../../types/metrics';
+import { useServers } from '@/hooks/useMetrics';
+import { METRIC_TYPES, CONDITIONS, isMetricType, isAlertCondition } from '@/lib/alertHelpers';
+import type { AlertRule, AlertRuleInput, MetricType, AlertCondition as AlertConditionType } from '@/types/metrics';
 
 export function AlertRuleForm({
     onSubmit,
@@ -9,7 +9,7 @@ export function AlertRuleForm({
     initialRule,
     isSubmitting,
 }: {
-    onSubmit: (rule: Omit<AlertRule, 'id' | 'created_at' | 'updated_at'>) => void;
+    onSubmit: (rule: AlertRuleInput) => void;
     onCancel: () => void;
     initialRule?: AlertRule;
     isSubmitting: boolean;

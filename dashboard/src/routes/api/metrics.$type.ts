@@ -7,9 +7,9 @@ import {
     fetchDiskIOMetrics,
     fetchNetworkMetrics,
     fetchProcessMetrics,
-} from '../../lib/server/db';
-import { verifyAuthToken, unauthorizedResponse } from '../../lib/server/middleware';
-import { metricsQuerySchema, metricTypeSchema } from '../../lib/server/validation';
+} from '@/lib/server/db';
+import { verifyAuthToken, unauthorizedResponse } from '@/lib/server/middleware';
+import { metricsQuerySchema, metricTypeSchema } from '@/lib/server/validation';
 import type { z } from 'zod';
 
 type MetricTypeParam = z.infer<typeof metricTypeSchema>;

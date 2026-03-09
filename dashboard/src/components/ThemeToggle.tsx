@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { useTheme } from '../lib/theme';
+import { useTheme } from '@/lib/theme';
 
 export function ThemeToggle(): ReactElement {
     const { theme, setTheme } = useTheme();

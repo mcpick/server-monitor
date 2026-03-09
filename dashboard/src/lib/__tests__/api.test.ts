@@ -13,7 +13,7 @@ import {
     createAlertRule,
     updateAlertRule,
     deleteAlertRule,
-} from '../turso';
+} from '../api';
 
 vi.mock('../auth', () => ({
     getAuthToken: vi.fn(),
@@ -30,7 +30,7 @@ function expectAuthHeaders(call: unknown[], token: string): void {
     expect(headers.get('Authorization')).toBe(`Bearer ${token}`);
 }
 
-describe('turso API client', () => {
+describe('API client', () => {
     const mockFetch = vi.fn();
 
     beforeEach(() => {

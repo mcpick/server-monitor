@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient, type QueryKey } from '@tanstack/react-query';
+import { useQuery, type QueryKey } from '@tanstack/react-query';
 import type {
     Server,
     CPUMetric,
@@ -11,7 +11,7 @@ import type {
     TimeRange,
     AlertRule,
     AlertHistory,
-} from '../types/metrics';
+} from '@/types/metrics';
 import {
     fetchServers,
     fetchCPUMetrics,
@@ -24,11 +24,8 @@ import {
     fetchAlertRules,
     fetchAlertHistory,
     fetchActiveAlerts,
-    createAlertRule,
-    updateAlertRule,
-    deleteAlertRule,
-} from '../lib/turso';
-import { queryKeys } from '../lib/queryKeys';
+} from '@/lib/api';
+import { queryKeys } from '@/lib/queryKeys';
 
 interface UseDataResult<T> {
     data: T | null;
@@ -173,40 +170,4 @@ export function useActiveAlerts(
         fetchActiveAlerts,
         { refetchInterval: refreshInterval },
     );
-}
-
-type AlertRuleInput = Omit<AlertRule, 'id' | 'created_at' | 'updated_at'>;
-
-export function useCreateAlertRuleMutation(): ReturnType<typeof useMutation<void, Error, AlertRuleInput>> {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: createAlertRule,
-        onSuccess: () => {
-            void queryClient.invalidateQueries({ queryKey: queryKeys.alertRules() });
-        },
-    });
-}
-
-export function useUpdateAlertRuleMutation(): ReturnType<typeof useMutation<void, Error, { id: string; rule: Partial<AlertRuleInput> }>> {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: ({ id, rule }: { id: string; rule: Partial<AlertRuleInput> }) =>
-            updateAlertRule(id, rule),
-        onSuccess: () => {
-            void queryClient.invalidateQueries({ queryKey: queryKeys.alertRules() });
-        },
-    });
-}
-
-export function useDeleteAlertRuleMutation(): ReturnType<typeof useMutation<void, Error, string>> {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: deleteAlertRule,
-        onSuccess: () => {
-            void queryClient.invalidateQueries({ queryKey: queryKeys.alertRules() });
-        },
-    });
 }

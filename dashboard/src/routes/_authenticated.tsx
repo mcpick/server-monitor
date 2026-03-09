@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
-import { ensureAuthenticated } from '../lib/auth';
+import { ensureAuthenticated } from '@/lib/auth';
 
 function AuthenticatedLayout(): ReactElement {
     return <Outlet />;

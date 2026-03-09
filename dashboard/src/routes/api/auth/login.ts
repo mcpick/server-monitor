@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { verifyPassword, getAuthCredentials } from '../../../lib/server/auth';
-import { generateAccessToken, generateRefreshToken } from '../../../lib/server/jwt';
-import { checkRateLimit } from '../../../lib/server/rateLimit';
-import { logAuthAttempt } from '../../../lib/server/audit';
-import { loginSchema, parseRequestBody } from '../../../lib/server/validation';
+import { verifyPassword, getAuthCredentials } from '@/lib/server/auth';
+import { generateAccessToken, generateRefreshToken } from '@/lib/server/jwt';
+import { checkRateLimit } from '@/lib/server/rateLimit';
+import { logAuthAttempt } from '@/lib/server/audit';
+import { loginSchema, parseRequestBody } from '@/lib/server/validation';
 
 function getClientIP(request: Request): string {
     const forwarded = request.headers.get('x-forwarded-for');

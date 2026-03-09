@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { verifyIngestToken, unauthorizedResponse } from '../../lib/server/middleware';
-import { ingestPayloadSchema, parseRequestBody } from '../../lib/server/validation';
+import { verifyIngestToken, unauthorizedResponse } from '@/lib/server/middleware';
+import { ingestPayloadSchema, parseRequestBody } from '@/lib/server/validation';
 import {
     upsertServer,
     insertCpuMetric,
@@ -10,7 +10,7 @@ import {
     insertDiskIOMetrics,
     insertNetworkMetrics,
     insertProcessMetrics,
-} from '../../lib/server/db';
+} from '@/lib/server/db';
 
 export const Route = createFileRoute('/api/ingest')({
     server: {

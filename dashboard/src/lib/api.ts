@@ -8,9 +8,10 @@ import type {
     NetworkMetric,
     ProcessMetric,
     AlertRule,
+    AlertRuleInput,
     AlertHistory,
-} from '../types/metrics';
-import { getAuthToken } from './auth';
+} from '@/types/metrics';
+import { getAuthToken } from '@/lib/auth';
 
 /**
  * Generic fetch utility for API requests with auth.
@@ -125,7 +126,7 @@ export async function fetchActiveAlerts(): Promise<AlertHistory[]> {
 }
 
 export async function createAlertRule(
-    rule: Omit<AlertRule, 'id' | 'created_at' | 'updated_at'>,
+    rule: AlertRuleInput,
 ): Promise<void> {
     await apiFetch<AlertRule>('/api/alerts/rules', {
         method: 'POST',
@@ -136,7 +137,7 @@ export async function createAlertRule(
 
 export async function updateAlertRule(
     id: string,
-    rule: Partial<Omit<AlertRule, 'id' | 'created_at' | 'updated_at'>>,
+    rule: Partial<AlertRuleInput>,
 ): Promise<void> {
     await apiFetch<void>(`/api/alerts/rules/${id}`, {
         method: 'PUT',

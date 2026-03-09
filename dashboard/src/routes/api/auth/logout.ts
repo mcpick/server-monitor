@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { logApiAccess } from '../../../lib/server/audit';
+import { logApiAccess } from '@/lib/server/audit';
 
 function getClientIP(request: Request): string {
     const forwarded = request.headers.get('x-forwarded-for');

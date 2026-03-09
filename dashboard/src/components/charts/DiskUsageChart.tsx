@@ -10,7 +10,7 @@ import {
     Legend,
     Cell,
 } from 'recharts';
-import type { DiskUsageMetric } from '../../types/metrics';
+import type { DiskUsageMetric } from '@/types/metrics';
 import { formatBytes } from '@/lib/formatting';
 
 interface DiskUsageChartProps {

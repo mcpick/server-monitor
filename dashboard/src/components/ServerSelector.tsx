@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import type { Server } from '../types/metrics';
+import type { Server } from '@/types/metrics';
 
 interface ServerSelectorProps {
     servers: Server[];

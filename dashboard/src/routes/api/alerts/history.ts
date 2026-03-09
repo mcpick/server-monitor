@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { fetchAlertHistory } from '../../../lib/server/db';
-import { verifyAuthToken, unauthorizedResponse } from '../../../lib/server/middleware';
-import { alertHistoryQuerySchema } from '../../../lib/server/validation';
+import { fetchAlertHistory } from '@/lib/server/db';
+import { verifyAuthToken, unauthorizedResponse } from '@/lib/server/middleware';
+import { alertHistoryQuerySchema } from '@/lib/server/validation';
 
 export const Route = createFileRoute('/api/alerts/history')({
     server: {

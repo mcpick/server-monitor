@@ -10,7 +10,7 @@ import {
     Legend,
 } from 'recharts';
 import { format } from 'date-fns';
-import type { SwapMetric } from '../../types/metrics';
+import type { SwapMetric } from '@/types/metrics';
 import { formatBytes } from '@/lib/formatting';
 
 interface SwapChartProps {

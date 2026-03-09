@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { updateAlertRule, deleteAlertRule } from '../../../lib/server/db';
-import { verifyAuthToken, unauthorizedResponse } from '../../../lib/server/middleware';
-import { updateAlertRuleSchema, parseRequestBody } from '../../../lib/server/validation';
+import { updateAlertRule, deleteAlertRule } from '@/lib/server/db';
+import { verifyAuthToken, unauthorizedResponse } from '@/lib/server/middleware';
+import { updateAlertRuleSchema, parseRequestBody } from '@/lib/server/validation';
 
 export const Route = createFileRoute('/api/alerts/rules/$id')({
     server: {

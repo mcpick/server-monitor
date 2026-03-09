@@ -100,6 +100,8 @@ export interface AlertHistory {
     threshold: number;
 }
 
+export type AlertRuleInput = Omit<AlertRule, 'id' | 'created_at' | 'updated_at'>;
+
 export type TimeRangePreset = '1h' | '6h' | '24h' | '7d' | '30d' | 'custom';
 
 export interface TimeRange {

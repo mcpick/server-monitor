@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import * as turso from '../../lib/turso';
+import * as api from '../../lib/api';
 import { queryKeys } from '../../lib/queryKeys';
 
-vi.mock('../../lib/turso');
+vi.mock('../../lib/api');
 
-const mockedTurso = vi.mocked(turso);
+const mockedApi = vi.mocked(api);
 
 describe('useMetrics hooks', () => {
     beforeEach(() => {
@@ -47,7 +47,7 @@ describe('useMetrics hooks', () => {
         });
     });
 
-    describe('turso fetch functions', () => {
+    describe('api fetch functions', () => {
         it('fetchServers returns server data', async () => {
             const mockServers = [
                 {
@@ -62,12 +62,12 @@ describe('useMetrics hooks', () => {
                 },
             ];
 
-            mockedTurso.fetchServers.mockResolvedValue(mockServers);
+            mockedApi.fetchServers.mockResolvedValue(mockServers);
 
-            const result = await turso.fetchServers();
+            const result = await api.fetchServers();
 
             expect(result).toEqual(mockServers);
-            expect(mockedTurso.fetchServers).toHaveBeenCalledTimes(1);
+            expect(mockedApi.fetchServers).toHaveBeenCalledTimes(1);
         });
 
         it('fetchCPUMetrics is called with correct parameters', async () => {
@@ -83,16 +83,16 @@ describe('useMetrics hooks', () => {
                 },
             ];
 
-            mockedTurso.fetchCPUMetrics.mockResolvedValue(mockMetrics);
+            mockedApi.fetchCPUMetrics.mockResolvedValue(mockMetrics);
 
-            const result = await turso.fetchCPUMetrics(
+            const result = await api.fetchCPUMetrics(
                 'server-1',
                 1700000000,
                 1700003600,
             );
 
             expect(result).toEqual(mockMetrics);
-            expect(mockedTurso.fetchCPUMetrics).toHaveBeenCalledWith(
+            expect(mockedApi.fetchCPUMetrics).toHaveBeenCalledWith(
                 'server-1',
                 1700000000,
                 1700003600,
@@ -101,9 +101,9 @@ describe('useMetrics hooks', () => {
 
         it('handles fetch error', async () => {
             const error = new Error('Failed to fetch');
-            mockedTurso.fetchServers.mockRejectedValue(error);
+            mockedApi.fetchServers.mockRejectedValue(error);
 
-            await expect(turso.fetchServers()).rejects.toThrow(
+            await expect(api.fetchServers()).rejects.toThrow(
                 'Failed to fetch',
             );
         });

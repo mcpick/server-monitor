@@ -1,11 +1,11 @@
 import type { ReactElement } from 'react';
 import { Link } from '@tanstack/react-router';
-import { logout } from '../lib/auth';
-import { useActiveAlerts } from '../hooks/useMetrics';
-import { ServerSelector } from './ServerSelector';
-import { TimeRangeSelector } from './TimeRangeSelector';
-import { ThemeToggle } from './ThemeToggle';
-import type { Server, TimeRangePreset } from '../types/metrics';
+import { logout } from '@/lib/auth';
+import { useActiveAlerts } from '@/hooks/useMetrics';
+import { ServerSelector } from '@/components/ServerSelector';
+import { TimeRangeSelector } from '@/components/TimeRangeSelector';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import type { Server, TimeRangePreset } from '@/types/metrics';
 
 interface DashboardHeaderProps {
     servers: Server[];

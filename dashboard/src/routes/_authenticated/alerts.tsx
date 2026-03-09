@@ -4,15 +4,17 @@ import {
     useAlertRules,
     useAlertHistory,
     useActiveAlerts,
+} from '@/hooks/useMetrics';
+import {
     useCreateAlertRuleMutation,
     useUpdateAlertRuleMutation,
     useDeleteAlertRuleMutation,
-} from '../../hooks/useMetrics';
-import type { AlertRule, TimeRange } from '../../types/metrics';
-import { getTimeRange } from '../../types/metrics';
-import { AlertRuleForm } from '../../components/alerts/AlertRuleForm';
-import { AlertRulesList } from '../../components/alerts/AlertRulesList';
-import { AlertHistoryList } from '../../components/alerts/AlertHistoryList';
+} from '@/hooks/useAlertMutations';
+import type { AlertRule, AlertRuleInput, TimeRange } from '@/types/metrics';
+import { getTimeRange } from '@/types/metrics';
+import { AlertRuleForm } from '@/components/alerts/AlertRuleForm';
+import { AlertRulesList } from '@/components/alerts/AlertRulesList';
+import { AlertHistoryList } from '@/components/alerts/AlertHistoryList';
 
 type TabView = 'rules' | 'history';
 
@@ -29,21 +31,23 @@ function AlertsPage(): ReactElement {
     const updateMutation = useUpdateAlertRuleMutation();
     const deleteMutation = useDeleteAlertRuleMutation();
 
-    function handleCreateRule(
-        rule: Omit<AlertRule, 'id' | 'created_at' | 'updated_at'>,
-    ): void {
-        void createMutation.mutateAsync(rule).then(() => {
+    async function handleCreateRule(rule: AlertRuleInput): Promise<void> {
+        try {
+            await createMutation.mutateAsync(rule);
             setShowForm(false);
-        });
+        } catch {
+            // Mutation error is available via createMutation.error
+        }
     }
 
-    function handleUpdateRule(
-        rule: Omit<AlertRule, 'id' | 'created_at' | 'updated_at'>,
-    ): void {
+    async function handleUpdateRule(rule: AlertRuleInput): Promise<void> {
         if (!editingRule) return;
-        void updateMutation.mutateAsync({ id: editingRule.id, rule }).then(() => {
+        try {
+            await updateMutation.mutateAsync({ id: editingRule.id, rule });
             setEditingRule(null);
-        });
+        } catch {
+            // Mutation error is available via updateMutation.error
+        }
     }
 
     function handleDeleteRule(id: string): void {
@@ -131,6 +135,11 @@ function AlertsPage(): ReactElement {
                                         <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
                                             {editingRule ? 'Edit Alert Rule' : 'Create Alert Rule'}
                                         </h2>
+                                        {(createMutation.error || updateMutation.error) && (
+                                            <p className="text-sm text-red-600 dark:text-red-400 mb-4">
+                                                {createMutation.error?.message ?? updateMutation.error?.message}
+                                            </p>
+                                        )}
                                         <AlertRuleForm
                                             onSubmit={editingRule ? handleUpdateRule : handleCreateRule}
                                             onCancel={() => {

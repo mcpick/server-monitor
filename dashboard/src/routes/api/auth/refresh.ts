@@ -3,8 +3,8 @@ import {
     verifyRefreshToken,
     generateAccessToken,
     generateRefreshToken,
-} from '../../../lib/server/jwt';
-import { refreshSchema, parseRequestBody } from '../../../lib/server/validation';
+} from '@/lib/server/jwt';
+import { refreshSchema, parseRequestBody } from '@/lib/server/validation';
 
 export const Route = createFileRoute('/api/auth/refresh')({
     server: {

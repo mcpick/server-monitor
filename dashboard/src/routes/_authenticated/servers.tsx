@@ -1,7 +1,7 @@
 import { useState, type ReactElement } from 'react';
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { useServers } from '../../hooks/useMetrics';
-import type { Server } from '../../types/metrics';
+import { useServers } from '@/hooks/useMetrics';
+import type { Server } from '@/types/metrics';
 
 type ViewMode = 'list' | 'details' | 'add';
 

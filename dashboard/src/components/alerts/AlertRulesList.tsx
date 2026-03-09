@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
-import { useServers } from '../../hooks/useMetrics';
-import { METRIC_TYPES, formatCondition } from '../../lib/alertHelpers';
-import type { AlertRule } from '../../types/metrics';
+import { useServers } from '@/hooks/useMetrics';
+import { METRIC_TYPES, formatCondition } from '@/lib/alertHelpers';
+import type { AlertRule } from '@/types/metrics';
 
 export function AlertRulesList({
     rules,
