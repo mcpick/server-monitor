@@ -10,12 +10,18 @@ import type {
     AlertRule,
     AlertHistory,
 } from '../types/metrics';
+import { getAuthToken } from './auth';
 
 /**
- * Generic fetch utility for API requests.
+ * Generic fetch utility for API requests with auth.
  */
 async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
-    const response = await fetch(url, options);
+    const token = getAuthToken();
+    const headers = new Headers(options?.headers);
+    if (token) {
+        headers.set('Authorization', `Bearer ${token}`);
+    }
+    const response = await fetch(url, { ...options, headers });
     if (!response.ok) {
         throw new Error(`API request failed: ${response.status} ${response.statusText}`);
     }
@@ -132,21 +138,15 @@ export async function updateAlertRule(
     id: string,
     rule: Partial<Omit<AlertRule, 'id' | 'created_at' | 'updated_at'>>,
 ): Promise<void> {
-    const response = await fetch(`/api/alerts/rules/${id}`, {
+    await apiFetch<void>(`/api/alerts/rules/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(rule),
     });
-    if (!response.ok) {
-        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
-    }
 }
 
 export async function deleteAlertRule(id: string): Promise<void> {
-    const response = await fetch(`/api/alerts/rules/${id}`, {
+    await apiFetch<void>(`/api/alerts/rules/${id}`, {
         method: 'DELETE',
     });
-    if (!response.ok) {
-        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
-    }
 }
