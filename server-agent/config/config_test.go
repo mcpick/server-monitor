@@ -11,20 +11,20 @@ func TestLoad_RequiredEnvVars(t *testing.T) {
 
 	_, err := Load()
 	if err == nil {
-		t.Error("Expected error when TURSO_DATABASE_URL is missing")
+		t.Error("Expected error when INGEST_URL is missing")
 	}
 
-	t.Setenv("TURSO_DATABASE_URL", "libsql://test.turso.io")
+	t.Setenv("INGEST_URL", "https://monitor.example.com/api/ingest")
 	_, err = Load()
 	if err == nil {
-		t.Error("Expected error when TURSO_AUTH_TOKEN is missing")
+		t.Error("Expected error when INGEST_API_KEY is missing")
 	}
 }
 
 func TestLoad_Defaults(t *testing.T) {
 	os.Clearenv()
-	t.Setenv("TURSO_DATABASE_URL", "libsql://test.turso.io")
-	t.Setenv("TURSO_AUTH_TOKEN", "test-token")
+	t.Setenv("INGEST_URL", "https://monitor.example.com/api/ingest")
+	t.Setenv("INGEST_API_KEY", "test-key")
 
 	cfg, err := Load()
 	if err != nil {
@@ -50,8 +50,8 @@ func TestLoad_Defaults(t *testing.T) {
 
 func TestLoad_CustomValues(t *testing.T) {
 	os.Clearenv()
-	t.Setenv("TURSO_DATABASE_URL", "libsql://custom.turso.io")
-	t.Setenv("TURSO_AUTH_TOKEN", "custom-token")
+	t.Setenv("INGEST_URL", "https://custom.example.com/api/ingest")
+	t.Setenv("INGEST_API_KEY", "custom-key")
 	t.Setenv("COLLECTION_INTERVAL", "10s")
 	t.Setenv("HOSTNAME", "custom-host")
 	t.Setenv("SERVER_ID", "custom-id")
@@ -62,12 +62,12 @@ func TestLoad_CustomValues(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if cfg.TursoDatabaseURL != "libsql://custom.turso.io" {
-		t.Errorf("Expected custom database URL, got %s", cfg.TursoDatabaseURL)
+	if cfg.IngestURL != "https://custom.example.com/api/ingest" {
+		t.Errorf("Expected custom ingest URL, got %s", cfg.IngestURL)
 	}
 
-	if cfg.TursoAuthToken != "custom-token" {
-		t.Errorf("Expected custom auth token, got %s", cfg.TursoAuthToken)
+	if cfg.IngestAPIKey != "custom-key" {
+		t.Errorf("Expected custom API key, got %s", cfg.IngestAPIKey)
 	}
 
 	if cfg.CollectionInterval != 10*time.Second {
@@ -89,8 +89,8 @@ func TestLoad_CustomValues(t *testing.T) {
 
 func TestLoad_InvalidInterval(t *testing.T) {
 	os.Clearenv()
-	t.Setenv("TURSO_DATABASE_URL", "libsql://test.turso.io")
-	t.Setenv("TURSO_AUTH_TOKEN", "test-token")
+	t.Setenv("INGEST_URL", "https://monitor.example.com/api/ingest")
+	t.Setenv("INGEST_API_KEY", "test-key")
 	t.Setenv("COLLECTION_INTERVAL", "invalid")
 
 	_, err := Load()

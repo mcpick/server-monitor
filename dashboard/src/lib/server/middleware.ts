@@ -1,4 +1,5 @@
 import { verifyAccessToken, type TokenPayload } from './jwt';
+import { env } from './env';
 
 export interface AuthContext {
     userId: string;
@@ -27,6 +28,21 @@ export async function verifyAuthToken(request: Request): Promise<AuthContext | n
     } catch {
         return null;
     }
+}
+
+/**
+ * Verify ingest API key from a request.
+ * Returns true if the Bearer token matches INGEST_API_KEY.
+ */
+export function verifyIngestToken(request: Request): boolean {
+    const authHeader = request.headers.get('Authorization');
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return false;
+    }
+
+    const token = authHeader.slice(7);
+    return token === env.INGEST_API_KEY;
 }
 
 /**

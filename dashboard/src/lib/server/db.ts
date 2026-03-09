@@ -2,6 +2,16 @@ import { drizzle } from 'drizzle-orm/d1';
 import type { DrizzleD1Database } from 'drizzle-orm/d1';
 import { and, desc, eq, gte, isNull, lte } from 'drizzle-orm';
 import { env as cfEnv } from 'cloudflare:workers';
+import type { z } from 'zod';
+import type {
+    ingestCpuSchema,
+    ingestMemorySchema,
+    ingestSwapSchema,
+    ingestDiskUsageSchema,
+    ingestDiskIOSchema,
+    ingestNetworkSchema,
+    ingestProcessSchema,
+} from './validation';
 import {
     servers,
     cpuMetrics,
@@ -337,4 +347,91 @@ export async function updateAlertRule(
 
 export async function deleteAlertRule(id: string): Promise<void> {
     await getDb().delete(alertRules).where(eq(alertRules.id, id));
+}
+
+// --- Ingest functions ---
+
+export async function upsertServer(id: string, hostname: string): Promise<void> {
+    const now = Math.floor(Date.now() / 1000);
+    await getDb()
+        .insert(servers)
+        .values({ id, hostname, createdAt: now })
+        .onConflictDoUpdate({
+            target: servers.id,
+            set: { hostname },
+        });
+}
+
+export async function insertCpuMetric(
+    serverId: string,
+    timestamp: number,
+    data: z.infer<typeof ingestCpuSchema>,
+): Promise<void> {
+    await getDb()
+        .insert(cpuMetrics)
+        .values({ serverId, timestamp, ...data });
+}
+
+export async function insertMemoryMetric(
+    serverId: string,
+    timestamp: number,
+    data: z.infer<typeof ingestMemorySchema>,
+): Promise<void> {
+    await getDb()
+        .insert(memoryMetrics)
+        .values({ serverId, timestamp, ...data });
+}
+
+export async function insertSwapMetric(
+    serverId: string,
+    timestamp: number,
+    data: z.infer<typeof ingestSwapSchema>,
+): Promise<void> {
+    await getDb()
+        .insert(swapMetrics)
+        .values({ serverId, timestamp, ...data });
+}
+
+export async function insertDiskUsageMetrics(
+    serverId: string,
+    timestamp: number,
+    data: z.infer<typeof ingestDiskUsageSchema>[],
+): Promise<void> {
+    if (data.length === 0) return;
+    await getDb()
+        .insert(diskUsageMetrics)
+        .values(data.map((d) => ({ serverId, timestamp, ...d })));
+}
+
+export async function insertDiskIOMetrics(
+    serverId: string,
+    timestamp: number,
+    data: z.infer<typeof ingestDiskIOSchema>[],
+): Promise<void> {
+    if (data.length === 0) return;
+    await getDb()
+        .insert(diskIOMetrics)
+        .values(data.map((d) => ({ serverId, timestamp, ...d })));
+}
+
+export async function insertNetworkMetrics(
+    serverId: string,
+    timestamp: number,
+    data: z.infer<typeof ingestNetworkSchema>[],
+): Promise<void> {
+    if (data.length === 0) return;
+    await getDb()
+        .insert(networkMetrics)
+        .values(data.map((d) => ({ serverId, timestamp, ...d })));
+}
+
+export async function insertProcessMetrics(
+    serverId: string,
+    timestamp: number,
+    data: z.infer<typeof ingestProcessSchema>[],
+): Promise<void> {
+    if (data.length === 0) return;
+    await getDb()
+        .insert(processMetrics)
+        .values(data.map((d) => ({ serverId, timestamp, ...d })));
 }

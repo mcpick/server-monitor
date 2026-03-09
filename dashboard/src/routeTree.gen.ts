@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as ApiServersRouteImport } from './routes/api/servers'
+import { Route as ApiIngestRouteImport } from './routes/api/ingest'
 import { Route as AuthenticatedServersRouteImport } from './routes/_authenticated/servers'
 import { Route as AuthenticatedAlertsRouteImport } from './routes/_authenticated/alerts'
 import { Route as ApiMetricsTypeRouteImport } from './routes/api/metrics.$type'
@@ -41,6 +42,11 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
 const ApiServersRoute = ApiServersRouteImport.update({
   id: '/api/servers',
   path: '/api/servers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiIngestRoute = ApiIngestRouteImport.update({
+  id: '/api/ingest',
+  path: '/api/ingest',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedServersRoute = AuthenticatedServersRouteImport.update({
@@ -98,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/alerts': typeof AuthenticatedAlertsRoute
   '/servers': typeof AuthenticatedServersRoute
+  '/api/ingest': typeof ApiIngestRoute
   '/api/servers': typeof ApiServersRoute
   '/': typeof AuthenticatedIndexRoute
   '/api/alerts/active': typeof ApiAlertsActiveRoute
@@ -113,6 +120,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/alerts': typeof AuthenticatedAlertsRoute
   '/servers': typeof AuthenticatedServersRoute
+  '/api/ingest': typeof ApiIngestRoute
   '/api/servers': typeof ApiServersRoute
   '/': typeof AuthenticatedIndexRoute
   '/api/alerts/active': typeof ApiAlertsActiveRoute
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_authenticated/alerts': typeof AuthenticatedAlertsRoute
   '/_authenticated/servers': typeof AuthenticatedServersRoute
+  '/api/ingest': typeof ApiIngestRoute
   '/api/servers': typeof ApiServersRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/api/alerts/active': typeof ApiAlertsActiveRoute
@@ -147,6 +156,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/alerts'
     | '/servers'
+    | '/api/ingest'
     | '/api/servers'
     | '/'
     | '/api/alerts/active'
@@ -162,6 +172,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/alerts'
     | '/servers'
+    | '/api/ingest'
     | '/api/servers'
     | '/'
     | '/api/alerts/active'
@@ -178,6 +189,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/_authenticated/alerts'
     | '/_authenticated/servers'
+    | '/api/ingest'
     | '/api/servers'
     | '/_authenticated/'
     | '/api/alerts/active'
@@ -193,6 +205,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  ApiIngestRoute: typeof ApiIngestRoute
   ApiServersRoute: typeof ApiServersRoute
   ApiAlertsActiveRoute: typeof ApiAlertsActiveRoute
   ApiAlertsHistoryRoute: typeof ApiAlertsHistoryRoute
@@ -231,6 +244,13 @@ declare module '@tanstack/react-router' {
       path: '/api/servers'
       fullPath: '/api/servers'
       preLoaderRoute: typeof ApiServersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ingest': {
+      id: '/api/ingest'
+      path: '/api/ingest'
+      fullPath: '/api/ingest'
+      preLoaderRoute: typeof ApiIngestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/servers': {
@@ -337,6 +357,7 @@ const ApiAlertsRulesRouteWithChildren = ApiAlertsRulesRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
+  ApiIngestRoute: ApiIngestRoute,
   ApiServersRoute: ApiServersRoute,
   ApiAlertsActiveRoute: ApiAlertsActiveRoute,
   ApiAlertsHistoryRoute: ApiAlertsHistoryRoute,

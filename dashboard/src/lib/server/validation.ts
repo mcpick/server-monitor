@@ -1,6 +1,15 @@
 import { z } from 'zod';
 import { createInsertSchema, createUpdateSchema } from 'drizzle-zod';
-import { alertRules } from './schema';
+import {
+    alertRules,
+    cpuMetrics,
+    memoryMetrics,
+    swapMetrics,
+    diskUsageMetrics,
+    diskIOMetrics,
+    networkMetrics,
+    processMetrics,
+} from './schema';
 
 export const loginSchema = z.object({
     username: z.string().min(1, 'Username is required'),
@@ -30,6 +39,40 @@ export const updateAlertRuleSchema = createUpdateSchema(alertRules, {
     id: true,
     createdAt: true,
     updatedAt: true,
+});
+
+const sharedMetricFields = { id: true, serverId: true, timestamp: true } as const;
+
+export const ingestCpuSchema = createInsertSchema(cpuMetrics).omit(sharedMetricFields);
+
+export const ingestMemorySchema = createInsertSchema(memoryMetrics).omit(sharedMetricFields);
+
+export const ingestSwapSchema = createInsertSchema(swapMetrics).omit(sharedMetricFields);
+
+export const ingestDiskUsageSchema = createInsertSchema(diskUsageMetrics).omit(sharedMetricFields);
+
+export const ingestDiskIOSchema = createInsertSchema(diskIOMetrics).omit(sharedMetricFields);
+
+export const ingestNetworkSchema = createInsertSchema(networkMetrics).omit({
+    ...sharedMetricFields,
+    iface: true,
+}).extend({
+    iface: z.string(),
+});
+
+export const ingestProcessSchema = createInsertSchema(processMetrics).omit(sharedMetricFields);
+
+export const ingestPayloadSchema = z.object({
+    serverId: z.string().min(1),
+    hostname: z.string().min(1),
+    timestamp: z.number().int().positive(),
+    cpu: ingestCpuSchema.optional(),
+    memory: ingestMemorySchema.optional(),
+    swap: ingestSwapSchema.optional(),
+    diskUsage: z.array(ingestDiskUsageSchema).optional(),
+    diskIO: z.array(ingestDiskIOSchema).optional(),
+    network: z.array(ingestNetworkSchema).optional(),
+    processes: z.array(ingestProcessSchema).optional(),
 });
 
 export const metricsQuerySchema = z.object({
