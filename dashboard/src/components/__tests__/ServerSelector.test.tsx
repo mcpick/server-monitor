@@ -46,7 +46,7 @@ describe('ServerSelector', () => {
             />,
         );
 
-        const select = screen.getByRole('combobox') as HTMLSelectElement;
+        const select = screen.getByRole('combobox') as unknown as HTMLSelectElement;
         expect(select.value).toBe('server-2');
     });
 

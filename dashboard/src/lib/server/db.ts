@@ -1,7 +1,7 @@
-import { drizzle } from 'drizzle-orm/libsql/web';
-import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import { drizzle } from 'drizzle-orm/d1';
+import type { DrizzleD1Database } from 'drizzle-orm/d1';
 import { and, desc, eq, gte, isNull, lte } from 'drizzle-orm';
-import { env } from './env';
+import { env as cfEnv } from 'cloudflare:workers';
 import {
     servers,
     cpuMetrics,
@@ -25,19 +25,14 @@ import type {
     ProcessMetric,
     AlertRule,
     AlertHistory,
-} from '../../types/metrics';
+} from '@/types/metrics';
 
-let db: LibSQLDatabase | null = null;
+let db: DrizzleD1Database | null = null;
 
-export function getDb(): LibSQLDatabase {
+export function getDb(): DrizzleD1Database {
     if (db) return db;
 
-    db = drizzle({
-        connection: {
-            url: env.TURSO_DATABASE_URL,
-            authToken: env.TURSO_AUTH_TOKEN,
-        },
-    });
+    db = drizzle(cfEnv.DB);
     return db;
 }
 

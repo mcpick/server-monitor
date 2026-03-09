@@ -1,23 +1,29 @@
-/// <reference types="vitest/config" />
+import { defineConfig } from "vite";
+import { devtools } from "@tanstack/devtools-vite";
+import tsconfigPaths from "vite-tsconfig-paths";
 
-import { cloudflare } from '@cloudflare/vite-plugin';
-import tailwindcss from '@tailwindcss/vite';
-import react from '@vitejs/plugin-react';
-import { tanstackStart } from '@tanstack/react-start/plugin/vite';
-import { defineConfig } from 'vite';
+import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+
+import viteReact from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import { cloudflare } from "@cloudflare/vite-plugin";
 
 const isTest = !!process.env.VITEST;
 
-export default defineConfig({
+const config = defineConfig({
     plugins: [
-        !isTest && cloudflare({ viteEnvironment: { name: 'ssr' } }),
-        !isTest && tanstackStart(),
-        react(),
+        devtools(),
+        !isTest && cloudflare({ viteEnvironment: { name: "ssr" } }),
+        tsconfigPaths({ projects: ["./tsconfig.json"] }),
         !isTest && tailwindcss(),
+        !isTest && tanstackStart(),
+        viteReact(),
     ],
     test: {
         globals: true,
-        environment: 'jsdom',
-        setupFiles: ['./src/test/setup.ts'],
+        environment: "jsdom",
+        setupFiles: ["./src/test/setup.ts"],
     },
 });
+
+export default config;

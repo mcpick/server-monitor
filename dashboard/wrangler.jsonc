@@ -10,8 +10,15 @@
   "routes": [
     { "pattern": "monitor.mcpick.link", "custom_domain": true },
   ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "server-monitor-db",
+      "database_id": "3ff62dcd-f503-48ca-953e-8590d83c3192",
+      "migrations_dir": "./drizzle"
+    }
+  ],
   "vars": {
-    "TURSO_DATABASE_URL": "libsql://server-monitor-jackmcpickle.turso.io",
     "AUTH_USERNAME": "jackmcpickle",
   },
   "assets": {

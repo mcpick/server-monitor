@@ -12,10 +12,10 @@ export const refreshSchema = z.object({
 });
 
 export const insertAlertRuleSchema = createInsertSchema(alertRules, {
-    name: (s) => s.min(1, 'Name is required'),
+    name: () => z.string().min(1, 'Name is required'),
     metricType: () => z.enum(['cpu', 'memory', 'swap', 'disk_usage']),
     condition: () => z.enum(['gt', 'lt', 'gte', 'lte']),
-    threshold: (s) => s.finite(),
+    threshold: () => z.number().finite(),
 }).omit({
     id: true,
     createdAt: true,
@@ -25,7 +25,7 @@ export const insertAlertRuleSchema = createInsertSchema(alertRules, {
 export const updateAlertRuleSchema = createUpdateSchema(alertRules, {
     metricType: () => z.enum(['cpu', 'memory', 'swap', 'disk_usage']).optional(),
     condition: () => z.enum(['gt', 'lt', 'gte', 'lte']).optional(),
-    threshold: (s) => s.finite().optional(),
+    threshold: () => z.number().finite().optional(),
 }).omit({
     id: true,
     createdAt: true,
