@@ -18,7 +18,6 @@ import { Route as AuthenticatedServersRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedAlertsRouteImport } from './routes/_authenticated/alerts'
 import { Route as ApiServersIdRouteImport } from './routes/api/servers.$id'
 import { Route as ApiMetricsTypeRouteImport } from './routes/api/metrics.$type'
-import { Route as ApiAuthRefreshRouteImport } from './routes/api/auth/refresh'
 import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth/logout'
 import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
 import { Route as ApiAlertsRulesRouteImport } from './routes/api/alerts/rules'
@@ -71,11 +70,6 @@ const ApiMetricsTypeRoute = ApiMetricsTypeRouteImport.update({
   path: '/api/metrics/$type',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAuthRefreshRoute = ApiAuthRefreshRouteImport.update({
-  id: '/api/auth/refresh',
-  path: '/api/auth/refresh',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiAuthLogoutRoute = ApiAuthLogoutRouteImport.update({
   id: '/api/auth/logout',
   path: '/api/auth/logout',
@@ -125,7 +119,6 @@ export interface FileRoutesByFullPath {
   '/api/alerts/rules': typeof ApiAlertsRulesRouteWithChildren
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
-  '/api/auth/refresh': typeof ApiAuthRefreshRoute
   '/api/metrics/$type': typeof ApiMetricsTypeRoute
   '/api/servers/$id': typeof ApiServersIdRouteWithChildren
   '/api/alerts/rules/$id': typeof ApiAlertsRulesIdRoute
@@ -143,7 +136,6 @@ export interface FileRoutesByTo {
   '/api/alerts/rules': typeof ApiAlertsRulesRouteWithChildren
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
-  '/api/auth/refresh': typeof ApiAuthRefreshRoute
   '/api/metrics/$type': typeof ApiMetricsTypeRoute
   '/api/servers/$id': typeof ApiServersIdRouteWithChildren
   '/api/alerts/rules/$id': typeof ApiAlertsRulesIdRoute
@@ -163,7 +155,6 @@ export interface FileRoutesById {
   '/api/alerts/rules': typeof ApiAlertsRulesRouteWithChildren
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
-  '/api/auth/refresh': typeof ApiAuthRefreshRoute
   '/api/metrics/$type': typeof ApiMetricsTypeRoute
   '/api/servers/$id': typeof ApiServersIdRouteWithChildren
   '/api/alerts/rules/$id': typeof ApiAlertsRulesIdRoute
@@ -183,7 +174,6 @@ export interface FileRouteTypes {
     | '/api/alerts/rules'
     | '/api/auth/login'
     | '/api/auth/logout'
-    | '/api/auth/refresh'
     | '/api/metrics/$type'
     | '/api/servers/$id'
     | '/api/alerts/rules/$id'
@@ -201,7 +191,6 @@ export interface FileRouteTypes {
     | '/api/alerts/rules'
     | '/api/auth/login'
     | '/api/auth/logout'
-    | '/api/auth/refresh'
     | '/api/metrics/$type'
     | '/api/servers/$id'
     | '/api/alerts/rules/$id'
@@ -220,7 +209,6 @@ export interface FileRouteTypes {
     | '/api/alerts/rules'
     | '/api/auth/login'
     | '/api/auth/logout'
-    | '/api/auth/refresh'
     | '/api/metrics/$type'
     | '/api/servers/$id'
     | '/api/alerts/rules/$id'
@@ -237,7 +225,6 @@ export interface RootRouteChildren {
   ApiAlertsRulesRoute: typeof ApiAlertsRulesRouteWithChildren
   ApiAuthLoginRoute: typeof ApiAuthLoginRoute
   ApiAuthLogoutRoute: typeof ApiAuthLogoutRoute
-  ApiAuthRefreshRoute: typeof ApiAuthRefreshRoute
   ApiMetricsTypeRoute: typeof ApiMetricsTypeRoute
 }
 
@@ -304,13 +291,6 @@ declare module '@tanstack/react-router' {
       path: '/api/metrics/$type'
       fullPath: '/api/metrics/$type'
       preLoaderRoute: typeof ApiMetricsTypeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/auth/refresh': {
-      id: '/api/auth/refresh'
-      path: '/api/auth/refresh'
-      fullPath: '/api/auth/refresh'
-      preLoaderRoute: typeof ApiAuthRefreshRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/logout': {
@@ -427,7 +407,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAlertsRulesRoute: ApiAlertsRulesRouteWithChildren,
   ApiAuthLoginRoute: ApiAuthLoginRoute,
   ApiAuthLogoutRoute: ApiAuthLogoutRoute,
-  ApiAuthRefreshRoute: ApiAuthRefreshRoute,
   ApiMetricsTypeRoute: ApiMetricsTypeRoute,
 }
 export const routeTree = rootRouteImport

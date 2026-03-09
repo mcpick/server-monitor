@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import {
     createServerSchema,
     loginSchema,
-    refreshSchema,
     metricsQuerySchema,
     metricTypeSchema,
     serverIdSchema,
@@ -77,18 +76,6 @@ describe('validation', () => {
 
         it('fails with missing fields', () => {
             const result = loginSchema.safeParse({});
-            expect(result.success).toBe(false);
-        });
-    });
-
-    describe('refreshSchema', () => {
-        it('passes with valid refresh token', () => {
-            const result = refreshSchema.safeParse({ refreshToken: 'token-123' });
-            expect(result.success).toBe(true);
-        });
-
-        it('fails with empty token', () => {
-            const result = refreshSchema.safeParse({ refreshToken: '' });
             expect(result.success).toBe(false);
         });
     });

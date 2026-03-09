@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { verifyPassword, getAuthCredentials } from '@/lib/server/auth';
-import { generateAccessToken, generateRefreshToken } from '@/lib/server/jwt';
+import { createSession, createSessionCookie } from '@/lib/server/session';
 import { checkRateLimit } from '@/lib/server/rateLimit';
 import { logAuthAttempt } from '@/lib/server/audit';
 import { loginSchema, parseRequestBody } from '@/lib/server/validation';
@@ -65,24 +65,21 @@ export const Route = createFileRoute('/api/auth/login')({
                     return new Response('Invalid credentials', { status: 401 });
                 }
 
-                // Generate tokens
+                // Create session
                 try {
-                    const [accessToken, refreshToken] = await Promise.all([
-                        generateAccessToken(body.username),
-                        generateRefreshToken(body.username),
-                    ]);
-
+                    const sessionId = await createSession(body.username);
                     await logAuthAttempt(clientIP, body.username, true);
 
-                    const response = {
-                        accessToken,
-                        refreshToken,
-                        expiresIn: 15 * 60, // 15 minutes in seconds
-                    };
-
-                    return Response.json(response);
+                    return Response.json(
+                        { success: true },
+                        {
+                            headers: {
+                                'Set-Cookie': createSessionCookie(sessionId),
+                            },
+                        },
+                    );
                 } catch (error) {
-                    console.error('Failed to generate tokens:', error);
+                    console.error('Failed to create session:', error);
                     return new Response('Internal server error', { status: 500 });
                 }
             },

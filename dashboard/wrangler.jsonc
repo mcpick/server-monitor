@@ -10,6 +10,12 @@
   "routes": [
     { "pattern": "monitor.mcpick.link", "custom_domain": true },
   ],
+  "kv_namespaces": [
+    {
+      "binding": "SESSIONS",
+      "id": "3889f662d17448408fcf996fd551e802"
+    }
+  ],
   "d1_databases": [
     {
       "binding": "DB",

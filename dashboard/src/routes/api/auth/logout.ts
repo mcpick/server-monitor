@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { logApiAccess } from '@/lib/server/audit';
+import { getSessionIdFromRequest, deleteSession, createLogoutCookie } from '@/lib/server/session';
 
 function getClientIP(request: Request): string {
     const forwarded = request.headers.get('x-forwarded-for');
@@ -14,13 +15,19 @@ export const Route = createFileRoute('/api/auth/logout')({
         handlers: {
             POST: async ({ request }) => {
                 const clientIP = getClientIP(request);
-
-                // In a more sophisticated setup, you would invalidate the refresh token
-                // by storing it in a blocklist or deleting it from a token store.
-                // For now, we just log the logout event.
                 await logApiAccess(clientIP, 'POST', '/api/auth/logout');
 
-                return new Response(null, { status: 204 });
+                const sessionId = getSessionIdFromRequest(request);
+                if (sessionId) {
+                    await deleteSession(sessionId);
+                }
+
+                return new Response(null, {
+                    status: 204,
+                    headers: {
+                        'Set-Cookie': createLogoutCookie(),
+                    },
+                });
             },
         },
     },

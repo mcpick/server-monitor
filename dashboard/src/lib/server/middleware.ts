@@ -1,10 +1,9 @@
-import { verifyAccessToken, type TokenPayload } from './jwt';
+import { getSessionIdFromRequest, validateSession } from './session';
 import { hashToken } from './token';
 import { findServerByTokenHash } from './db';
 
 export interface AuthContext {
     userId: string;
-    payload: TokenPayload;
 }
 
 export interface IngestAuthContext {
@@ -12,27 +11,20 @@ export interface IngestAuthContext {
 }
 
 /**
- * Extract and verify the access token from a request.
- * Returns the token payload if valid, or null if invalid/missing.
+ * Extract and verify auth from a request.
+ * Validates session cookie from request.
+ * Returns the auth context if valid, or null if invalid/missing.
  */
 export async function verifyAuthToken(request: Request): Promise<AuthContext | null> {
-    const authHeader = request.headers.get('Authorization');
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return null;
-    }
-
-    const token = authHeader.slice(7); // Remove 'Bearer ' prefix
-
-    try {
-        const payload = await verifyAccessToken(token);
-        if (!payload.sub) {
-            return null;
+    const sessionId = getSessionIdFromRequest(request);
+    if (sessionId) {
+        const session = await validateSession(sessionId);
+        if (session) {
+            return { userId: session.userId };
         }
-        return { userId: payload.sub, payload };
-    } catch {
-        return null;
     }
+
+    return null;
 }
 
 /**

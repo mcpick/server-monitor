@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { verifyAuthToken, verifyIngestToken, unauthorizedResponse } from '../middleware';
 
-vi.mock('../jwt', () => ({
-    verifyAccessToken: vi.fn(),
+vi.mock('../session', () => ({
+    getSessionIdFromRequest: vi.fn(),
+    validateSession: vi.fn(),
 }));
 
 vi.mock('../token', () => ({
@@ -13,14 +14,14 @@ vi.mock('../db', () => ({
     findServerByTokenHash: vi.fn(),
 }));
 
-import { verifyAccessToken } from '../jwt';
+import { getSessionIdFromRequest, validateSession } from '../session';
 import { hashToken } from '../token';
 import { findServerByTokenHash } from '../db';
 
+const mockGetSessionIdFromRequest = vi.mocked(getSessionIdFromRequest);
+const mockValidateSession = vi.mocked(validateSession);
 const mockHashToken = vi.mocked(hashToken);
 const mockFindServerByTokenHash = vi.mocked(findServerByTokenHash);
-
-const mockVerifyAccessToken = vi.mocked(verifyAccessToken);
 
 describe('middleware', () => {
     beforeEach(() => {
@@ -28,7 +29,8 @@ describe('middleware', () => {
     });
 
     describe('verifyAuthToken', () => {
-        it('returns null when no Authorization header is present', async () => {
+        it('returns null when no session cookie is present', async () => {
+            mockGetSessionIdFromRequest.mockReturnValue(null);
             const request = new Request('http://localhost/api/test');
 
             const result = await verifyAuthToken(request);
@@ -36,53 +38,28 @@ describe('middleware', () => {
             expect(result).toBeNull();
         });
 
-        it('returns null when Authorization header does not start with Bearer', async () => {
-            const request = new Request('http://localhost/api/test', {
-                headers: { Authorization: 'Basic abc123' },
-            });
+        it('returns null when session is invalid', async () => {
+            mockGetSessionIdFromRequest.mockReturnValue('invalid-session');
+            mockValidateSession.mockResolvedValueOnce(null);
+            const request = new Request('http://localhost/api/test');
 
             const result = await verifyAuthToken(request);
 
             expect(result).toBeNull();
+            expect(mockValidateSession).toHaveBeenCalledWith('invalid-session');
         });
 
-        it('returns null when token verification throws', async () => {
-            mockVerifyAccessToken.mockRejectedValueOnce(new Error('Invalid token'));
-            const request = new Request('http://localhost/api/test', {
-                headers: { Authorization: 'Bearer invalid-token' },
+        it('returns AuthContext for a valid session', async () => {
+            mockGetSessionIdFromRequest.mockReturnValue('valid-session');
+            mockValidateSession.mockResolvedValueOnce({
+                userId: 'user-123',
+                createdAt: Date.now(),
             });
+            const request = new Request('http://localhost/api/test');
 
             const result = await verifyAuthToken(request);
 
-            expect(result).toBeNull();
-            expect(mockVerifyAccessToken).toHaveBeenCalledWith('invalid-token');
-        });
-
-        it('returns null when payload has no sub', async () => {
-            mockVerifyAccessToken.mockResolvedValueOnce({
-                type: 'access',
-                sub: '',
-            });
-            const request = new Request('http://localhost/api/test', {
-                headers: { Authorization: 'Bearer token-no-sub' },
-            });
-
-            const result = await verifyAuthToken(request);
-
-            expect(result).toBeNull();
-        });
-
-        it('returns AuthContext for a valid token', async () => {
-            const payload = { sub: 'user-123', type: 'access' as const };
-            mockVerifyAccessToken.mockResolvedValueOnce(payload);
-            const request = new Request('http://localhost/api/test', {
-                headers: { Authorization: 'Bearer valid-token' },
-            });
-
-            const result = await verifyAuthToken(request);
-
-            expect(result).toEqual({ userId: 'user-123', payload });
-            expect(mockVerifyAccessToken).toHaveBeenCalledWith('valid-token');
+            expect(result).toEqual({ userId: 'user-123' });
         });
     });
 

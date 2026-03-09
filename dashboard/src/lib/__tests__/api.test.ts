@@ -18,28 +18,12 @@ import {
     regenerateServerToken,
 } from '../api';
 
-vi.mock('../auth', () => ({
-    getAuthToken: vi.fn(),
-}));
-
-import { getAuthToken } from '../auth';
-
-const mockGetAuthToken = vi.mocked(getAuthToken);
-
-function expectAuthHeaders(call: unknown[], token: string): void {
-    const options = call[1] as RequestInit;
-    const headers = options.headers as Headers;
-    expect(headers).toBeInstanceOf(Headers);
-    expect(headers.get('Authorization')).toBe(`Bearer ${token}`);
-}
-
 describe('API client', () => {
     const mockFetch = vi.fn();
 
     beforeEach(() => {
         vi.stubGlobal('fetch', mockFetch);
         mockFetch.mockReset();
-        mockGetAuthToken.mockReturnValue('test-auth-token');
     });
 
     afterEach(() => {
@@ -59,8 +43,7 @@ describe('API client', () => {
 
             const servers = await fetchServers();
 
-            expect(mockFetch).toHaveBeenCalledWith('/api/servers', expect.objectContaining({ headers: expect.any(Headers) }));
-            expectAuthHeaders(mockFetch.mock.calls[0], 'test-auth-token');
+            expect(mockFetch).toHaveBeenCalledWith('/api/servers', undefined);
             expect(servers).toEqual(mockServers);
         });
 
@@ -68,20 +51,6 @@ describe('API client', () => {
             mockFetch.mockResolvedValueOnce({ ok: false, status: 500, statusText: 'Internal Server Error' });
 
             await expect(fetchServers()).rejects.toThrow('API request failed');
-        });
-
-        it('does not set Authorization header when getAuthToken returns null', async () => {
-            mockGetAuthToken.mockReturnValue(null);
-            mockFetch.mockResolvedValueOnce({
-                ok: true,
-                json: async () => [],
-            });
-
-            await fetchServers();
-
-            const options = mockFetch.mock.calls[0][1] as RequestInit;
-            const headers = options.headers as Headers;
-            expect(headers.has('Authorization')).toBe(false);
         });
     });
 
@@ -107,9 +76,8 @@ describe('API client', () => {
 
             expect(mockFetch).toHaveBeenCalledWith(
                 '/api/metrics/cpu?server_id=server-1&start=1699999000&end=1700001000',
-                expect.objectContaining({ headers: expect.any(Headers) }),
+                undefined,
             );
-            expectAuthHeaders(mockFetch.mock.calls[0], 'test-auth-token');
             expect(metrics).toHaveLength(1);
             expect(metrics[0].usage_percent).toBe(45.5);
         });
@@ -289,8 +257,7 @@ describe('API client', () => {
 
             const rules = await fetchAlertRules();
 
-            expect(mockFetch).toHaveBeenCalledWith('/api/alerts/rules', expect.objectContaining({ headers: expect.any(Headers) }));
-            expectAuthHeaders(mockFetch.mock.calls[0], 'test-auth-token');
+            expect(mockFetch).toHaveBeenCalledWith('/api/alerts/rules', undefined);
             expect(rules).toEqual(mockRules);
         });
     });
@@ -315,8 +282,7 @@ describe('API client', () => {
 
             const alerts = await fetchActiveAlerts();
 
-            expect(mockFetch).toHaveBeenCalledWith('/api/alerts/active', expect.objectContaining({ headers: expect.any(Headers) }));
-            expectAuthHeaders(mockFetch.mock.calls[0], 'test-auth-token');
+            expect(mockFetch).toHaveBeenCalledWith('/api/alerts/active', undefined);
             expect(alerts).toEqual(mockAlerts);
         });
     });
@@ -343,9 +309,8 @@ describe('API client', () => {
             const options = call[1] as RequestInit;
             expect(options.method).toBe('POST');
             expect(options.body).toBe(JSON.stringify(rule));
-            const headers = options.headers as Headers;
-            expect(headers.get('Content-Type')).toBe('application/json');
-            expect(headers.get('Authorization')).toBe('Bearer test-auth-token');
+            const headers = options.headers as Record<string, string>;
+            expect(headers['Content-Type']).toBe('application/json');
         });
     });
 
@@ -360,9 +325,8 @@ describe('API client', () => {
             const options = call[1] as RequestInit;
             expect(options.method).toBe('PUT');
             expect(options.body).toBe(JSON.stringify({ enabled: false }));
-            const headers = options.headers as Headers;
-            expect(headers.get('Content-Type')).toBe('application/json');
-            expect(headers.get('Authorization')).toBe('Bearer test-auth-token');
+            const headers = options.headers as Record<string, string>;
+            expect(headers['Content-Type']).toBe('application/json');
         });
     });
 
@@ -376,12 +340,11 @@ describe('API client', () => {
             expect(call[0]).toBe('/api/alerts/rules/rule-1');
             const options = call[1] as RequestInit;
             expect(options.method).toBe('DELETE');
-            expectAuthHeaders(call, 'test-auth-token');
         });
     });
 
     describe('createServer', () => {
-        it('sends POST to /api/servers with displayName body and auth header', async () => {
+        it('sends POST to /api/servers with displayName body', async () => {
             const mockRegistration = { id: 'server-1', token: 'abc123' };
             mockFetch.mockResolvedValueOnce({
                 ok: true,
@@ -395,9 +358,8 @@ describe('API client', () => {
             const options = call[1] as RequestInit;
             expect(options.method).toBe('POST');
             expect(options.body).toBe(JSON.stringify({ displayName: 'My Server' }));
-            const headers = options.headers as Headers;
-            expect(headers.get('Content-Type')).toBe('application/json');
-            expect(headers.get('Authorization')).toBe('Bearer test-auth-token');
+            const headers = options.headers as Record<string, string>;
+            expect(headers['Content-Type']).toBe('application/json');
             expect(result).toEqual(mockRegistration);
         });
 
@@ -409,7 +371,7 @@ describe('API client', () => {
     });
 
     describe('deleteServer', () => {
-        it('sends DELETE to /api/servers/{id} with auth header', async () => {
+        it('sends DELETE to /api/servers/{id}', async () => {
             mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({}) });
 
             await deleteServer('server-1');
@@ -418,7 +380,6 @@ describe('API client', () => {
             expect(call[0]).toBe('/api/servers/server-1');
             const options = call[1] as RequestInit;
             expect(options.method).toBe('DELETE');
-            expectAuthHeaders(call, 'test-auth-token');
         });
 
         it('throws on non-ok response', async () => {
@@ -429,7 +390,7 @@ describe('API client', () => {
     });
 
     describe('regenerateServerToken', () => {
-        it('sends POST to /api/servers/{id}/regenerate-token with auth header', async () => {
+        it('sends POST to /api/servers/{id}/regenerate-token', async () => {
             const mockResponse = { token: 'new-token-123' };
             mockFetch.mockResolvedValueOnce({
                 ok: true,
@@ -442,7 +403,6 @@ describe('API client', () => {
             expect(call[0]).toBe('/api/servers/server-1/regenerate-token');
             const options = call[1] as RequestInit;
             expect(options.method).toBe('POST');
-            expectAuthHeaders(call, 'test-auth-token');
             expect(result).toEqual(mockResponse);
         });
 

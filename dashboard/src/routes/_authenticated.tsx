@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
-import { ensureAuthenticated } from '@/lib/auth';
+import { checkAuth } from '@/lib/server/checkAuth';
 
 function AuthenticatedLayout(): ReactElement {
     return <Outlet />;
@@ -8,7 +8,7 @@ function AuthenticatedLayout(): ReactElement {
 
 export const Route = createFileRoute('/_authenticated')({
     beforeLoad: async () => {
-        const authenticated = await ensureAuthenticated();
+        const authenticated = await checkAuth();
         if (!authenticated) {
             throw redirect({
                 to: '/login',

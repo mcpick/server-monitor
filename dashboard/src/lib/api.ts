@@ -12,18 +12,13 @@ import type {
     AlertRuleInput,
     AlertHistory,
 } from '@/types/metrics';
-import { getAuthToken } from '@/lib/auth';
 
 /**
- * Generic fetch utility for API requests with auth.
+ * Generic fetch utility for API requests.
+ * Session cookie is sent automatically by the browser.
  */
 async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
-    const token = getAuthToken();
-    const headers = new Headers(options?.headers);
-    if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
-    }
-    const response = await fetch(url, { ...options, headers });
+    const response = await fetch(url, options);
     if (!response.ok) {
         throw new Error(`API request failed: ${response.status} ${response.statusText}`);
     }

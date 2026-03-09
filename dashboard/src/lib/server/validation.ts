@@ -26,10 +26,6 @@ export const loginSchema = z.object({
     password: z.string().min(1, 'Password is required'),
 });
 
-export const refreshSchema = z.object({
-    refreshToken: z.string().min(1, 'Refresh token is required'),
-});
-
 export const insertAlertRuleSchema = createInsertSchema(alertRules, {
     name: () => z.string().min(1, 'Name is required'),
     metricType: () => z.enum(['cpu', 'memory', 'swap', 'disk_usage']),

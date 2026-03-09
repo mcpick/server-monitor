@@ -1,123 +1,16 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import {
-    login,
-    logout,
-    isAuthenticated,
-    ensureAuthenticated,
-    getAuthToken,
-    refreshTokens,
-} from '../auth';
-
-const ACCESS_TOKEN_KEY = 'server_monitor_access_token';
-const REFRESH_TOKEN_KEY = 'server_monitor_refresh_token';
-const TOKEN_EXPIRY_KEY = 'server_monitor_token_expiry';
+import { login, logout } from '../auth';
 
 describe('auth', () => {
     const mockFetch = vi.fn();
 
     beforeEach(() => {
-        localStorage.clear();
         vi.stubGlobal('fetch', mockFetch);
         mockFetch.mockReset();
     });
 
     afterEach(() => {
         vi.unstubAllGlobals();
-    });
-
-    describe('isAuthenticated', () => {
-        it('returns false when no token is stored', () => {
-            expect(isAuthenticated()).toBe(false);
-        });
-
-        it('returns true when a valid non-expired token is stored', () => {
-            localStorage.setItem(ACCESS_TOKEN_KEY, 'valid-token');
-            localStorage.setItem(TOKEN_EXPIRY_KEY, String(Date.now() + 60000));
-            expect(isAuthenticated()).toBe(true);
-        });
-
-        it('returns false when token is expired', () => {
-            localStorage.setItem(ACCESS_TOKEN_KEY, 'valid-token');
-            localStorage.setItem(TOKEN_EXPIRY_KEY, String(Date.now() - 60000));
-            expect(isAuthenticated()).toBe(false);
-        });
-    });
-
-    describe('ensureAuthenticated', () => {
-        it('returns false when no token is stored', async () => {
-            expect(await ensureAuthenticated()).toBe(false);
-        });
-
-        it('returns true when token is valid and not near expiry', async () => {
-            localStorage.setItem(ACCESS_TOKEN_KEY, 'valid-token');
-            localStorage.setItem(TOKEN_EXPIRY_KEY, String(Date.now() + 60000));
-            expect(await ensureAuthenticated()).toBe(true);
-        });
-
-        it('attempts refresh when token is near expiry and succeeds', async () => {
-            localStorage.setItem(ACCESS_TOKEN_KEY, 'old-token');
-            localStorage.setItem(REFRESH_TOKEN_KEY, 'refresh-token');
-            localStorage.setItem(TOKEN_EXPIRY_KEY, String(Date.now() + 10000));
-
-            const mockResponse = {
-                accessToken: 'new-access-token',
-                refreshToken: 'new-refresh-token',
-                expiresIn: 900,
-            };
-            mockFetch.mockResolvedValueOnce({
-                ok: true,
-                json: async () => mockResponse,
-            });
-
-            expect(await ensureAuthenticated()).toBe(true);
-            expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBe('new-access-token');
-        });
-
-        it('returns false when token is near expiry and no refresh token', async () => {
-            localStorage.setItem(ACCESS_TOKEN_KEY, 'old-token');
-            localStorage.setItem(TOKEN_EXPIRY_KEY, String(Date.now() + 10000));
-
-            expect(await ensureAuthenticated()).toBe(false);
-            expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBeNull();
-        });
-
-        it('returns false when token is expired and refresh fails', async () => {
-            localStorage.setItem(ACCESS_TOKEN_KEY, 'old-token');
-            localStorage.setItem(REFRESH_TOKEN_KEY, 'refresh-token');
-            localStorage.setItem(TOKEN_EXPIRY_KEY, String(Date.now() - 60000));
-
-            mockFetch.mockResolvedValueOnce({ ok: false, status: 401 });
-
-            expect(await ensureAuthenticated()).toBe(false);
-            expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBeNull();
-        });
-    });
-
-    describe('getAuthToken', () => {
-        it('returns null when no token is stored', () => {
-            expect(getAuthToken()).toBeNull();
-        });
-
-        it('returns the token when stored', () => {
-            localStorage.setItem(ACCESS_TOKEN_KEY, 'test-token');
-            expect(getAuthToken()).toBe('test-token');
-        });
-    });
-
-    describe('logout', () => {
-        it('removes all auth tokens from localStorage', async () => {
-            localStorage.setItem(ACCESS_TOKEN_KEY, 'test-token');
-            localStorage.setItem(REFRESH_TOKEN_KEY, 'refresh-token');
-            localStorage.setItem(TOKEN_EXPIRY_KEY, '12345');
-
-            mockFetch.mockResolvedValueOnce({ ok: true });
-
-            await logout();
-
-            expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBeNull();
-            expect(localStorage.getItem(REFRESH_TOKEN_KEY)).toBeNull();
-            expect(localStorage.getItem(TOKEN_EXPIRY_KEY)).toBeNull();
-        });
     });
 
     describe('login', () => {
@@ -134,23 +27,12 @@ describe('auth', () => {
             });
         });
 
-        it('returns true and stores tokens when credentials are correct', async () => {
-            const mockResponse = {
-                accessToken: 'access-token-123',
-                refreshToken: 'refresh-token-456',
-                expiresIn: 900,
-            };
-            mockFetch.mockResolvedValueOnce({
-                ok: true,
-                json: async () => mockResponse,
-            });
+        it('returns true when credentials are correct', async () => {
+            mockFetch.mockResolvedValueOnce({ ok: true });
 
             const result = await login('admin', 'correct-password');
 
             expect(result).toBe(true);
-            expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBe('access-token-123');
-            expect(localStorage.getItem(REFRESH_TOKEN_KEY)).toBe('refresh-token-456');
-            expect(localStorage.getItem(TOKEN_EXPIRY_KEY)).toBeTruthy();
         });
 
         it('returns false when fetch throws an error', async () => {
@@ -162,66 +44,19 @@ describe('auth', () => {
         });
     });
 
-    describe('refreshTokens', () => {
-        it('returns false when no refresh token is stored', async () => {
-            const result = await refreshTokens();
+    describe('logout', () => {
+        it('calls logout endpoint', async () => {
+            mockFetch.mockResolvedValueOnce({ ok: true });
 
-            expect(result).toBe(false);
-            expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBeNull();
+            await logout();
+
+            expect(mockFetch).toHaveBeenCalledWith('/api/auth/logout', { method: 'POST' });
         });
 
-        it('stores new tokens on successful refresh', async () => {
-            localStorage.setItem(REFRESH_TOKEN_KEY, 'old-refresh-token');
-
-            const mockResponse = {
-                accessToken: 'new-access-token',
-                refreshToken: 'new-refresh-token',
-                expiresIn: 900,
-            };
-            mockFetch.mockResolvedValueOnce({
-                ok: true,
-                json: async () => mockResponse,
-            });
-
-            const result = await refreshTokens();
-
-            expect(result).toBe(true);
-            expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBe('new-access-token');
-            expect(localStorage.getItem(REFRESH_TOKEN_KEY)).toBe('new-refresh-token');
-            expect(localStorage.getItem(TOKEN_EXPIRY_KEY)).toBeTruthy();
-            expect(mockFetch).toHaveBeenCalledWith('/api/auth/refresh', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ refreshToken: 'old-refresh-token' }),
-            });
-        });
-
-        it('clears all tokens on failed refresh', async () => {
-            localStorage.setItem(ACCESS_TOKEN_KEY, 'old-access-token');
-            localStorage.setItem(REFRESH_TOKEN_KEY, 'old-refresh-token');
-            localStorage.setItem(TOKEN_EXPIRY_KEY, '12345');
-
-            mockFetch.mockResolvedValueOnce({ ok: false, status: 401 });
-
-            const result = await refreshTokens();
-
-            expect(result).toBe(false);
-            expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBeNull();
-            expect(localStorage.getItem(REFRESH_TOKEN_KEY)).toBeNull();
-            expect(localStorage.getItem(TOKEN_EXPIRY_KEY)).toBeNull();
-        });
-
-        it('clears all tokens on network error', async () => {
-            localStorage.setItem(ACCESS_TOKEN_KEY, 'old-access-token');
-            localStorage.setItem(REFRESH_TOKEN_KEY, 'old-refresh-token');
-            localStorage.setItem(TOKEN_EXPIRY_KEY, '12345');
-
+        it('does not throw when logout API fails', async () => {
             mockFetch.mockRejectedValueOnce(new Error('Network error'));
 
-            const result = await refreshTokens();
-
-            expect(result).toBe(false);
-            expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBeNull();
+            await expect(logout()).resolves.toBeUndefined();
         });
     });
 });
