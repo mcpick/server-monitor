@@ -1,5 +1,5 @@
 import { useState, type ReactElement } from 'react';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { useServers } from '@/hooks/useMetrics';
 import { useDeleteServerMutation } from '@/hooks/useServerMutations';
 import { ServerList } from '@/components/ServerList';
@@ -62,6 +62,10 @@ function ServersPage(): ReactElement {
         setViewMode('list');
     }
 
+    function handleAddServer(): void {
+        setViewMode('add');
+    }
+
     function handleDeleteServer(id: string): void {
         deleteServerMutation.mutate(id, {
             onSuccess: () => {
@@ -72,11 +76,9 @@ function ServersPage(): ReactElement {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-                <div className="max-w-7xl mx-auto px-4 py-8">
-                    <div className="flex items-center justify-center h-64">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400" />
-                    </div>
+            <div className="p-6">
+                <div className="flex items-center justify-center h-64">
+                    <div className="animate-spin rounded-full size-8 border-b-2 border-blue-600 dark:border-blue-400" />
                 </div>
             </div>
         );
@@ -84,69 +86,52 @@ function ServersPage(): ReactElement {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-                <div className="max-w-7xl mx-auto px-4 py-8">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
-                        <p className="text-red-600 dark:text-red-400 mb-4">
-                            Failed to load servers: {error.message}
-                        </p>
-                        <button
-                            onClick={() => refetch()}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                        >
-                            Retry
-                        </button>
-                    </div>
+            <div className="p-6">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
+                    <p className="text-red-600 dark:text-red-400 mb-4">
+                        Failed to load servers: {error.message}
+                    </p>
+                    <button
+                        onClick={() => refetch()}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                        Retry
+                    </button>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-            <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-                <div className="max-w-7xl mx-auto px-4 py-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <Link
-                                to="/"
-                                className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                            >
-                                Dashboard
-                            </Link>
-                            <span className="text-gray-400 dark:text-gray-600">/</span>
-                            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-                                Servers
-                            </h1>
-                        </div>
-                        {viewMode === 'list' && (
-                            <button
-                                onClick={() => setViewMode('add')}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                            >
-                                Add Server
-                            </button>
-                        )}
-                    </div>
-                </div>
-            </header>
-
-            <main className="max-w-7xl mx-auto px-4 py-8">
+        <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+                <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+                    Servers
+                </h1>
                 {viewMode === 'list' && (
-                    <ServerList
-                        servers={serversWithStatus}
-                        onSelectServer={handleSelectServer}
-                    />
+                    <button
+                        onClick={handleAddServer}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                        Add Server
+                    </button>
                 )}
-                {viewMode === 'details' && selectedServer && (
-                    <ServerDetails
-                        server={selectedServer}
-                        onBack={handleBack}
-                        onDelete={handleDeleteServer}
-                    />
-                )}
-                {viewMode === 'add' && <AddServerWizard onBack={handleBack} />}
-            </main>
+            </div>
+
+            {viewMode === 'list' && (
+                <ServerList
+                    servers={serversWithStatus}
+                    onSelectServer={handleSelectServer}
+                />
+            )}
+            {viewMode === 'details' && selectedServer && (
+                <ServerDetails
+                    server={selectedServer}
+                    onBack={handleBack}
+                    onDelete={handleDeleteServer}
+                />
+            )}
+            {viewMode === 'add' && <AddServerWizard onBack={handleBack} />}
         </div>
     );
 }

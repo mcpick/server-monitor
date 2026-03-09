@@ -1,6 +1,6 @@
 # Server Monitor Agent
 
-A Go daemon that collects system metrics and sends them to a Turso database.
+A Go daemon that collects system metrics and sends them to an ingest endpoint via HTTP.
 
 ## Building
 
@@ -39,7 +39,7 @@ sudo chmod 600 /etc/server-agent/server-agent.env
 sudo chown server-agent:server-agent /etc/server-agent/server-agent.env
 ```
 
-Edit `/etc/server-agent/server-agent.env` with your Turso credentials.
+Edit `/etc/server-agent/server-agent.env` with your ingest endpoint URL and API key.
 
 ### 4. Install systemd service
 
@@ -61,11 +61,12 @@ sudo journalctl -u server-agent -f
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `TURSO_DATABASE_URL` | Yes | - | Turso database URL |
-| `TURSO_AUTH_TOKEN` | Yes | - | Turso authentication token |
+| `INGEST_URL` | Yes | - | URL of the ingest endpoint |
+| `INGEST_API_KEY` | Yes | - | API key for authenticating with the ingest endpoint |
 | `COLLECTION_INTERVAL` | No | `5s` | Metrics collection interval |
 | `HOSTNAME` | No | System hostname | Custom hostname for this server |
 | `SERVER_ID` | No | Auto-generated | Unique identifier for this server |
+| `HEALTH_PORT` | No | `8081` | Port for the health check HTTP server |
 
 ## Metrics Collected
 
