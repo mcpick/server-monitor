@@ -2,6 +2,7 @@ import { drizzle } from 'drizzle-orm/d1';
 import type { DrizzleD1Database } from 'drizzle-orm/d1';
 import { and, desc, eq, gte, isNull, lte } from 'drizzle-orm';
 import { env as cfEnv } from 'cloudflare:workers';
+import { nanoid } from 'nanoid';
 import type { z } from 'zod';
 import type {
     ingestCpuSchema,
@@ -60,7 +61,7 @@ export async function fetchServers(): Promise<Server[]> {
 }
 
 export async function createServer(displayName: string, tokenHash: string): Promise<string> {
-    const id = crypto.randomUUID();
+    const id = nanoid();
     const now = Math.floor(Date.now() / 1000);
     await getDb().insert(servers).values({
         id,
@@ -370,7 +371,7 @@ export async function fetchActiveAlerts(): Promise<AlertHistory[]> {
 export async function createAlertRule(
     rule: Omit<AlertRule, 'id' | 'created_at' | 'updated_at'>,
 ): Promise<AlertRule> {
-    const id = crypto.randomUUID();
+    const id = nanoid();
     const now = Math.floor(Date.now() / 1000);
 
     await getDb().insert(alertRules).values({

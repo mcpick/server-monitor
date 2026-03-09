@@ -11,7 +11,11 @@ import {
     processMetrics,
 } from './schema';
 
-export const uuidSchema = z.string().uuid();
+// Accepts nanoid (21 chars, A-Za-z0-9_-) or legacy UUID format
+export const serverIdSchema = z.string().regex(
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$|^[A-Za-z0-9_-]{21}$/,
+    'Invalid server ID format',
+);
 
 export const createServerSchema = z.object({
     displayName: z.string().min(1, 'Display name is required').max(100, 'Display name must be 100 characters or less'),

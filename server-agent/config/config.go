@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/google/uuid"
+	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 type Config struct {
@@ -53,7 +53,7 @@ func Load() (*Config, error) {
 
 	cfg.ServerID = os.Getenv("SERVER_ID")
 	if cfg.ServerID == "" {
-		cfg.ServerID = uuid.NewString()
+		cfg.ServerID = gonanoid.Must()
 	}
 
 	cfg.HealthPort = os.Getenv("HEALTH_PORT")

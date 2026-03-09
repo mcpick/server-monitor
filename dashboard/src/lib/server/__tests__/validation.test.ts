@@ -5,10 +5,38 @@ import {
     refreshSchema,
     metricsQuerySchema,
     metricTypeSchema,
+    serverIdSchema,
     parseRequestBody,
 } from '../validation';
 
 describe('validation', () => {
+    describe('serverIdSchema', () => {
+        it('passes with valid nanoid (21 chars)', () => {
+            const result = serverIdSchema.safeParse('V1StGXR8_Z5jdHi6B-myT');
+            expect(result.success).toBe(true);
+        });
+
+        it('passes with valid UUID', () => {
+            const result = serverIdSchema.safeParse('550e8400-e29b-41d4-a716-446655440000');
+            expect(result.success).toBe(true);
+        });
+
+        it('fails with empty string', () => {
+            const result = serverIdSchema.safeParse('');
+            expect(result.success).toBe(false);
+        });
+
+        it('fails with invalid string', () => {
+            const result = serverIdSchema.safeParse('not-a-valid-id');
+            expect(result.success).toBe(false);
+        });
+
+        it('fails with nanoid of wrong length', () => {
+            const result = serverIdSchema.safeParse('V1StGXR8_Z5jdHi6B-my');
+            expect(result.success).toBe(false);
+        });
+    });
+
     describe('createServerSchema', () => {
         it('passes with valid display name', () => {
             const result = createServerSchema.safeParse({ displayName: 'My Server' });

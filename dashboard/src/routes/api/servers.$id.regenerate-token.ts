@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { regenerateServerToken, findServerById } from '@/lib/server/db';
 import { verifyAuthToken, unauthorizedResponse } from '@/lib/server/middleware';
 import { generateServerToken, hashToken } from '@/lib/server/token';
-import { uuidSchema } from '@/lib/server/validation';
+import { serverIdSchema } from '@/lib/server/validation';
 
 export const Route = createFileRoute('/api/servers/$id/regenerate-token')({
     server: {
@@ -13,7 +13,7 @@ export const Route = createFileRoute('/api/servers/$id/regenerate-token')({
                     return unauthorizedResponse();
                 }
 
-                const parsed = uuidSchema.safeParse(params.id);
+                const parsed = serverIdSchema.safeParse(params.id);
                 if (!parsed.success) {
                     return Response.json({ error: 'Invalid server ID format' }, { status: 400 });
                 }
