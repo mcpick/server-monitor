@@ -1,11 +1,14 @@
 -- Server Monitor Database Schema
--- For use with Turso (libSQL)
+-- For use with Cloudflare D1
 
 -- System identification
 CREATE TABLE IF NOT EXISTS servers (
     id TEXT PRIMARY KEY,
     hostname TEXT NOT NULL,
-    created_at INTEGER NOT NULL
+    display_name TEXT NOT NULL,
+    token_hash TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    last_seen_at INTEGER
 );
 
 -- CPU metrics (aggregated)

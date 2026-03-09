@@ -51,10 +51,75 @@ export async function fetchServers(): Promise<Server[]> {
         .select({
             id: servers.id,
             hostname: servers.hostname,
+            display_name: servers.displayName,
             created_at: servers.createdAt,
+            last_seen_at: servers.lastSeenAt,
         })
         .from(servers)
-        .orderBy(servers.hostname);
+        .orderBy(servers.displayName);
+}
+
+export async function createServer(displayName: string, tokenHash: string): Promise<string> {
+    const id = crypto.randomUUID();
+    const now = Math.floor(Date.now() / 1000);
+    await getDb().insert(servers).values({
+        id,
+        hostname: '',
+        displayName,
+        tokenHash,
+        createdAt: now,
+    });
+    return id;
+}
+
+export async function findServerById(id: string): Promise<Server | undefined> {
+    const rows = await getDb()
+        .select({
+            id: servers.id,
+            hostname: servers.hostname,
+            display_name: servers.displayName,
+            created_at: servers.createdAt,
+            last_seen_at: servers.lastSeenAt,
+        })
+        .from(servers)
+        .where(eq(servers.id, id))
+        .limit(1);
+    return rows[0];
+}
+
+export async function deleteServer(id: string): Promise<void> {
+    const db = getDb();
+    await db.batch([
+        db.delete(processMetrics).where(eq(processMetrics.serverId, id)),
+        db.delete(networkMetrics).where(eq(networkMetrics.serverId, id)),
+        db.delete(diskIOMetrics).where(eq(diskIOMetrics.serverId, id)),
+        db.delete(diskUsageMetrics).where(eq(diskUsageMetrics.serverId, id)),
+        db.delete(swapMetrics).where(eq(swapMetrics.serverId, id)),
+        db.delete(memoryMetrics).where(eq(memoryMetrics.serverId, id)),
+        db.delete(cpuMetrics).where(eq(cpuMetrics.serverId, id)),
+        db.delete(alertHistory).where(eq(alertHistory.serverId, id)),
+        db.delete(alertRules).where(eq(alertRules.serverId, id)),
+        db.delete(servers).where(eq(servers.id, id)),
+    ]);
+}
+
+export async function regenerateServerToken(id: string, tokenHash: string): Promise<void> {
+    await getDb().update(servers).set({ tokenHash }).where(eq(servers.id, id));
+}
+
+export async function findServerByTokenHash(tokenHash: string): Promise<Server | undefined> {
+    const rows = await getDb()
+        .select({
+            id: servers.id,
+            hostname: servers.hostname,
+            display_name: servers.displayName,
+            created_at: servers.createdAt,
+            last_seen_at: servers.lastSeenAt,
+        })
+        .from(servers)
+        .where(eq(servers.tokenHash, tokenHash))
+        .limit(1);
+    return rows[0];
 }
 
 export async function fetchCPUMetrics(
@@ -351,15 +416,11 @@ export async function deleteAlertRule(id: string): Promise<void> {
 
 // --- Ingest functions ---
 
-export async function upsertServer(id: string, hostname: string): Promise<void> {
-    const now = Math.floor(Date.now() / 1000);
+export async function updateServerOnIngest(id: string, hostname: string): Promise<void> {
     await getDb()
-        .insert(servers)
-        .values({ id, hostname, createdAt: now })
-        .onConflictDoUpdate({
-            target: servers.id,
-            set: { hostname },
-        });
+        .update(servers)
+        .set({ hostname, lastSeenAt: Math.floor(Date.now() / 1000) })
+        .where(eq(servers.id, id));
 }
 
 export async function insertCpuMetric(

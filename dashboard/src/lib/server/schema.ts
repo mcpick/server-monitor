@@ -3,7 +3,10 @@ import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core
 export const servers = sqliteTable('servers', {
     id: text().primaryKey(),
     hostname: text().notNull(),
+    displayName: text('display_name').notNull(),
+    tokenHash: text('token_hash').notNull(),
     createdAt: integer('created_at').notNull(),
+    lastSeenAt: integer('last_seen_at'),
 });
 
 export const cpuMetrics = sqliteTable(

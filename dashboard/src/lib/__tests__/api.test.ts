@@ -13,6 +13,9 @@ import {
     createAlertRule,
     updateAlertRule,
     deleteAlertRule,
+    createServer,
+    deleteServer,
+    regenerateServerToken,
 } from '../api';
 
 vi.mock('../auth', () => ({
@@ -46,8 +49,8 @@ describe('API client', () => {
     describe('fetchServers', () => {
         it('returns mapped server data', async () => {
             const mockServers = [
-                { id: 'server-1', hostname: 'web-01', created_at: 1700000000 },
-                { id: 'server-2', hostname: 'db-01', created_at: 1700000100 },
+                { id: 'server-1', hostname: 'web-01', created_at: 1700000000, last_seen_at: 1700000000 },
+                { id: 'server-2', hostname: 'db-01', created_at: 1700000100, last_seen_at: 1700000100 },
             ];
             mockFetch.mockResolvedValueOnce({
                 ok: true,
@@ -374,6 +377,79 @@ describe('API client', () => {
             const options = call[1] as RequestInit;
             expect(options.method).toBe('DELETE');
             expectAuthHeaders(call, 'test-auth-token');
+        });
+    });
+
+    describe('createServer', () => {
+        it('sends POST to /api/servers with displayName body and auth header', async () => {
+            const mockRegistration = { id: 'server-1', token: 'abc123' };
+            mockFetch.mockResolvedValueOnce({
+                ok: true,
+                json: async () => mockRegistration,
+            });
+
+            const result = await createServer('My Server');
+
+            const call = mockFetch.mock.calls[0];
+            expect(call[0]).toBe('/api/servers');
+            const options = call[1] as RequestInit;
+            expect(options.method).toBe('POST');
+            expect(options.body).toBe(JSON.stringify({ displayName: 'My Server' }));
+            const headers = options.headers as Headers;
+            expect(headers.get('Content-Type')).toBe('application/json');
+            expect(headers.get('Authorization')).toBe('Bearer test-auth-token');
+            expect(result).toEqual(mockRegistration);
+        });
+
+        it('throws on non-ok response', async () => {
+            mockFetch.mockResolvedValueOnce({ ok: false, status: 400, statusText: 'Bad Request' });
+
+            await expect(createServer('Bad')).rejects.toThrow('API request failed');
+        });
+    });
+
+    describe('deleteServer', () => {
+        it('sends DELETE to /api/servers/{id} with auth header', async () => {
+            mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({}) });
+
+            await deleteServer('server-1');
+
+            const call = mockFetch.mock.calls[0];
+            expect(call[0]).toBe('/api/servers/server-1');
+            const options = call[1] as RequestInit;
+            expect(options.method).toBe('DELETE');
+            expectAuthHeaders(call, 'test-auth-token');
+        });
+
+        it('throws on non-ok response', async () => {
+            mockFetch.mockResolvedValueOnce({ ok: false, status: 404, statusText: 'Not Found' });
+
+            await expect(deleteServer('bad-id')).rejects.toThrow('API request failed');
+        });
+    });
+
+    describe('regenerateServerToken', () => {
+        it('sends POST to /api/servers/{id}/regenerate-token with auth header', async () => {
+            const mockResponse = { token: 'new-token-123' };
+            mockFetch.mockResolvedValueOnce({
+                ok: true,
+                json: async () => mockResponse,
+            });
+
+            const result = await regenerateServerToken('server-1');
+
+            const call = mockFetch.mock.calls[0];
+            expect(call[0]).toBe('/api/servers/server-1/regenerate-token');
+            const options = call[1] as RequestInit;
+            expect(options.method).toBe('POST');
+            expectAuthHeaders(call, 'test-auth-token');
+            expect(result).toEqual(mockResponse);
+        });
+
+        it('throws on non-ok response', async () => {
+            mockFetch.mockResolvedValueOnce({ ok: false, status: 404, statusText: 'Not Found' });
+
+            await expect(regenerateServerToken('bad-id')).rejects.toThrow('API request failed');
         });
     });
 });

@@ -1,7 +1,15 @@
 export interface Server {
     id: string;
     hostname: string;
+    display_name: string;
     created_at: number;
+    last_seen_at: number | null;
+}
+
+export interface ServerRegistration {
+    id: string;
+    display_name: string;
+    token: string;
 }
 
 export interface CPUMetric {

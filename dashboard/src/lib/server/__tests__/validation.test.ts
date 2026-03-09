@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+    createServerSchema,
     loginSchema,
     refreshSchema,
     metricsQuerySchema,
@@ -8,6 +9,28 @@ import {
 } from '../validation';
 
 describe('validation', () => {
+    describe('createServerSchema', () => {
+        it('passes with valid display name', () => {
+            const result = createServerSchema.safeParse({ displayName: 'My Server' });
+            expect(result.success).toBe(true);
+        });
+
+        it('fails with empty string', () => {
+            const result = createServerSchema.safeParse({ displayName: '' });
+            expect(result.success).toBe(false);
+        });
+
+        it('fails with string over 100 chars', () => {
+            const result = createServerSchema.safeParse({ displayName: 'a'.repeat(101) });
+            expect(result.success).toBe(false);
+        });
+
+        it('fails with missing displayName', () => {
+            const result = createServerSchema.safeParse({});
+            expect(result.success).toBe(false);
+        });
+    });
+
     describe('loginSchema', () => {
         it('passes with valid username and password', () => {
             const result = loginSchema.safeParse({ username: 'admin', password: 'secret' });

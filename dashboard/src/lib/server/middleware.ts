@@ -1,9 +1,14 @@
 import { verifyAccessToken, type TokenPayload } from './jwt';
-import { env } from './env';
+import { hashToken } from './token';
+import { findServerByTokenHash } from './db';
 
 export interface AuthContext {
     userId: string;
     payload: TokenPayload;
+}
+
+export interface IngestAuthContext {
+    serverId: string;
 }
 
 /**
@@ -31,18 +36,25 @@ export async function verifyAuthToken(request: Request): Promise<AuthContext | n
 }
 
 /**
- * Verify ingest API key from a request.
- * Returns true if the Bearer token matches INGEST_API_KEY.
+ * Verify ingest token from a request by hashing and looking up in the database.
+ * Returns the server context if valid, or null if invalid/missing.
  */
-export function verifyIngestToken(request: Request): boolean {
+export async function verifyIngestToken(request: Request): Promise<IngestAuthContext | null> {
     const authHeader = request.headers.get('Authorization');
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return false;
+        return null;
     }
 
     const token = authHeader.slice(7);
-    return token === env.INGEST_API_KEY;
+    const hash = await hashToken(token);
+    const server = await findServerByTokenHash(hash);
+
+    if (!server) {
+        return null;
+    }
+
+    return { serverId: server.id };
 }
 
 /**

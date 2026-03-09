@@ -1,5 +1,6 @@
 import type {
     Server,
+    ServerRegistration,
     CPUMetric,
     MemoryMetric,
     SwapMetric,
@@ -149,5 +150,25 @@ export async function updateAlertRule(
 export async function deleteAlertRule(id: string): Promise<void> {
     await apiFetch<void>(`/api/alerts/rules/${id}`, {
         method: 'DELETE',
+    });
+}
+
+export async function createServer(displayName: string): Promise<ServerRegistration> {
+    return apiFetch<ServerRegistration>('/api/servers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ displayName }),
+    });
+}
+
+export async function deleteServer(id: string): Promise<void> {
+    await apiFetch<void>(`/api/servers/${id}`, {
+        method: 'DELETE',
+    });
+}
+
+export async function regenerateServerToken(id: string): Promise<{ token: string }> {
+    return apiFetch<{ token: string }>(`/api/servers/${id}/regenerate-token`, {
+        method: 'POST',
     });
 }

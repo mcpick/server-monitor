@@ -29,7 +29,7 @@ export function ServerSelector({
                     key={server.id}
                     value={server.id}
                 >
-                    {server.hostname}
+                    {server.display_name}{server.hostname ? ` (${server.hostname})` : ''}
                 </option>
             ))}
         </select>

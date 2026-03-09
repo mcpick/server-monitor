@@ -53,12 +53,16 @@ describe('useMetrics hooks', () => {
                 {
                     id: 'server-1',
                     hostname: 'server1.example.com',
+                    display_name: 'Server 1',
                     created_at: 1700000000,
+                    last_seen_at: 1700000000,
                 },
                 {
                     id: 'server-2',
                     hostname: 'server2.example.com',
+                    display_name: 'Server 2',
                     created_at: 1700000001,
+                    last_seen_at: 1700000001,
                 },
             ];
 

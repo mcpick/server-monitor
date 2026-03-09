@@ -23,6 +23,14 @@ const config = defineConfig({
         globals: true,
         environment: "jsdom",
         setupFiles: ["./src/test/setup.ts"],
+        server: {
+            deps: {
+                inline: ["cloudflare:workers"],
+            },
+        },
+        alias: {
+            "cloudflare:workers": new URL("./src/test/__mocks__/cloudflare-workers.ts", import.meta.url).pathname,
+        },
     },
 });
 

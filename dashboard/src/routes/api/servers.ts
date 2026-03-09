@@ -1,12 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { fetchServers } from '@/lib/server/db';
+import { fetchServers, createServer } from '@/lib/server/db';
 import { verifyAuthToken, unauthorizedResponse } from '@/lib/server/middleware';
+import { createServerSchema, parseRequestBody } from '@/lib/server/validation';
+import { generateServerToken, hashToken } from '@/lib/server/token';
+import type { ServerRegistration } from '@/types/metrics';
 
 export const Route = createFileRoute('/api/servers')({
     server: {
         handlers: {
             GET: async ({ request }) => {
-                // Verify authentication
                 const auth = await verifyAuthToken(request);
                 if (!auth) {
                     return unauthorizedResponse();
@@ -17,6 +19,41 @@ export const Route = createFileRoute('/api/servers')({
                     return Response.json(servers);
                 } catch (error) {
                     console.error('Failed to fetch servers:', error);
+                    return new Response('Internal Server Error', { status: 500 });
+                }
+            },
+            POST: async ({ request }) => {
+                const auth = await verifyAuthToken(request);
+                if (!auth) {
+                    return unauthorizedResponse();
+                }
+
+                let body: unknown;
+                try {
+                    body = await request.json();
+                } catch {
+                    return Response.json({ error: 'Invalid JSON' }, { status: 400 });
+                }
+
+                const parsed = parseRequestBody(createServerSchema, body);
+                if (!parsed.success) {
+                    return Response.json({ error: parsed.error }, { status: 400 });
+                }
+
+                try {
+                    const token = generateServerToken();
+                    const tokenHash = await hashToken(token);
+                    const id = await createServer(parsed.data.displayName, tokenHash);
+
+                    const result = {
+                        id,
+                        display_name: parsed.data.displayName,
+                        token,
+                    } satisfies ServerRegistration;
+
+                    return Response.json(result, { status: 201 });
+                } catch (error) {
+                    console.error('Failed to create server:', error);
                     return new Response('Internal Server Error', { status: 500 });
                 }
             },

@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { verifyIngestToken, unauthorizedResponse } from '@/lib/server/middleware';
 import { ingestPayloadSchema, parseRequestBody } from '@/lib/server/validation';
 import {
-    upsertServer,
+    updateServerOnIngest,
     insertCpuMetric,
     insertMemoryMetric,
     insertSwapMetric,
@@ -16,7 +16,8 @@ export const Route = createFileRoute('/api/ingest')({
     server: {
         handlers: {
             POST: async ({ request }) => {
-                if (!verifyIngestToken(request)) {
+                const authResult = await verifyIngestToken(request);
+                if (!authResult) {
                     return unauthorizedResponse();
                 }
 
@@ -35,8 +36,15 @@ export const Route = createFileRoute('/api/ingest')({
                 const { serverId, hostname, timestamp, cpu, memory, swap, diskUsage, diskIO, network, processes } =
                     parsed.data;
 
+                if (serverId !== authResult.serverId) {
+                    return Response.json(
+                        { error: 'Server ID does not match authenticated token' },
+                        { status: 403 },
+                    );
+                }
+
                 try {
-                    await upsertServer(serverId, hostname);
+                    await updateServerOnIngest(serverId, hostname);
 
                     if (cpu) {
                         await insertCpuMetric(serverId, timestamp, cpu);

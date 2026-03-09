@@ -11,6 +11,12 @@ import {
     processMetrics,
 } from './schema';
 
+export const uuidSchema = z.string().uuid();
+
+export const createServerSchema = z.object({
+    displayName: z.string().min(1, 'Display name is required').max(100, 'Display name must be 100 characters or less'),
+});
+
 export const loginSchema = z.object({
     username: z.string().min(1, 'Username is required'),
     password: z.string().min(1, 'Password is required'),
