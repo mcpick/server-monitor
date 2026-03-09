@@ -1,4 +1,5 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
+import { env } from './env';
 
 const SALT_ROUNDS = 12;
 
@@ -16,13 +17,9 @@ export async function verifyPassword(
 export function getAuthCredentials(): {
     username: string;
     passwordHash: string;
-} | null {
-    const username = process.env.AUTH_USERNAME;
-    const passwordHash = process.env.AUTH_PASSWORD_HASH;
-
-    if (!username || !passwordHash) {
-        return null;
-    }
-
-    return { username, passwordHash };
+} {
+    return {
+        username: env.AUTH_USERNAME,
+        passwordHash: env.AUTH_PASSWORD_HASH,
+    };
 }

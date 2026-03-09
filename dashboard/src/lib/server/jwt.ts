@@ -1,14 +1,11 @@
 import { SignJWT, jwtVerify, type JWTPayload } from 'jose';
+import { env } from './env';
 
 const ACCESS_TOKEN_EXPIRY = '15m';
 const REFRESH_TOKEN_EXPIRY = '7d';
 
 function getJwtSecret(): Uint8Array {
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
-        throw new Error('JWT_SECRET environment variable is required');
-    }
-    return new TextEncoder().encode(secret);
+    return new TextEncoder().encode(env.JWT_SECRET);
 }
 
 export interface TokenPayload extends JWTPayload {

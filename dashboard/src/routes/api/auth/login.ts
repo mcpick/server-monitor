@@ -41,10 +41,6 @@ export const Route = createFileRoute('/api/auth/login')({
                 }
 
                 const credentials = getAuthCredentials();
-                if (!credentials) {
-                    console.error('Auth credentials not configured');
-                    return new Response('Server configuration error', { status: 500 });
-                }
 
                 let body: LoginRequest;
                 try {

@@ -1,0 +1,28 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "server-monitor",
+  "main": "@tanstack/react-start/server-entry",
+  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_date": "2025-04-01",
+
+  // Enable workers.dev subdomain
+  "workers_dev": true,
+  "vars": {
+    "TURSO_DATABASE_URL": "libsql://server-monitor-jackmcpickle.turso.io",
+    "AUTH_USERNAME": "jackmcpickle",
+  },
+  "assets": {
+    "directory": "./dist",
+  },
+  // Observability & tracing
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+    },
+    "traces": {
+      "enabled": true,
+    },
+  },
+}
