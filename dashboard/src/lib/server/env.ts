@@ -1,4 +1,5 @@
 import { createEnv } from '@t3-oss/env-core';
+import { env as cfEnv } from 'cloudflare:workers';
 import { z } from 'zod';
 
 export const env = createEnv({
@@ -7,6 +8,6 @@ export const env = createEnv({
         AUTH_PASSWORD_HASH: z.string().min(1),
         JWT_SECRET: z.string().min(1),
     },
-    runtimeEnv: import.meta.env,
+    runtimeEnv: cfEnv,
     emptyStringAsUndefined: true,
 });
