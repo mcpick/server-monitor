@@ -15,12 +15,28 @@ import {
     deleteAlertRule,
 } from '../turso';
 
+vi.mock('../auth', () => ({
+    getAuthToken: vi.fn(),
+}));
+
+import { getAuthToken } from '../auth';
+
+const mockGetAuthToken = vi.mocked(getAuthToken);
+
+function expectAuthHeaders(call: unknown[], token: string): void {
+    const options = call[1] as RequestInit;
+    const headers = options.headers as Headers;
+    expect(headers).toBeInstanceOf(Headers);
+    expect(headers.get('Authorization')).toBe(`Bearer ${token}`);
+}
+
 describe('turso API client', () => {
     const mockFetch = vi.fn();
 
     beforeEach(() => {
         vi.stubGlobal('fetch', mockFetch);
         mockFetch.mockReset();
+        mockGetAuthToken.mockReturnValue('test-auth-token');
     });
 
     afterEach(() => {
@@ -40,7 +56,8 @@ describe('turso API client', () => {
 
             const servers = await fetchServers();
 
-            expect(mockFetch).toHaveBeenCalledWith('/api/servers', undefined);
+            expect(mockFetch).toHaveBeenCalledWith('/api/servers', expect.objectContaining({ headers: expect.any(Headers) }));
+            expectAuthHeaders(mockFetch.mock.calls[0], 'test-auth-token');
             expect(servers).toEqual(mockServers);
         });
 
@@ -48,6 +65,20 @@ describe('turso API client', () => {
             mockFetch.mockResolvedValueOnce({ ok: false, status: 500, statusText: 'Internal Server Error' });
 
             await expect(fetchServers()).rejects.toThrow('API request failed');
+        });
+
+        it('does not set Authorization header when getAuthToken returns null', async () => {
+            mockGetAuthToken.mockReturnValue(null);
+            mockFetch.mockResolvedValueOnce({
+                ok: true,
+                json: async () => [],
+            });
+
+            await fetchServers();
+
+            const options = mockFetch.mock.calls[0][1] as RequestInit;
+            const headers = options.headers as Headers;
+            expect(headers.has('Authorization')).toBe(false);
         });
     });
 
@@ -73,8 +104,9 @@ describe('turso API client', () => {
 
             expect(mockFetch).toHaveBeenCalledWith(
                 '/api/metrics/cpu?server_id=server-1&start=1699999000&end=1700001000',
-                undefined,
+                expect.objectContaining({ headers: expect.any(Headers) }),
             );
+            expectAuthHeaders(mockFetch.mock.calls[0], 'test-auth-token');
             expect(metrics).toHaveLength(1);
             expect(metrics[0].usage_percent).toBe(45.5);
         });
@@ -254,7 +286,8 @@ describe('turso API client', () => {
 
             const rules = await fetchAlertRules();
 
-            expect(mockFetch).toHaveBeenCalledWith('/api/alerts/rules', undefined);
+            expect(mockFetch).toHaveBeenCalledWith('/api/alerts/rules', expect.objectContaining({ headers: expect.any(Headers) }));
+            expectAuthHeaders(mockFetch.mock.calls[0], 'test-auth-token');
             expect(rules).toEqual(mockRules);
         });
     });
@@ -279,7 +312,8 @@ describe('turso API client', () => {
 
             const alerts = await fetchActiveAlerts();
 
-            expect(mockFetch).toHaveBeenCalledWith('/api/alerts/active', undefined);
+            expect(mockFetch).toHaveBeenCalledWith('/api/alerts/active', expect.objectContaining({ headers: expect.any(Headers) }));
+            expectAuthHeaders(mockFetch.mock.calls[0], 'test-auth-token');
             expect(alerts).toEqual(mockAlerts);
         });
     });
@@ -301,37 +335,45 @@ describe('turso API client', () => {
 
             await createAlertRule(rule);
 
-            expect(mockFetch).toHaveBeenCalledWith('/api/alerts/rules', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(rule),
-            });
+            const call = mockFetch.mock.calls[0];
+            expect(call[0]).toBe('/api/alerts/rules');
+            const options = call[1] as RequestInit;
+            expect(options.method).toBe('POST');
+            expect(options.body).toBe(JSON.stringify(rule));
+            const headers = options.headers as Headers;
+            expect(headers.get('Content-Type')).toBe('application/json');
+            expect(headers.get('Authorization')).toBe('Bearer test-auth-token');
         });
     });
 
     describe('updateAlertRule', () => {
         it('updates an alert rule', async () => {
-            mockFetch.mockResolvedValueOnce({ ok: true });
+            mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({}) });
 
             await updateAlertRule('rule-1', { enabled: false });
 
-            expect(mockFetch).toHaveBeenCalledWith('/api/alerts/rules/rule-1', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ enabled: false }),
-            });
+            const call = mockFetch.mock.calls[0];
+            expect(call[0]).toBe('/api/alerts/rules/rule-1');
+            const options = call[1] as RequestInit;
+            expect(options.method).toBe('PUT');
+            expect(options.body).toBe(JSON.stringify({ enabled: false }));
+            const headers = options.headers as Headers;
+            expect(headers.get('Content-Type')).toBe('application/json');
+            expect(headers.get('Authorization')).toBe('Bearer test-auth-token');
         });
     });
 
     describe('deleteAlertRule', () => {
         it('deletes an alert rule', async () => {
-            mockFetch.mockResolvedValueOnce({ ok: true });
+            mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({}) });
 
             await deleteAlertRule('rule-1');
 
-            expect(mockFetch).toHaveBeenCalledWith('/api/alerts/rules/rule-1', {
-                method: 'DELETE',
-            });
+            const call = mockFetch.mock.calls[0];
+            expect(call[0]).toBe('/api/alerts/rules/rule-1');
+            const options = call[1] as RequestInit;
+            expect(options.method).toBe('DELETE');
+            expectAuthHeaders(call, 'test-auth-token');
         });
     });
 });

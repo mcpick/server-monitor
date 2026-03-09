@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { login, logout, isAuthenticated, getAuthToken } from '../auth';
+import { login, logout, isAuthenticated, getAuthToken, refreshTokens } from '../auth';
 
 const ACCESS_TOKEN_KEY = 'server_monitor_access_token';
 const REFRESH_TOKEN_KEY = 'server_monitor_refresh_token';
@@ -102,6 +102,69 @@ describe('auth', () => {
             const result = await login('admin', 'password');
 
             expect(result).toBe(false);
+        });
+    });
+
+    describe('refreshTokens', () => {
+        it('returns false when no refresh token is stored', async () => {
+            const result = await refreshTokens();
+
+            expect(result).toBe(false);
+            expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBeNull();
+        });
+
+        it('stores new tokens on successful refresh', async () => {
+            localStorage.setItem(REFRESH_TOKEN_KEY, 'old-refresh-token');
+
+            const mockResponse = {
+                accessToken: 'new-access-token',
+                refreshToken: 'new-refresh-token',
+                expiresIn: 900,
+            };
+            mockFetch.mockResolvedValueOnce({
+                ok: true,
+                json: async () => mockResponse,
+            });
+
+            const result = await refreshTokens();
+
+            expect(result).toBe(true);
+            expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBe('new-access-token');
+            expect(localStorage.getItem(REFRESH_TOKEN_KEY)).toBe('new-refresh-token');
+            expect(localStorage.getItem(TOKEN_EXPIRY_KEY)).toBeTruthy();
+            expect(mockFetch).toHaveBeenCalledWith('/api/auth/refresh', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refreshToken: 'old-refresh-token' }),
+            });
+        });
+
+        it('clears all tokens on failed refresh', async () => {
+            localStorage.setItem(ACCESS_TOKEN_KEY, 'old-access-token');
+            localStorage.setItem(REFRESH_TOKEN_KEY, 'old-refresh-token');
+            localStorage.setItem(TOKEN_EXPIRY_KEY, '12345');
+
+            mockFetch.mockResolvedValueOnce({ ok: false, status: 401 });
+
+            const result = await refreshTokens();
+
+            expect(result).toBe(false);
+            expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBeNull();
+            expect(localStorage.getItem(REFRESH_TOKEN_KEY)).toBeNull();
+            expect(localStorage.getItem(TOKEN_EXPIRY_KEY)).toBeNull();
+        });
+
+        it('clears all tokens on network error', async () => {
+            localStorage.setItem(ACCESS_TOKEN_KEY, 'old-access-token');
+            localStorage.setItem(REFRESH_TOKEN_KEY, 'old-refresh-token');
+            localStorage.setItem(TOKEN_EXPIRY_KEY, '12345');
+
+            mockFetch.mockRejectedValueOnce(new Error('Network error'));
+
+            const result = await refreshTokens();
+
+            expect(result).toBe(false);
+            expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBeNull();
         });
     });
 });
