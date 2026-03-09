@@ -11,14 +11,10 @@ import {
 } from 'recharts';
 import { format } from 'date-fns';
 import type { MemoryMetric } from '../../types/metrics';
+import { formatBytes } from '@/lib/formatting';
 
 interface MemoryChartProps {
     data: MemoryMetric[];
-}
-
-function formatBytes(bytes: number): string {
-    const gb = bytes / (1024 * 1024 * 1024);
-    return `${gb.toFixed(1)} GB`;
 }
 
 export function MemoryChart({ data }: MemoryChartProps): ReactElement {

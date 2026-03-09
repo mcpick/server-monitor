@@ -11,18 +11,10 @@ import {
     Cell,
 } from 'recharts';
 import type { DiskUsageMetric } from '../../types/metrics';
+import { formatBytes } from '@/lib/formatting';
 
 interface DiskUsageChartProps {
     data: DiskUsageMetric[];
-}
-
-function formatBytes(bytes: number): string {
-    const tb = bytes / (1024 * 1024 * 1024 * 1024);
-    if (tb >= 1) {
-        return `${tb.toFixed(1)} TB`;
-    }
-    const gb = bytes / (1024 * 1024 * 1024);
-    return `${gb.toFixed(1)} GB`;
 }
 
 export function DiskUsageChart({ data }: DiskUsageChartProps): ReactElement {

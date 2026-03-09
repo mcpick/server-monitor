@@ -11,18 +11,10 @@ import {
 } from 'recharts';
 import { format } from 'date-fns';
 import type { DiskIOMetric } from '../../types/metrics';
+import { formatRate } from '@/lib/formatting';
 
 interface DiskIOChartProps {
     data: DiskIOMetric[];
-}
-
-function formatRate(bytesPerSecond: number): string {
-    const mbps = bytesPerSecond / (1024 * 1024);
-    if (mbps >= 1) {
-        return `${mbps.toFixed(1)} MB/s`;
-    }
-    const kbps = bytesPerSecond / 1024;
-    return `${kbps.toFixed(0)} KB/s`;
 }
 
 export function DiskIOChart({ data }: DiskIOChartProps): ReactElement {

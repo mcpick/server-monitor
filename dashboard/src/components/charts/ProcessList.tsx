@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react';
 import type { ProcessMetric } from '../../types/metrics';
+import { getStatusColor } from '@/lib/formatting';
 
 interface ProcessListProps {
     data: ProcessMetric[];
@@ -51,26 +52,14 @@ export function ProcessList({ data }: ProcessListProps): ReactElement {
                             </td>
                             <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 text-right">
                                 <span
-                                    className={`inline-block px-2 py-1 rounded ${
-                                        proc.cpu_percent > 50
-                                            ? 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300'
-                                            : proc.cpu_percent > 25
-                                              ? 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300'
-                                              : 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300'
-                                    }`}
+                                    className={`inline-block px-2 py-1 rounded ${getStatusColor(proc.cpu_percent)}`}
                                 >
                                     {proc.cpu_percent.toFixed(1)}%
                                 </span>
                             </td>
                             <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 text-right">
                                 <span
-                                    className={`inline-block px-2 py-1 rounded ${
-                                        proc.memory_percent > 50
-                                            ? 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300'
-                                            : proc.memory_percent > 25
-                                              ? 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300'
-                                              : 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300'
-                                    }`}
+                                    className={`inline-block px-2 py-1 rounded ${getStatusColor(proc.memory_percent)}`}
                                 >
                                     {proc.memory_percent.toFixed(1)}%
                                 </span>
