@@ -43,17 +43,16 @@ const DEFAULT_REFRESH_INTERVAL = 10000;
  * Factory function to create metric hooks with consistent behavior.
  * Reduces duplication across useXMetrics hooks.
  */
-function useMetricQuery<T>(
+function useDataQuery<T>(
     queryKey: QueryKey,
-    queryFn: () => Promise<T[]>,
-    enabled: boolean,
-    refreshInterval: number,
-): UseDataResult<T[]> {
+    queryFn: () => Promise<T>,
+    options?: { enabled?: boolean; refetchInterval?: number },
+): UseDataResult<T> {
     const query = useQuery({
         queryKey,
         queryFn,
-        enabled,
-        refetchInterval: refreshInterval,
+        enabled: options?.enabled,
+        refetchInterval: options?.refetchInterval,
     });
 
     return {
@@ -65,17 +64,7 @@ function useMetricQuery<T>(
 }
 
 export function useServers(): UseDataResult<Server[]> {
-    const query = useQuery({
-        queryKey: queryKeys.servers(),
-        queryFn: fetchServers,
-    });
-
-    return {
-        data: query.data ?? null,
-        loading: query.isLoading,
-        error: query.error,
-        refetch: () => void query.refetch(),
-    };
+    return useDataQuery(queryKeys.servers(), fetchServers);
 }
 
 export function useCPUMetrics(
@@ -83,12 +72,10 @@ export function useCPUMetrics(
     timeRange: TimeRange,
     refreshInterval = DEFAULT_REFRESH_INTERVAL,
 ): UseDataResult<CPUMetric[]> {
-    return useMetricQuery(
+    return useDataQuery(
         queryKeys.cpu(serverId, timeRange),
-        () =>
-            fetchCPUMetrics(serverId!, timeRange.startTime, timeRange.endTime),
-        !!serverId,
-        refreshInterval,
+        () => fetchCPUMetrics(serverId!, timeRange.startTime, timeRange.endTime),
+        { enabled: !!serverId, refetchInterval: refreshInterval },
     );
 }
 
@@ -97,16 +84,10 @@ export function useMemoryMetrics(
     timeRange: TimeRange,
     refreshInterval = DEFAULT_REFRESH_INTERVAL,
 ): UseDataResult<MemoryMetric[]> {
-    return useMetricQuery(
+    return useDataQuery(
         queryKeys.memory(serverId, timeRange),
-        () =>
-            fetchMemoryMetrics(
-                serverId!,
-                timeRange.startTime,
-                timeRange.endTime,
-            ),
-        !!serverId,
-        refreshInterval,
+        () => fetchMemoryMetrics(serverId!, timeRange.startTime, timeRange.endTime),
+        { enabled: !!serverId, refetchInterval: refreshInterval },
     );
 }
 
@@ -115,12 +96,10 @@ export function useSwapMetrics(
     timeRange: TimeRange,
     refreshInterval = DEFAULT_REFRESH_INTERVAL,
 ): UseDataResult<SwapMetric[]> {
-    return useMetricQuery(
+    return useDataQuery(
         queryKeys.swap(serverId, timeRange),
-        () =>
-            fetchSwapMetrics(serverId!, timeRange.startTime, timeRange.endTime),
-        !!serverId,
-        refreshInterval,
+        () => fetchSwapMetrics(serverId!, timeRange.startTime, timeRange.endTime),
+        { enabled: !!serverId, refetchInterval: refreshInterval },
     );
 }
 
@@ -132,28 +111,16 @@ export function useDiskMetrics(
     usage: UseDataResult<DiskUsageMetric[]>;
     io: UseDataResult<DiskIOMetric[]>;
 } {
-    const usage = useMetricQuery(
+    const usage = useDataQuery(
         queryKeys.diskUsage(serverId, timeRange),
-        () =>
-            fetchDiskUsageMetrics(
-                serverId!,
-                timeRange.startTime,
-                timeRange.endTime,
-            ),
-        !!serverId,
-        refreshInterval,
+        () => fetchDiskUsageMetrics(serverId!, timeRange.startTime, timeRange.endTime),
+        { enabled: !!serverId, refetchInterval: refreshInterval },
     );
 
-    const io = useMetricQuery(
+    const io = useDataQuery(
         queryKeys.diskIO(serverId, timeRange),
-        () =>
-            fetchDiskIOMetrics(
-                serverId!,
-                timeRange.startTime,
-                timeRange.endTime,
-            ),
-        !!serverId,
-        refreshInterval,
+        () => fetchDiskIOMetrics(serverId!, timeRange.startTime, timeRange.endTime),
+        { enabled: !!serverId, refetchInterval: refreshInterval },
     );
 
     return { usage, io };
@@ -164,16 +131,10 @@ export function useNetworkMetrics(
     timeRange: TimeRange,
     refreshInterval = DEFAULT_REFRESH_INTERVAL,
 ): UseDataResult<NetworkMetric[]> {
-    return useMetricQuery(
+    return useDataQuery(
         queryKeys.network(serverId, timeRange),
-        () =>
-            fetchNetworkMetrics(
-                serverId!,
-                timeRange.startTime,
-                timeRange.endTime,
-            ),
-        !!serverId,
-        refreshInterval,
+        () => fetchNetworkMetrics(serverId!, timeRange.startTime, timeRange.endTime),
+        { enabled: !!serverId, refetchInterval: refreshInterval },
     );
 }
 
@@ -182,111 +143,70 @@ export function useProcessMetrics(
     timeRange: TimeRange,
     refreshInterval = DEFAULT_REFRESH_INTERVAL,
 ): UseDataResult<ProcessMetric[]> {
-    return useMetricQuery(
+    return useDataQuery(
         queryKeys.process(serverId, timeRange),
-        () =>
-            fetchProcessMetrics(
-                serverId!,
-                timeRange.startTime,
-                timeRange.endTime,
-            ),
-        !!serverId,
-        refreshInterval,
+        () => fetchProcessMetrics(serverId!, timeRange.startTime, timeRange.endTime),
+        { enabled: !!serverId, refetchInterval: refreshInterval },
     );
 }
 
 export function useAlertRules(): UseDataResult<AlertRule[]> {
-    const query = useQuery({
-        queryKey: queryKeys.alertRules(),
-        queryFn: fetchAlertRules,
-    });
-
-    return {
-        data: query.data ?? null,
-        loading: query.isLoading,
-        error: query.error,
-        refetch: () => void query.refetch(),
-    };
+    return useDataQuery(queryKeys.alertRules(), fetchAlertRules);
 }
 
 export function useAlertHistory(
     timeRange: TimeRange,
     refreshInterval = DEFAULT_REFRESH_INTERVAL,
 ): UseDataResult<AlertHistory[]> {
-    const query = useQuery({
-        queryKey: queryKeys.alertHistory(timeRange),
-        queryFn: () => fetchAlertHistory(timeRange.startTime, timeRange.endTime),
-        refetchInterval: refreshInterval,
-    });
-
-    return {
-        data: query.data ?? null,
-        loading: query.isLoading,
-        error: query.error,
-        refetch: () => void query.refetch(),
-    };
+    return useDataQuery(
+        queryKeys.alertHistory(timeRange),
+        () => fetchAlertHistory(timeRange.startTime, timeRange.endTime),
+        { refetchInterval: refreshInterval },
+    );
 }
 
 export function useActiveAlerts(
     refreshInterval = DEFAULT_REFRESH_INTERVAL,
 ): UseDataResult<AlertHistory[]> {
-    const query = useQuery({
-        queryKey: queryKeys.activeAlerts(),
-        queryFn: fetchActiveAlerts,
-        refetchInterval: refreshInterval,
-    });
-
-    return {
-        data: query.data ?? null,
-        loading: query.isLoading,
-        error: query.error,
-        refetch: () => void query.refetch(),
-    };
+    return useDataQuery(
+        queryKeys.activeAlerts(),
+        fetchActiveAlerts,
+        { refetchInterval: refreshInterval },
+    );
 }
 
-export function useAlertRuleMutations(): {
-    createRule: (
-        rule: Omit<AlertRule, 'id' | 'created_at' | 'updated_at'>,
-    ) => Promise<void>;
-    updateRule: (
-        id: string,
-        rule: Partial<Omit<AlertRule, 'id' | 'created_at' | 'updated_at'>>,
-    ) => Promise<void>;
-    deleteRule: (id: string) => Promise<void>;
-    isCreating: boolean;
-    isUpdating: boolean;
-    isDeleting: boolean;
-} {
+type AlertRuleInput = Omit<AlertRule, 'id' | 'created_at' | 'updated_at'>;
+
+export function useCreateAlertRuleMutation(): ReturnType<typeof useMutation<void, Error, AlertRuleInput>> {
     const queryClient = useQueryClient();
 
-    const createMutation = useMutation({
+    return useMutation({
         mutationFn: createAlertRule,
         onSuccess: () => {
             void queryClient.invalidateQueries({ queryKey: queryKeys.alertRules() });
         },
     });
+}
 
-    const updateMutation = useMutation({
-        mutationFn: ({ id, rule }: { id: string; rule: Partial<Omit<AlertRule, 'id' | 'created_at' | 'updated_at'>> }) =>
+export function useUpdateAlertRuleMutation(): ReturnType<typeof useMutation<void, Error, { id: string; rule: Partial<AlertRuleInput> }>> {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, rule }: { id: string; rule: Partial<AlertRuleInput> }) =>
             updateAlertRule(id, rule),
         onSuccess: () => {
             void queryClient.invalidateQueries({ queryKey: queryKeys.alertRules() });
         },
     });
+}
 
-    const deleteMutation = useMutation({
+export function useDeleteAlertRuleMutation(): ReturnType<typeof useMutation<void, Error, string>> {
+    const queryClient = useQueryClient();
+
+    return useMutation({
         mutationFn: deleteAlertRule,
         onSuccess: () => {
             void queryClient.invalidateQueries({ queryKey: queryKeys.alertRules() });
         },
     });
-
-    return {
-        createRule: (rule) => createMutation.mutateAsync(rule),
-        updateRule: (id, rule) => updateMutation.mutateAsync({ id, rule }),
-        deleteRule: (id) => deleteMutation.mutateAsync(id),
-        isCreating: createMutation.isPending,
-        isUpdating: updateMutation.isPending,
-        isDeleting: deleteMutation.isPending,
-    };
 }

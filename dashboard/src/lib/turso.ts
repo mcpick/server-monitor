@@ -132,15 +132,21 @@ export async function updateAlertRule(
     id: string,
     rule: Partial<Omit<AlertRule, 'id' | 'created_at' | 'updated_at'>>,
 ): Promise<void> {
-    await fetch(`/api/alerts/rules/${id}`, {
+    const response = await fetch(`/api/alerts/rules/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(rule),
     });
+    if (!response.ok) {
+        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    }
 }
 
 export async function deleteAlertRule(id: string): Promise<void> {
-    await fetch(`/api/alerts/rules/${id}`, {
+    const response = await fetch(`/api/alerts/rules/${id}`, {
         method: 'DELETE',
     });
+    if (!response.ok) {
+        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    }
 }
